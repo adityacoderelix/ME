@@ -1,0 +1,261 @@
+[
+    {
+      "id": 1,
+      "type": "Villas",
+      "images": [
+        "/images/properties/luxe-villa/luxe1.jpeg",
+        "/images/properties/luxe-villa/luxe2.webp",
+        "/images/properties/luxe-villa/luxe3.jpeg",
+        "/images/properties/luxe-villa/luxe4.webp",
+        "/images/properties/luxe-villa/luxe5.webp",
+        "/images/properties/luxe-villa/luxe1.jpeg"
+      ],
+      "title": "Luxe Villa",
+      "location": "Arpora, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 2,
+      "type": "Villas",
+      "images": [
+        "/images/properties/casa-caisua/casa1.webp",
+        "/images/properties/casa-caisua/casa2.webp",
+        "/images/properties/casa-caisua/casa3.webp",
+        "/images/properties/casa-caisua/casa4.webp",
+        "/images/properties/casa-caisua/casa5.webp",
+        "/images/properties/casa-caisua/casa1.webp"
+      ],
+      "title": "Casa Caisua- Luxury Goan Loft Style Villa",
+      "location": "Vagator, Anjuna, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 3,
+      "type": "Farm House",
+      "images": [
+        "/images/properties/fig/fig1.jpg",
+        "/images/properties/fig/fig2.jpg",
+        "/images/properties/fig/fig3.jpg",
+        "/images/properties/fig/fig4.jpg",
+        "/images/properties/fig/fig5.jpg"
+      ],
+      "title": "The Figueiredo House - Lotoulim",
+      "location": "Goa, Goa",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 4,
+      "type": "Villas",
+      "images": [
+        "/images/properties/villa-de-festa/villa-de-festa1.webp",
+        "/images/properties/villa-de-festa/villa-de-festa2.webp",
+        "/images/properties/villa-de-festa/villa-de-festa3.webp",
+        "/images/properties/villa-de-festa/villa-de-festa4.webp",
+        "/images/properties/villa-de-festa/villa-de-festa5.webp"
+      ],
+      "title": "Villa De Festa",
+      "location": "Anjuna, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 5,
+      "type": "Pool",
+      "images": [
+        "/images/properties/stellar/stellar1.webp",
+        "/images/properties/stellar/stellar2.webp",
+        "/images/properties/stellar/stellar3.webp",
+        "/images/properties/stellar/stellar4.webp",
+        "/images/properties/stellar/stellar5.webp"
+      ],
+      "title": "Stellar Kamalaya Assagao",
+      "location": "Assagao, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 6,
+      "type": "Apartments",
+      "images": [
+        "/images/properties/colva/colva1.webp",
+        "/images/properties/colva/colva2.webp",
+        "/images/properties/colva/colva3.webp",
+        "/images/properties/colva/colva4.jpeg",
+        "/images/properties/colva/colva4.webp"
+      ],
+      "title": "A plush 2 Bedroom",
+      "location": "Colva, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 7,
+      "type": "Farm House",
+      "images": [
+        "/images/properties/menons/menons1.webp",
+        "/images/properties/menons/menons2.webp",
+        "/images/properties/menons/menons3.webp",
+        "/images/properties/menons/menons4.webp",
+        "/images/properties/menons/menons5.webp"
+      ],
+      "title": "Menons",
+      "location": "Benaulim, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 8,
+      "type": "Farm House",
+      "images": [
+        "/images/properties/ov4/ov4_1.webp",
+        "/images/properties/ov4/ov4_2.webp",
+        "/images/properties/ov4/ov4_3.webp",
+        "/images/properties/ov4/ov4_4.webp",
+        "/images/properties/ov4/ov4_5.webp"
+      ],
+      "title": "OV4 - 4BHK",
+      "location": "Calangute, India",
+      "price": 4907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 9,
+      "type": "Villas",
+      "images": [
+        "/images/properties/lotus/lotus1.webp",
+        "/images/properties/lotus/lotus2.webp",
+        "/images/properties/lotus/lotus3.webp",
+        "/images/properties/lotus/lotus4.webp",
+        "/images/properties/lotus/lotus5.webp"
+      ],
+      "title": "Lotus Villa",
+      "location": "Mandrem, India",
+      "price": 5907,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+    {
+      "id": 10,
+      "type": "Villas",
+      "images": [
+        "/images/properties/q/q1.webp",
+        "/images/properties/q/q2.webp",
+        "/images/properties/q/q3.webp",
+        "/images/properties/q/q4.webp",
+        "/images/properties/q/q5.webp"
+      ],
+      "title": "The Q Heritage Prvt Pool Villa",
+      "location": "Parra, India",
+      "price": 6299,
+      "badge": "Guest's fav",
+      "dateRange": "10 - 15 Nov"
+    },
+        {
+          "id": 11,
+          "type": "Farm House",
+          "images": [
+            "/images/properties/island-house-goa/island-house-goa1.jpg",
+            "/images/properties/island-house-goa/island-house-goa2.jpg",
+            "/images/properties/island-house-goa/island-house-goa3.jpg",
+            "/images/properties/island-house-goa/island-house-goa4.jpg",
+            "/images/properties/island-house-goa/island-house-goa5.jpg"
+          ],
+          "title": "Island House Goa",
+          "location": "Divar, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        },
+        {
+          "id": 12,
+          "type": "Villas",
+          "images": [
+            "/images/properties/island-pool-villa/island-pool-villa1.webp",
+            "/images/properties/island-pool-villa/island-pool-villa1.webp",
+            "/images/properties/island-pool-villa/island-pool-villa1.webp",
+            "/images/properties/island-pool-villa/island-pool-villa1.webp",
+            "/images/properties/island-pool-villa/island-pool-villa1.webp"
+          ],
+          "title": "Island Pool Villa",
+          "location": "Tiswadi, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        },
+        {
+          "id": 13,
+          "type": "Beachfront",
+          "images": [
+            "/images/properties/cabo-serai/cabo-serai1.jpg",
+            "/images/properties/cabo-serai/cabo-serai2.jpg",
+            "/images/properties/cabo-serai/cabo-serai3.jpg",
+            "/images/properties/cabo-serai/cabo-serai4.jpg",
+            "/images/properties/cabo-serai/cabo-serai5.jpg"
+          ],
+          "title": "Cabo Serai",
+          "location": "Canacona, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        },
+        {
+          "id": 14,
+          "type": "Villas",
+          "images": [
+            "/images/properties/3bhk-luxury-villa/3bhk-luxury-villa1.jpg",
+            "/images/properties/3bhk-luxury-villa/3bhk-luxury-villa2.jpg",
+            "/images/properties/3bhk-luxury-villa/3bhk-luxury-villa3.jpg",
+            "/images/properties/3bhk-luxury-villa/3bhk-luxury-villa4.jpg",
+            "/images/properties/3bhk-luxury-villa/3bhk-luxury-villa5.jpg"
+          ],
+          "title": "3 BHK Luxury Villa",
+          "location": "Dabolim, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        },
+        {
+          "id": 15,
+          "type": "Villas",
+          "images": [
+            "/images/properties/4bhk-heritage-villa/4bhk-heritage-villa1.webp",
+            "/images/properties/4bhk-heritage-villa/4bhk-heritage-villa2.webp",
+            "/images/properties/4bhk-heritage-villa/4bhk-heritage-villa3.webp",
+            "/images/properties/4bhk-heritage-villa/4bhk-heritage-villa4.webp",
+            "/images/properties/4bhk-heritage-villa/4bhk-heritage-villa5.webp"
+          ],
+          "title": "4BHK Heritage Villa",
+          "location": "Candolim, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        },
+        {
+          "id": 16,
+          "type": "Villas",
+          "images": [
+            "/images/properties/the-white-villa/the-white-villa1.webp",
+            "/images/properties/the-white-villa/the-white-villa2.webp",
+            "/images/properties/the-white-villa/the-white-villa3.webp",
+            "/images/properties/the-white-villa/the-white-villa4.webp",
+            "/images/properties/the-white-villa/the-white-villa5.webp"
+          ],
+          "title": "The White Villa",
+          "location": "Colva, India",
+          "price": 6299,
+          "badge": "Guest's fav",
+          "dateRange": "10 - 15 Nov"
+        }
+      ]
+      

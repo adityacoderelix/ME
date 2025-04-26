@@ -1,0 +1,202 @@
+"use client"
+
+import { useParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { useMemo, useEffect } from "react"; // Added useMemo and useEffect
+
+// Import your components
+import ImageGallery from "./components/image-gallery"
+import PropertyListing from "./components/property-listing"
+import Location from "./components/location"
+import ThingsToKnow from "./components/things-to-know"
+import HostProfile from "./components/host-profile" // Assuming this is the refactored component
+import ReviewSection from "./components/review-section"
+// Import the skeleton for HostProfile if you want a more granular loading state,
+// but the refactored HostProfile handles its own skeleton.
+// import { HostProfileSkeleton } from "./components/host-profile";
+
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// --- API Fetching Functions ---
+
+// Function to fetch property data
+const fetchProperty = async (id) => {
+  if (!id) throw new Error("Property ID is missing");
+  const response = await fetch(`${API_URL}/properties/${id}`)
+  if (!response.ok) {
+    console.error("Failed to fetch property:", response.status, await response.text());
+    throw new Error(`Failed to fetch property data (status: ${response.status})`)
+  }
+  return response.json()
+}
+
+// Function to fetch host data (moved here from HostProfile)
+const fetchHostData = async (hostIdStr) => {
+  if (!hostIdStr) {
+    throw new Error("Host ID is missing");
+  }
+  const response = await fetch(`${API_URL}/profile/host/brief/${hostIdStr}`)
+  if (!response.ok) {
+    console.error("Failed to fetch host:", response.status, await response.text());
+    throw new Error(`Failed to fetch host data (status: ${response.status})`)
+  }
+  return response.json()
+}
+
+
+// --- The Main Page Component ---
+
+export default function PropertyPage() {
+  const params = useParams()
+  const propertyId = params.id
+
+  // --- Query 1: Fetch Property Data ---
+  const {
+    data: propertyData,
+    isLoading: isPropertyLoading, // Renamed for clarity
+    error: propertyError,        // Renamed for clarity
+    isFetching: isPropertyFetching,
+    isError: isPropertyError,
+  } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => fetchProperty(propertyId),
+    enabled: !!propertyId, // Only run if propertyId exists
+    // Optional: Add staleTime, cacheTime etc.
+    // staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // --- Derive Host ID and Normalize ---
+  const hostId = propertyData?.host; // Get host ID from property data
+
+  const hostIdStr = useMemo(() => {
+    if (!hostId) return null;
+    return typeof hostId === "object"
+      ? hostId._id
+        ? hostId._id.toString()
+        : JSON.stringify(hostId) // Less ideal fallback
+      : typeof hostId === "string"
+        ? hostId
+        : String(hostId);
+  }, [hostId]); // Recalculate only if hostId changes
+
+  // --- Query 2: Fetch Host Data ---
+  const {
+    data: hostData,
+    isLoading: isHostLoading, // Renamed for clarity
+    error: hostError,        // Renamed for clarity
+    isFetching: isHostFetching,
+    isError: isHostError,
+  } = useQuery({
+    queryKey: ["hostProfile", hostIdStr], // Use normalized hostIdStr in key
+    queryFn: () => fetchHostData(hostIdStr),
+    // Enable only when we have a valid, non-empty string hostIdStr
+    enabled: !!hostIdStr && typeof hostIdStr === 'string' && hostIdStr.length > 0,
+    // Optional: Configure caching/retries differently for host data if needed
+    // staleTime: 15 * 60 * 1000, // 15 minutes
+  });
+
+  // --- Log states for debugging ---
+  useEffect(() => {
+    // console.log("Property Query:", { propertyId, isPropertyLoading, isPropertyFetching, isPropertyError, propertyError: propertyError?.message });
+  }, [propertyId, isPropertyLoading, isPropertyFetching, isPropertyError, propertyError]);
+
+  useEffect(() => {
+    // console.log("Host Query:", { hostIdStr, isHostLoading, isHostFetching, isHostError, hostError: hostError?.message });
+  }, [hostIdStr, isHostLoading, isHostFetching, isHostError, hostError]);
+
+
+  // --- Handle Main Property Loading/Error State ---
+  // Show loading indicator if the main property data is loading
+  if (isPropertyLoading) {
+      return (
+          <div className="min-h-screen flex items-center justify-center pt-32">
+              {/* You might want a more sophisticated page-level skeleton here */}
+              <p className="text-xl text-gray-600">Loading Property Details...</p>
+          </div>
+      );
+  }
+
+  // Show error message if the main property fetch failed
+  if (propertyError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-32">
+        <div className="text-center p-8 bg-red-50 rounded-lg shadow">
+          <h2 className="text-2xl font-bold text-red-700 mb-2">Error loading property</h2>
+          <p className="text-red-600">{propertyError.message || "An unknown error occurred."}</p>
+          <button
+            onClick={() => window.location.reload()} // Simple refresh action
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // If property data exists, derive necessary values
+  // Note: Put this *after* the loading/error checks for propertyData
+  const hostFirstName = propertyData?.host?.name?.split(" ")[0] || "Host";
+  const locationInfo = {
+    lat: propertyData?.address?.latitude,
+    long: propertyData?.address?.longitude,
+    address: (propertyData?.address?.city && propertyData?.address?.state && propertyData?.address?.country)
+      ? `${propertyData.address.city}, ${propertyData.address.state}, ${propertyData.address.country}`
+      : "Location not fully specified",
+  };
+
+  // --- Render the Page Content ---
+  return (
+    <main className="min-h-screen pt-16 md:pt-32 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Property Title */}
+        <h1 className="text-xl md:text-2xl font-bricolage font-semibold mb-4 md:mb-6">{propertyData?.title || "Property Title"}</h1>
+
+        {/* Image Gallery */}
+        {/* Pass isPropertyLoading here as images depend on property data */}
+        <ImageGallery images={propertyData?.photos || []} isLoading={isPropertyLoading} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mt-0 md:mt-8"> {/* Added grid layout */}
+           {/* Left Column (Listing Details) */}
+           <div className="lg:col-span-2 space-y-8"> {/* Takes 2/3 width on large screens */}
+              {/* Property Listing Details */}
+              {/* Pass isPropertyLoading if PropertyListing needs it */}
+              <PropertyListing
+              hostData={hostData}
+              propertyDetails={propertyData}
+              isLoading={isPropertyLoading} />
+
+              {/* Review Section */}
+              {/* Pass relevant review data and potentially property ID */}
+              <ReviewSection reviews={propertyData?.reviews} propertyId={propertyId} />
+
+           </div>
+
+        </div>
+
+
+         {/* Sections below the main grid */}
+        <div className="mt-12 space-y-12"> {/* Add spacing */}
+            {/* Location Map */}
+            <Location
+              locationInfo={locationInfo}
+              isLoading={isPropertyLoading} // Map depends on property location data
+            />
+
+            {/* Host Profile */}
+            {/* Pass data/loading/error states from the *host* query */}
+            <HostProfile
+              hostData={hostData}
+              isLoading={isHostLoading}
+              error={hostError}
+            />
+
+            {/* Things To Know */}
+             {/* Pass isPropertyLoading if ThingsToKnow depends on it */}
+            {/* <ThingsToKnow thingsToKnow={propertyData?.thingsToKnow || {}} isLoading={isPropertyLoading} /> */}
+        </div>
+
+      </div>
+    </main>
+  )
+}
