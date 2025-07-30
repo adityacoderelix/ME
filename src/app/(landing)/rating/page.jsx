@@ -2,15 +2,160 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import StarRating from "@/components/star-rating";
 import { AlertCircleIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function Ratings() {
+  const searchParams = useSearchParams();
+  const emailToken = searchParams.get("token");
   const [rating, setRating] = useState(0);
-
-  const handleRatingChange = (value) => {
-    console.log("You selected rating:", value);
+  const [reviewData, setReviewData] = useState();
+  const [isAuth, setIsAuth] = useState(false);
+  const bookingId = searchParams.get("booking");
+  const [data, setData] = useState();
+  const verifyToken = async (emailToken) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(`${API_URL}/review/verify`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            emailToken: emailToken,
+          }),
+        });
+        if (!response.ok) {
+          return;
+        }
+        return response.json();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
-  const handleChange = () => {};
+  const auth = async () => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    if (data) setIsAuth(true);
+  };
+
+  const getBookingId = async (bookingId) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(`${API_URL}/booking/${bookingId}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          return;
+        }
+        const result = await response.json();
+        setData(result.data.checkOut);
+        return result.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    auth();
+  }, []);
+  useEffect(() => {
+    if (emailToken) {
+      verifyToken(emailToken);
+    }
+  }, [emailToken]);
+
+  const {
+    data: bookingData,
+    isLoading: isBookingLoading, // Renamed for clarity
+    error: bookingError, // Renamed for clarity
+    isFetching: isBookingFetching,
+    isError: isBookingError,
+  } = useQuery({
+    queryKey: ["property", bookingId],
+    queryFn: () => getBookingId(bookingId),
+    enabled: !!bookingId, // Only run if propertyId exists
+    // Optional: Add staleTime, cacheTime etc.
+    // staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  const handleRatingChange = (value) => {
+    setRating(value);
+  };
+
+  const handleChange = (event) => {
+    setReviewData(event.target.value);
+  };
+
+  const handleSubmitReviewData = async () => {
+    try {
+      if (!reviewData) {
+        toast.error("Cannot leave review text box empty.");
+        return;
+      }
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+
+      if (data) {
+        const response = await fetch(`${API_URL}/review/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId: bookingId,
+            rating: rating,
+            content: reviewData,
+          }),
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReset = (value) => {
+    setRating(value);
+  };
+  // setData(bookingData.checkOut);
+  console.log(data);
+  const dat = new Date().toLocaleDateString();
+  if (!isAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        You are not authorized to access this page. &nbsp;{" "}
+        <Link href="/login">
+          <u>
+            <b>Click Here</b>
+          </u>
+        </Link>
+        &nbsp; to log in now to access.
+      </div>
+    );
+  }
+  if (dat != "7/29/2025") {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        Your review date has expired. The review remains open only for the next
+        14 days from check out date. &nbsp;{" "}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen font-poppins pt-24">
@@ -30,10 +175,20 @@ export default function Ratings() {
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
                 <h2 className="text-lg leading-6 font-semibold text-primary">
-                  Form
+                  My Review
                 </h2>
               </div>
+
               <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+                <div className=" p-10 font-sans">
+                  <h1 className="text-lg font-bold mb-4">
+                    Rate Your Experience
+                  </h1>
+                  <StarRating
+                    onRatingChange={handleRatingChange}
+                    resetChange={handleReset}
+                  />{" "}
+                </div>
                 <div className="py-4 sm:py-5 sm:grid sm:gap-4 sm:px-6">
                   <textarea
                     className="px-4 py-4 border border-gray h-40 "
@@ -41,13 +196,7 @@ export default function Ratings() {
                     placeholder="Write your review ....."
                     onChange={handleChange}
                   />
-                </div>
-
-                <div className=" p-10 font-sans">
-                  <h1 className="text-lg font-bold mb-4">
-                    Rate Your Experience
-                  </h1>
-                  <StarRating onRatingChange={handleRatingChange} />
+                  <Button onClick={handleSubmitReviewData}>Submit</Button>
                 </div>
               </div>
             </div>

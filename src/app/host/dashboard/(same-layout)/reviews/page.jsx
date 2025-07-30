@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -11,31 +11,101 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+} from "@/components/ui/table";
+import { Star, ThumbsUp, MessageSquare, TrendingUp, Flag } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { addDays, format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
-  
-} from "@/components/ui/table"
-import { Star,  ThumbsUp, MessageSquare, TrendingUp, Flag } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { addDays, format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-
-const reviews = [
- ]
+const reviews = [];
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function ReviewsPage() {
-  const [selectedProperty, setSelectedProperty] = useState("all")
-  const [selectedRating, setSelectedRating] = useState("all")
+  const [selectedProperty, setSelectedProperty] = useState("all");
+  const [selectedRating, setSelectedRating] = useState("all");
+  const [reviewData, setReviewData] = useState();
+  const [avgRating, setAvgRating] = useState();
+  const [count, setCount] = useState();
+  const [copyData, setCopyData] = useState();
   const [date, setDate] = useState({
     from: new Date(),
     to: addDays(new Date(), 20),
-  })
+  });
+
+  const fetchData = async () => {
+    try {
+      const getUserId = await localStorage.getItem("userId");
+      const userId = JSON.parse(getUserId);
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(`${API_URL}/hostData/review/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data}`,
+          },
+        });
+        if (!response.ok) {
+          toast.error("Error in fetching data");
+        }
+        const result = await response.json();
+        const final = await result;
+        setReviewData(result);
+        setCopyData(result);
+
+        return result.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+  for (let i in reviewData?.data) {
+    for (let j in reviewData?.data[i]) {
+      if (reviewData?.data[i][j].property.title == selectedProperty) {
+        const filteredProperty = reviewData?.data[i].filter(
+          (item) => item.property.title == selectedProperty
+        );
+      }
+    }
+  }
+  const filteredProperty = reviewData?.data[0].filter(
+    (item) => item.property.title == selectedProperty
+  );
+  console.log("sdhjshdjs", filteredProperty);
+  // const {
+  //   data: reviewData,
+  //   isLoading: isReviewLoading, // Renamed for clarity
+  //   error: reviewError, // Renamed for clarity
+  //   isFetching: isReviewFetching,
+  //   isError: isReviewError,
+  // } = useQuery({
+  //   queryKey: ["review"],
+  //   queryFn: () => fetchData(),
+  // });
 
   return (
     <div className="container mx-auto  space-y-6 max-w-full">
-                <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">Guest Reviews</h1>
-
+      <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">
+        Guest Reviews
+      </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
@@ -44,32 +114,44 @@ export default function ReviewsPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">No records found</p>
+            {reviewData?.reviewCount ? (
+              <div className="text-2xl font-bold">
+                {reviewData?.reviewCount}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No records found</p>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Average Rating
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
             {/* <p className="text-xs text-muted-foreground">+0.2 from last month</p> */}
-            <p className="text-xs text-muted-foreground">No records found</p>
-
+            {reviewData?.averageRating ? (
+              <div className="text-2xl font-bold">
+                {reviewData?.averageRating}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No records found</p>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Positive Reviews</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Positive Reviews
+            </CardTitle>
             <ThumbsUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
             {/* <p className="text-xs text-muted-foreground">+3% from last month</p> */}
             <p className="text-xs text-muted-foreground">No records found</p>
-
           </CardContent>
         </Card>
         <Card>
@@ -81,7 +163,6 @@ export default function ReviewsPage() {
             <div className="text-2xl font-bold">NA</div>
             {/* <p className="text-xs text-muted-foreground">+15% review rate</p> */}
             <p className="text-xs text-muted-foreground">No records found</p>
-
           </CardContent>
         </Card>
       </div>
@@ -93,16 +174,26 @@ export default function ReviewsPage() {
         <CardContent>
           <div className="flex justify-between items-center mb-4">
             <div className="flex space-x-2">
-              <Input
-                placeholder="Search reviews..."
-                className="w-[300px]"
-              />
-              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+              <Input placeholder="Search reviews..." className="w-[300px]" />
+              <Select
+                value={selectedProperty}
+                onValueChange={setSelectedProperty}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Filter by property" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
+
+                  {reviewData?.data
+                    ? reviewData?.data.map((item) =>
+                        item[0] ? (
+                          <SelectItem value={item[0]?.property?.title}>
+                            {item[0]?.property?.title}
+                          </SelectItem>
+                        ) : null
+                      )
+                    : null}
                   {/* <SelectItem value="beachside">Beachside Villa</SelectItem>
                   <SelectItem value="mountain">Mountain Retreat</SelectItem>
                   <SelectItem value="city">City Center Apartment</SelectItem> */}
@@ -171,38 +262,98 @@ export default function ReviewsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reviews.map((review) => (
-                <TableRow key={review.id}>
-                  <TableCell className="font-medium">{review.id}</TableCell>
-                  <TableCell>{review.guest}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} />
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">{review.comment}</TableCell>
-                  <TableCell>{review.property}</TableCell>
-                  <TableCell>{review.date}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <MessageSquare className="h-4 w-4" />
-                        <span className="sr-only">Reply</span>
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Flag className="h-4 w-4" />
-                        <span className="sr-only">Flag</span>
-                      </Button>
-                    </div>
+              {reviewData?.data ? (
+                reviewData?.data.map((item) =>
+                  item.map((review) => (
+                    <TableRow key={review._id}>
+                      <TableCell className="font-medium">
+                        {review._id}
+                      </TableCell>
+                      <TableCell>{review.user.firstName}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "fill-current text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {review.content}
+                      </TableCell>
+                      <TableCell>{review.property.title}</TableCell>
+                      <TableCell>
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button variant="ghost" size="sm">
+                            <MessageSquare className="h-4 w-4" />
+                            <span className="sr-only">Reply</span>
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Flag className="h-4 w-4" />
+                            <span className="sr-only">Flag</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )
+              ) : (
+                <TableRow>
+                  <TableCell className="font-medium">
+                    Loading Table Data....
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
+// {reviews.map((review) => (
+//             <TableRow key={review.id}>
+//               <TableCell className="font-medium">{review.id}</TableCell>
+//               <TableCell>{review.guest}</TableCell>
+//               <TableCell>
+//                 <div className="flex items-center">
+//                   {[...Array(5)].map((_, i) => (
+//                     <Star
+//                       key={i}
+//                       className={`h-4 w-4 ${
+//                         i < review.rating
+//                           ? "text-yellow-400"
+//                           : "text-gray-300"
+//                       }`}
+//                     />
+//                   ))}
+//                 </div>
+//               </TableCell>
+//               <TableCell className="max-w-xs truncate">
+//                 {review.comment}
+//               </TableCell>
+//               <TableCell>{review.property}</TableCell>
+//               <TableCell>{review.date}</TableCell>
+//               <TableCell>
+//                 <div className="flex space-x-2">
+//                   <Button variant="ghost" size="sm">
+//                     <MessageSquare className="h-4 w-4" />
+//                     <span className="sr-only">Reply</span>
+//                   </Button>
+//                   <Button variant="ghost" size="sm">
+//                     <Flag className="h-4 w-4" />
+//                     <span className="sr-only">Flag</span>
+//                   </Button>
+//                 </div>
+//               </TableCell>
+//             </TableRow>
+//           ))}

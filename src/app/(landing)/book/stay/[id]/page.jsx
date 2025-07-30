@@ -32,20 +32,35 @@ const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Function to fetch property data
 const fetchProperty = async (id) => {
-  if (!id) throw new Error("Property ID is missing");
-  const response = await fetch(`${API_URL}/properties/${id}`);
-  // console.log("djfjdf", await response.json());
-  if (!response.ok) {
-    console.error(
-      "Failed to fetch property:",
-      response.status,
-      await response.text()
-    );
-    throw new Error(
-      `Failed to fetch property data (status: ${response.status})`
-    );
+  try {
+    if (!id) throw new Error("Property ID is missing");
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    if (data) {
+      const response = await fetch(`${API_URL}/properties/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
+        },
+      });
+      // console.log("djfjdf", await response.json());
+      if (!response.ok) {
+        console.error(
+          "Failed to fetch property:",
+          response.status,
+          await response.text()
+        );
+        throw new Error(
+          `Failed to fetch property data (status: ${response.status})`
+        );
+      }
+      const result = await response.json();
+      return result.data;
+    }
+  } catch (err) {
+    console.error(err);
   }
-  return response.json();
 };
 
 // Create a BookPageContent component that uses React Query
@@ -54,7 +69,7 @@ function BookPageContent() {
   const searchParams = useSearchParams();
   const params = useParams();
   const propertyId = params.id;
-
+  const [isAuth, setIsAuth] = useState(false);
   const [date, setDate] = useState({
     from: searchParams.get("checkin")
       ? new Date(searchParams.get("checkin"))
@@ -63,6 +78,17 @@ function BookPageContent() {
       ? new Date(searchParams.get("checkout"))
       : new Date("2025-03-28"),
   });
+
+  const auth = async () => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    if (data) setIsAuth(true);
+  };
+
+  useEffect(() => {
+    auth();
+  }, []);
+
   const [guests, setGuests] = useState(searchParams.get("guests") || "1");
   const [nights, setNights] = useState(searchParams.get("nights") || "0");
 
@@ -149,11 +175,14 @@ function BookPageContent() {
   ) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
-      console.log(checkout);
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      console.log(propertyId, amount, currency, checkin, checkout, host);
       const response = await fetch(`${API_URL}/booking/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
           userId: userId,
@@ -179,10 +208,13 @@ function BookPageContent() {
   const createPaymentOrder = async (currency, amount) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
       const response = await fetch(`${API_URL}/payment/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
           userId: userId,
@@ -201,11 +233,13 @@ function BookPageContent() {
   const verifyPayment = async (orderId, paymentId, signature) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
-
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
       const response = await fetch(`${API_URL}/payment/verify-payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
           razorpay_order_id: orderId,
@@ -223,10 +257,13 @@ function BookPageContent() {
   const updateBookingStatus = async (bookingId, host) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
       const response = await fetch(`${API_URL}/booking/updateStatus`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
           bookingId: bookingId,
@@ -380,125 +417,127 @@ function BookPageContent() {
   ];
   const propertyCheckIn = property?.checkInTime || "2:00 PM";
   const propertyCheckOut = property?.checkOutTime || "11:00 AM";
+  if (isAuth) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-24 md:py-32">
+        <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
+          <ChevronLeft className="mr-2 h-4 w-4" /> Back to listing
+        </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h1 className="text-3xl font-semibold font-bricolage mb-6">
+              Confirm and pay
+            </h1>
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-24 md:py-32">
-      <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
-        <ChevronLeft className="mr-2 h-4 w-4" /> Back to listing
-      </Button>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <h1 className="text-3xl font-semibold font-bricolage mb-6">
-            Confirm and pay
-          </h1>
-
-          <div className="mb-8 border rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">Your trip</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-1">Dates</h3>
-                <p>
-                  {date.from.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}{" "}
-                  -{" "}
-                  {date.to?.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-1">Guests</h3>
-                <p>
-                  {guests} guest{Number(guests) > 1 ? "s" : ""}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-8 border-b pb-8">
-            <h2 className="text-xl font-semibold mb-4">Check-in details</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-1">Check-in</h3>
-                <p>{propertyCheckIn}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-1">Check-out</h3>
-                <p>{propertyCheckOut}</p>
+            <div className="mb-8 border rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4">Your trip</h2>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-1">Dates</h3>
+                  <p>
+                    {date.from.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    -{" "}
+                    {date.to?.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Guests</h3>
+                  <p>
+                    {guests} guest{Number(guests) > 1 ? "s" : ""}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="mb-8 border-b pb-8">
-            <h2 className="text-xl font-semibold mb-4">House rules</h2>
-            <ul className="space-y-2">
-              {propertyHouseRules.map((rule, index) => (
-                <li key={index} className="flex items-start">
+            <div className="mb-8 border-b pb-8">
+              <h2 className="text-xl font-semibold mb-4">Check-in details</h2>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-1">Check-in</h3>
+                  <p>{propertyCheckIn}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Check-out</h3>
+                  <p>{propertyCheckOut}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-8 border-b pb-8">
+              <h2 className="text-xl font-semibold mb-4">House rules</h2>
+              <ul className="space-y-2">
+                {propertyHouseRules.map((rule, index) => (
+                  <li key={index} className="flex items-start">
+                    <Check className="h-5 w-5 mr-2 text-green-600 shrink-0 mt-0.5" />
+                    <span>{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mb-8 border-b pb-8">
+              <h2 className="text-xl font-semibold mb-4">
+                Cancellation policy
+              </h2>
+              <p className="text-gray-700">
+                Free cancellation for 48 hours. After that, cancel before 2:00
+                PM on{" "}
+                {date.from.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                and get a full refund, minus the first night and service fee.
+              </p>
+              <Link
+                href="/cancellation-policy"
+                className="px-0 text-black font-medium underline mt-2"
+              >
+                Learn more
+              </Link>
+            </div>
+
+            <div className="mb-8 border-b pb-8">
+              <h2 className="text-xl font-semibold mb-4">Ground rules</h2>
+              <p className="text-gray-700">
+                We ask every guest to remember a few simple things about what
+                makes a great guest.
+              </p>
+              <ul className="mt-4 space-y-2">
+                <li className="flex items-start">
                   <Check className="h-5 w-5 mr-2 text-green-600 shrink-0 mt-0.5" />
-                  <span>{rule}</span>
+                  <span>Follow the house rules</span>
                 </li>
-              ))}
-            </ul>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 mr-2 text-green-600 shrink-0 mt-0.5" />
+                  <span>Treat your Host's home like your own</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-8">
+              <Button
+                onClick={handlePayment}
+                className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
+              >
+                Pay ₹{totals.total.toLocaleString()}
+              </Button>
+              <p className="text-sm text-center mt-4 text-gray-500">
+                You won't be charged yet
+              </p>
+            </div>
           </div>
 
-          <div className="mb-8 border-b pb-8">
-            <h2 className="text-xl font-semibold mb-4">Cancellation policy</h2>
-            <p className="text-gray-700">
-              Free cancellation for 48 hours. After that, cancel before 2:00 PM
-              on{" "}
-              {date.from.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}{" "}
-              and get a full refund, minus the first night and service fee.
-            </p>
-            <Link
-              href="/cancellation-policy"
-              className="px-0 text-black font-medium underline mt-2"
-            >
-              Learn more
-            </Link>
-          </div>
-
-          <div className="mb-8 border-b pb-8">
-            <h2 className="text-xl font-semibold mb-4">Ground rules</h2>
-            <p className="text-gray-700">
-              We ask every guest to remember a few simple things about what
-              makes a great guest.
-            </p>
-            <ul className="mt-4 space-y-2">
-              <li className="flex items-start">
-                <Check className="h-5 w-5 mr-2 text-green-600 shrink-0 mt-0.5" />
-                <span>Follow the house rules</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="h-5 w-5 mr-2 text-green-600 shrink-0 mt-0.5" />
-                <span>Treat your Host's home like your own</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="mb-8">
-            <Button
-              onClick={handlePayment}
-              className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
-            >
-              Pay ₹{totals.total.toLocaleString()}
-            </Button>
-            <p className="text-sm text-center mt-4 text-gray-500">
-              You won't be charged yet
-            </p>
-          </div>
-        </div>
-
-        <div className="lg:sticky lg:top-8 self-start">
-          <Card className="border rounded-xl shadow-lg">
-            <CardHeader className="flex flex-row items-center space-x-4 pb-4">
-              {/* <Image
+          <div className="lg:sticky lg:top-8 self-start">
+            <Card className="border rounded-xl shadow-lg">
+              <CardHeader className="flex flex-row items-center space-x-4 pb-4">
+                {/* <Image
                 src={propertyImage || "/placeholder.svg"}
                 alt={propertyTitle}
                 width={120}
@@ -506,69 +545,83 @@ function BookPageContent() {
                
                 className="rounded-lg object-cover"
               /> */}
-              <div>
-                <p className="text-sm text-gray-500 mb-1">
-                  Entire {property?.propertyType} in{" "}
-                  {property?.address?.city || "Goa"}
-                </p>
-                <CardTitle className="text-lg">{propertyTitle}</CardTitle>
-                <div className="flex items-center mt-2">
-                  <Star className="h-4 w-4 fill-current text-black mr-1" />
-                  <span className="text-sm">
-                    {propertyRating} · {propertyReviews} reviews
-                  </span>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">
+                    Entire {property?.propertyType} in{" "}
+                    {property?.address?.city || "Goa"}
+                  </p>
+                  <CardTitle className="text-lg">{propertyTitle}</CardTitle>
+                  <div className="flex items-center mt-2">
+                    <Star className="h-4 w-4 fill-current text-black mr-1" />
+                    <span className="text-sm">
+                      {propertyRating} · {propertyReviews} reviews
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="border-t pt-6">
-              <h3 className="font-medium font-bricolage text-lg mb-4">
-                Price details
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="underline">
-                    ₹{propertyPrice.toLocaleString()} x {totals.nights} night
-                    {totals.nights > 1 ? "s" : ""}
-                  </span>
-                  <span>₹{totals.subtotal.toLocaleString()}</span>
+              </CardHeader>
+              <CardContent className="border-t pt-6">
+                <h3 className="font-medium font-bricolage text-lg mb-4">
+                  Price details
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="underline">
+                      ₹{propertyPrice.toLocaleString()} x {totals.nights} night
+                      {totals.nights > 1 ? "s" : ""}
+                    </span>
+                    <span>₹{totals.subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="hidden justify-between">
+                    <span className="underline">Cleaning fee</span>
+                    <span>₹{totals.cleaningFee.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="underline">
+                      Majestic Escape service fee
+                    </span>
+                    <span>₹{totals.serviceFee.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="underline">Taxes</span>
+                    <span>₹{totals.taxes.toLocaleString()}</span>
+                  </div>
                 </div>
-                <div className="hidden justify-between">
-                  <span className="underline">Cleaning fee</span>
-                  <span>₹{totals.cleaningFee.toLocaleString()}</span>
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                <div className="flex justify-between w-full font-semibold text-lg">
+                  <span>Total (INR)</span>
+                  <span>₹{totals.total.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="underline">Majestic Escape service fee</span>
-                  <span>₹{totals.serviceFee.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="underline">Taxes</span>
-                  <span>₹{totals.taxes.toLocaleString()}</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="border-t pt-4">
-              <div className="flex justify-between w-full font-semibold text-lg">
-                <span>Total (INR)</span>
-                <span>₹{totals.total.toLocaleString()}</span>
-              </div>
-            </CardFooter>
-          </Card>
+              </CardFooter>
+            </Card>
 
-          <div className="mt-6 p-4 border rounded-xl">
-            <h3 className="font-semibold mb-4">
-              Your reservation is protected by
-            </h3>
-            <div className="flex items-center gap-2 mb-2">
-              <Check className="h-5 w-5 text-green-600" />
-              <span className="text-sm">Booking Protection Guarantee</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-600" />
-              <span className="text-sm">24/7 Customer Support</span>
+            <div className="mt-6 p-4 border rounded-xl">
+              <h3 className="font-semibold mb-4">
+                Your reservation is protected by
+              </h3>
+              <div className="flex items-center gap-2 mb-2">
+                <Check className="h-5 w-5 text-green-600" />
+                <span className="text-sm">Booking Protection Guarantee</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-green-600" />
+                <span className="text-sm">24/7 Customer Support</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    );
+  }
+  return (
+    <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+      You are not authorized to access this page. &nbsp;{" "}
+      <Link href="/login">
+        <u>
+          <b>Click Here</b>
+        </u>
+      </Link>
+      &nbsp; to log in now to access.
     </div>
   );
 }

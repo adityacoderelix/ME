@@ -1,78 +1,46 @@
-'use client'
+"use client";
 
-import { useState, useMemo, useEffect } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Filter, Star, X } from 'lucide-react'
-import Image from "next/image"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+import { useState, useMemo, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Filter, Star, X } from "lucide-react";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const generateRandomBooking = (id: number) => {
-  const properties = [
-    "Casa Belo - Chic 1BHK Serviced apt | Pool + Gym",
-    "Modern & Comfortable - 1 BHK w/ AC & Fast Wifi",
-    "Luxurious Villa with Ocean View",
-    "Cozy Mountain Retreat",
-    "Urban Loft in City Center"
-  ]
-  const locations = ["North Goa, India", "Deulwada Aramboi, India", "Bali, Indonesia", "Swiss Alps", "New York, USA"]
-  const hosts = ["Nanda and Noopur", "Ricardo", "Emma", "John", "Sarah"]
-  const statuses = ["Confirmed", "Pending", "Cancelled"]
-  const prices = [11000, 17000, 25000, 9000, 30000]
-
-  const randomDate = (start: Date, end: Date) => {
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
-  }
-
-  const now = new Date()
-  const pastDate = randomDate(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()), now)
-  const futureDate = randomDate(now, new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()))
-  
-  const isPast = Math.random() > 0.5
-  const checkIn = isPast ? pastDate : futureDate
-  const checkOut = new Date(checkIn.getTime() + Math.random() * 14 * 24 * 60 * 60 * 1000)
-
-  return {
-    id,
-    property: properties[Math.floor(Math.random() * properties.length)],
-    location: locations[Math.floor(Math.random() * locations.length)],
-    host: hosts[Math.floor(Math.random() * hosts.length)],
-    rating: (Math.random() * 1 + 4).toFixed(1),
-    reviews: Math.floor(Math.random() * 100),
-    checkIn,
-    checkOut,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    price: prices[Math.floor(Math.random() * prices.length)],
-    nights: Math.floor((checkOut.getTime() - checkIn.getTime()) / (24 * 60 * 60 * 1000))
-  }
-}
-
-type Booking = ReturnType<typeof generateRandomBooking>
 interface FilterState {
-  location: string
-  minPrice: string
-  maxPrice: string
+  location: string;
+  minPrice: string;
+  maxPrice: string;
 }
 
-const FilterDialog = ({ 
-  open, 
-  onOpenChange, 
-  filters, 
-  onFilterChange, 
-  onApply, 
-  onClear 
+const FilterDialog = ({
+  open,
+  onOpenChange,
+  filters,
+  onFilterChange,
+  onApply,
+  onClear,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  filters: { location: string; minPrice: string; maxPrice: string }
-  onFilterChange: (field: keyof FilterState, value: string) => void
-  onApply: () => void
-  onClear: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  filters: { location: string; minPrice: string; maxPrice: string };
+  onFilterChange: (field: keyof FilterState, value: string) => void;
+  onApply: () => void;
+  onClear: () => void;
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -83,140 +51,187 @@ const FilterDialog = ({
             Apply filters to find specific bookings
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="location" className="text-right">Location</Label>
+            <Label htmlFor="location" className="text-right">
+              Location
+            </Label>
             <Input
               id="location"
               value={filters.location}
-              onChange={(e) => onFilterChange('location', e.target.value)}
+              onChange={(e) => onFilterChange("location", e.target.value)}
               className="col-span-3"
               placeholder="Enter location"
             />
           </div>
-          
+
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="minPrice" className="text-right">Min Price</Label>
+            <Label htmlFor="minPrice" className="text-right">
+              Min Price
+            </Label>
             <Input
               id="minPrice"
               type="number"
               value={filters.minPrice}
-              onChange={(e) => onFilterChange('minPrice', e.target.value)}
+              onChange={(e) => onFilterChange("minPrice", e.target.value)}
               className="col-span-3"
               placeholder="Minimum price"
               min="0"
             />
           </div>
-          
+
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="maxPrice" className="text-right">Max Price</Label>
+            <Label htmlFor="maxPrice" className="text-right">
+              Max Price
+            </Label>
             <Input
               id="maxPrice"
               type="number"
               value={filters.maxPrice}
-              onChange={(e) => onFilterChange('maxPrice', e.target.value)}
+              onChange={(e) => onFilterChange("maxPrice", e.target.value)}
               className="col-span-3"
               placeholder="Maximum price"
               min="0"
             />
           </div>
         </div>
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={onClear}>
             Clear Filters
           </Button>
-          <Button onClick={onApply}>
-            Apply Filters
-          </Button>
+          <Button onClick={onApply}>Apply Filters</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 const ManageBookings = () => {
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [activeTab, setActiveTab] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
-  const [tempFilters, setTempFilters] = useState({ location: '', minPrice: '', maxPrice: '' })
-  const [appliedFilters, setAppliedFilters] = useState({ location: '', minPrice: '', maxPrice: '' })
-  const [isLoading, setIsLoading] = useState(true)
-
+  const [bookings, setBookings] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const router = useRouter();
+  const [tempFilters, setTempFilters] = useState({
+    location: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+  const [appliedFilters, setAppliedFilters] = useState({
+    location: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setBookings(Array.from({ length: 20 }, (_, i) => generateRandomBooking(i + 1)))
-    setIsLoading(false)
-  }, [])
+    const fetchData = async () => {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        try {
+          const response = await fetch(`${API_URL}/booking/data`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data}`,
+              "Content-Type": "application/json",
+            },
+          });
+          const result = await response.json();
+          setBookings(result.data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+    fetchData();
+    setIsLoading(false);
+  }, []);
 
   const filteredBookings = useMemo(() => {
-    return bookings.filter(booking => {
-      const isUpcoming = booking.checkIn > new Date()
-      const isPast = booking.checkOut < new Date()
-      const isCancelled = booking.status === 'Cancelled'
+    return bookings.filter((booking) => {
+      console.log(booking.propertyId.address.city);
+      const checkIn = new Date(booking.checkIn);
+      const checkOut = new Date(booking.checkOut);
 
-      const matchesTab = 
-        (activeTab === 'all') ||
-        (activeTab === 'upcoming' && isUpcoming) ||
-        (activeTab === 'past' && isPast) ||
-        (activeTab === 'cancelled' && isCancelled)
+      const isUpcoming = checkIn.toDateString() > new Date().toDateString();
+      const isPast = checkOut.toDateString() < new Date().toDateString();
+      const isCancelled = booking.status === "Cancelled";
 
-        const matchesLocation = !appliedFilters.location || 
-        booking.location.toLowerCase().includes(appliedFilters.location.toLowerCase())
-      
-      const matchesMinPrice = !appliedFilters.minPrice || 
-        booking.price >= parseInt(appliedFilters.minPrice)
-      
-      const matchesMaxPrice = !appliedFilters.maxPrice || 
-        booking.price <= parseInt(appliedFilters.maxPrice)
+      const matchesTab =
+        activeTab === "all" ||
+        (activeTab === "upcoming" && isUpcoming) ||
+        (activeTab === "past" && isPast) ||
+        (activeTab === "cancelled" && isCancelled);
 
-      return matchesTab && matchesLocation && matchesMinPrice && matchesMaxPrice
-    })
-  }, [bookings, activeTab,  appliedFilters])
+      const matchesLocation =
+        !appliedFilters.location ||
+        booking.propertyId.address.city
+          .toLowerCase()
+          .includes(appliedFilters.location.toLowerCase());
 
+      const matchesMinPrice =
+        !appliedFilters.minPrice ||
+        booking.price >= parseInt(appliedFilters.minPrice);
+
+      const matchesMaxPrice =
+        !appliedFilters.maxPrice ||
+        booking.price <= parseInt(appliedFilters.maxPrice);
+
+      return (
+        matchesTab && matchesLocation && matchesMinPrice && matchesMaxPrice
+      );
+    });
+  }, [bookings, activeTab, appliedFilters]);
+
+  console.log(filteredBookings);
   const handleClearFilters = () => {
-    const emptyFilters = { location: '', minPrice: '', maxPrice: '' }
-    setTempFilters(emptyFilters)
-    setAppliedFilters(emptyFilters)
-    setShowFilters(false)
-  }
+    const emptyFilters = { location: "", minPrice: "", maxPrice: "" };
+    setTempFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setShowFilters(false);
+  };
 
   const handleApplyFilters = () => {
-    setAppliedFilters(tempFilters)
-    setShowFilters(false)
-  }
+    setAppliedFilters(tempFilters);
+    setShowFilters(false);
+  };
 
   const handleFilterChange = (field: keyof FilterState, value: string) => {
-    setTempFilters(prev => ({ ...prev, [field]: value }))
-  }
+    setTempFilters((prev) => ({ ...prev, [field]: value }));
+  };
 
   const removeFilter = (field: keyof FilterState) => {
-    setAppliedFilters(prev => ({ ...prev, [field]: '' }))
-    setTempFilters(prev => ({ ...prev, [field]: '' }))
-  }
-
-  
+    setAppliedFilters((prev) => ({ ...prev, [field]: "" }));
+    setTempFilters((prev) => ({ ...prev, [field]: "" }));
+  };
 
   if (isLoading) {
-    return<div>Loading...</div>
+    return <div>Loading...</div>;
   }
+  const today = new Date().toLocaleDateString();
+  const hour = new Date().getHours();
 
   return (
-    <main className='py-16 md:py-24'>
-
-   
+    <main className="py-16 md:py-24">
       <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <h1 className="text-2xl font-bricolage text-absoluteDark font-bold">My Booking</h1>
-        
+        <h1 className="text-2xl font-bricolage text-absoluteDark font-bold">
+          My Booking
+        </h1>
+
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full lg:w-auto"
+          >
             <TabsList className="h-auto p-0 bg-transparent border-b border-gray-200 w-full lg:w-auto flex flex-wrap">
               {[
-                { value: 'all', label: 'All' },
-                { value: 'upcoming', label: 'Upcoming' },
-                { value: 'past', label: 'Past' },
-                { value: 'cancelled', label: 'Cancelled' },
+                { value: "all", label: "All" },
+                { value: "upcoming", label: "Upcoming" },
+                { value: "past", label: "Past" },
+                { value: "cancelled", label: "Cancelled" },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -228,10 +243,10 @@ const ManageBookings = () => {
               ))}
             </TabsList>
           </Tabs>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2"
             onClick={() => setShowFilters(true)}
           >
@@ -248,28 +263,37 @@ const ManageBookings = () => {
           />
         </div>
 
-        
-
         {/* Active Filters Display */}
-        {(appliedFilters.location || appliedFilters.minPrice || appliedFilters.maxPrice) && (
+        {(appliedFilters.location ||
+          appliedFilters.minPrice ||
+          appliedFilters.maxPrice) && (
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>Active filters:</span>
             {appliedFilters.location && (
               <Badge variant="secondary" className="gap-1">
                 Location: {appliedFilters.location}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => removeFilter('location')} />
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => removeFilter("location")}
+                />
               </Badge>
             )}
             {appliedFilters.minPrice && (
               <Badge variant="secondary" className="gap-1">
                 Min Price: ₹{appliedFilters.minPrice}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => removeFilter('minPrice')} />
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => removeFilter("minPrice")}
+                />
               </Badge>
             )}
             {appliedFilters.maxPrice && (
               <Badge variant="secondary" className="gap-1">
                 Max Price: ₹{appliedFilters.maxPrice}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => removeFilter('maxPrice')} />
+                <X
+                  className="w-3 h-3 cursor-pointer"
+                  onClick={() => removeFilter("maxPrice")}
+                />
               </Badge>
             )}
           </div>
@@ -281,11 +305,11 @@ const ManageBookings = () => {
             <div>Date</div>
             <div>Status</div>
             <div>Price</div>
-            <div>Action</div>
+            <div></div>
           </div>
 
           {filteredBookings.map((booking) => (
-            <Card key={booking.id} className="p-4 hidden">
+            <Card key={booking._id} className="p-4">
               <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-4">
                 <div className="flex flex-col lg:flex-row gap-4">
                   <Image
@@ -297,48 +321,80 @@ const ManageBookings = () => {
                   />
                   <div className="space-y-2">
                     <h3 className="font-medium">{booking.property}</h3>
-                    <p className="text-sm text-muted-foreground">Entire rental unit in {booking.location}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      Located at {booking.propertyId.address.city}
+                    </p>
+                    {/* <div className="flex items-center gap-2">
                       <Avatar className="w-6 h-6">
                         <AvatarImage alt="Host" src="/placeholder.svg" />
                         <AvatarFallback>H</AvatarFallback>
                       </Avatar>
                       <div className="text-sm">
-                        <span className="text-muted-foreground">Hosted by</span> {booking.host}
+                        <span className="text-muted-foreground">Hosted by</span>{" "}
+                        {booking.host}
                         <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-primaryGreen text-primaryGreen" />
                           <span className="font-medium">{booking.rating}</span>
-                          <span className="text-muted-foreground">({booking.reviews} reviews)</span>
+                          <span className="text-muted-foreground">
+                            ({booking.reviews} reviews)
+                          </span>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
                 <div className="space-y-4 lg:space-y-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
                     <div className="text-sm">
                       <div className="text-muted-foreground">Check in</div>
-                      <div>{booking.checkIn.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                      <div>
+                        {new Date(booking.checkIn).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
                     <div className="text-sm">
                       <div className="text-muted-foreground">Check out</div>
-                      <div>{booking.checkOut.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                      <div>
+                        {new Date(booking.checkOut).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <Badge 
-                    variant="secondary" 
+                <div className="space-y-4 lg:space-y-2 ">
+                  <Badge
+                    variant="secondary"
                     className={`
-                      ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-700' : ''}
-                      ${booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : ''}
-                      ${booking.status === 'Cancelled' ? 'bg-red-100 text-red-700' : ''}
+                      ${
+                        booking.status === "Confirmed"
+                          ? "bg-green-100 text-green-700"
+                          : ""
+                      }
+                      ${
+                        booking.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : ""
+                      }
+                      ${
+                        booking.status === "Cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : ""
+                      }
                       hover:bg-opacity-80
                     `}
                   >
@@ -347,24 +403,41 @@ const ManageBookings = () => {
                 </div>
 
                 <div>
-                  <div className="font-medium">₹{booking.price.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground">Total {booking.nights} nights</div>
+                  <div className="font-medium">
+                    ₹{booking.price.toLocaleString()}
+                  </div>
+                  {/* <div className="text-sm text-muted-foreground">
+                    Total {booking.nights} nights
+                  </div> */}
                 </div>
 
                 <div className="">
-                  <Button variant="outline"  size="sm" className="bg-primaryGreen text-white py-3 rounded-md w-full">
-                    View Details
-                  </Button>
-                
+                  {
+                    // today == "7/24/2025" && hour==new Date(booking.checkOut).getHours()+5 ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-primaryGreen text-white py-3 rounded-md w-full"
+                      onClick={() => {
+                        console.log(booking._id);
+                        router.push(`/rating?booking=${booking._id}`);
+                      }}
+                    >
+                      Review Now
+                    </Button>
+                    // )
+                    // : (
+                    //   ""
+                    // )
+                  }
                 </div>
               </div>
             </Card>
           ))}
         </div>
       </div>
-      </main>
-   
-  )
-}
+    </main>
+  );
+};
 
-export default ManageBookings
+export default ManageBookings;
