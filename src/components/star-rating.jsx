@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { Button } from "@/components/ui/button";
 const Star = ({ filled }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -17,7 +17,7 @@ const Star = ({ filled }) => (
   </svg>
 );
 
-export default function StarRating({ max = 5, onRatingChange }) {
+export default function StarRating({ max = 5, onRatingChange, resetChange }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
 
@@ -25,24 +25,34 @@ export default function StarRating({ max = 5, onRatingChange }) {
     setRating(value);
     if (onRatingChange) onRatingChange(value);
   };
-
+  const handleReset = () => {
+    setRating(0);
+    if (resetChange) resetChange(0);
+  };
   return (
-    <div className="flex space-x-2">
-      {Array.from({ length: max }, (_, index) => {
-        const value = index + 1;
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => handleClick(value)}
-            onMouseEnter={() => setHover(value)}
-            onMouseLeave={() => setHover(0)}
-            className="text-yellow-400 hover:scale-110 transition-transform duration-150"
-          >
-            <Star filled={value <= (hover || rating)} />
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div className="flex space-x-2">
+        {Array.from({ length: max }, (_, index) => {
+          const value = index + 1;
+          return (
+            <>
+              <button
+                key={value}
+                type="button"
+                onClick={() => handleClick(value)}
+                onMouseEnter={() => setHover(value)}
+                onMouseLeave={() => setHover(0)}
+                className="text-yellow-400 hover:scale-110 transition-transform duration-150"
+              >
+                <Star filled={value <= (hover || rating)} />
+              </button>
+            </>
+          );
+        })}
+      </div>
+      <Button className="mt-4" onClick={handleReset}>
+        Reset
+      </Button>
+    </>
   );
 }
