@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,50 +26,278 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { addDays, format, subMonths } from "date-fns"
-import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { Calendar } from "@/components/ui/calendar";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import ConfirmationModal from "@/components/dialog-modal"; // adjust path as needed
+
+import { cn } from "@/lib/utils";
+import { addDays, format, subMonths } from "date-fns";
+import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Mock data for reservations
-const reservations = [
-  ]
+const reservations = [];
 
 export default function ReservationsPage() {
   const [date, setDate] = useState({
     from: new Date(),
-    to: addDays(new Date(), 7)
-  })
+    to: addDays(new Date(), 7),
+  });
 
   const handleDateRangeChange = (range) => {
-    const today = new Date()
+    const today = new Date();
     switch (range) {
-      case '1d':
-        setDate({ from: today, to: today })
-        break
-      case '1w':
-        setDate({ from: today, to: addDays(today, 7) })
-        break
-      case '1m':
-        setDate({ from: today, to: addDays(today, 30) })
-        break
-      case '3m':
-        setDate({ from: subMonths(today, 3), to: today })
-        break
-      case '6m':
-        setDate({ from: subMonths(today, 6), to: today })
-        break
+      case "1d":
+        setDate({ from: today, to: today });
+        break;
+      case "1w":
+        setDate({ from: today, to: addDays(today, 7) });
+        break;
+      case "1m":
+        setDate({ from: today, to: addDays(today, 30) });
+        break;
+      case "3m":
+        setDate({ from: subMonths(today, 3), to: today });
+        break;
+      case "6m":
+        setDate({ from: subMonths(today, 6), to: today });
+        break;
       default:
-        break
+        break;
     }
-  }
+  };
 
+  const handleFilter = async () => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    console.log(data);
+    if (data) {
+      try {
+        const response = await fetch(
+          `${API_URL}/booking/filter?search=&status=&from=&to=`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const result = await response.json();
+        console.log(result);
+        const final = await result.data;
+        setBookings(final);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+  const [bookings, setBookings] = useState();
+  const [localState, setLocalState] = useState();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [status, setStatus] = useState();
+  const fetchData = async () => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    console.log(data);
+    if (data) {
+      try {
+        const response = await fetch(`${API_URL}/booking/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const result = await response.json();
+        console.log(result);
+        const final = await result.data;
+        setBookings(final);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const sendConfirmationToUser = async (
+    bookingId,
+    userEmail,
+    hostEmail,
+    userName,
+    hostName
+  ) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+
+      if (data) {
+        const response = await fetch(`${API_URL}/booking/host/confirm`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId: bookingId,
+            userEmail: userEmail,
+            hostEmail: hostEmail,
+            userName: userName,
+            hostName: hostName,
+          }),
+        });
+        if (!response.ok) {
+          toast.error("Failed to send approval email");
+          return;
+        }
+        toast.success("Successfully send the approval email");
+        fetchData();
+        return response;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  console.log("the searcgh", searchValue, status);
+  const sendRejectionToUser = async (
+    bookingId,
+    userEmail,
+    hostEmail,
+    userName,
+    hostName
+  ) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+
+      if (data) {
+        const response = await fetch(`${API_URL}/booking/host/cancel`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId: bookingId,
+            userEmail: userEmail,
+            hostEmail: hostEmail,
+            userName: userName,
+            hostName: hostName,
+          }),
+        });
+        if (!response.ok) {
+          toast.error("Failed to send rejection email");
+          return;
+        }
+        toast.success("Successfully send the rejection email");
+        fetchData();
+        return response;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const sendCancelToUser = async (
+    bookingId,
+    userEmail,
+    hostEmail,
+    userName,
+    hostName
+  ) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+
+      if (data) {
+        const response = await fetch(`${API_URL}/booking/host/terminate`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${data}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId: bookingId,
+            userEmail: userEmail,
+            hostEmail: hostEmail,
+            userName: userName,
+            hostName: hostName,
+          }),
+        });
+        if (!response.ok) {
+          toast.error("Failed to send cancellation email");
+          return;
+        }
+        toast.success("Successfully send the cancellation email");
+        fetchData();
+        return response;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const openModal = (action, booking) => {
+    setModalAction(action);
+    setSelectedBooking(booking);
+    setTimeout(() => setModalOpen(true), 50);
+  };
+
+  const handleModalConfirm = () => {
+    const booking = selectedBooking;
+    const { _id, userId, hostId } = booking;
+
+    const params = [
+      _id,
+      userId?.email,
+      hostId?.email,
+      userId?.firstName + " " + userId?.lastName,
+      hostId?.firstName + " " + hostId?.lastName,
+    ];
+
+    if (modalAction === "accept") sendConfirmationToUser(...params);
+    if (modalAction === "reject") sendRejectionToUser(...params);
+    if (modalAction === "cancel") sendCancelToUser(...params);
+
+    setModalOpen(false);
+  };
+
+  console.log(bookings);
   return (
     <div className=" space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">Bookings</h1>
+        <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">
+          Bookings
+        </h1>
+        <ConfirmationModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
+          title={`Are you sure you want to ${
+            modalAction === "accept"
+              ? "accept"
+              : modalAction === "reject"
+              ? "reject"
+              : "cancel"
+          } this reservation?`}
+          choice={
+            modalAction === "accept"
+              ? "Accept"
+              : modalAction === "reject"
+              ? "Reject"
+              : "cancel"
+          }
+        />
 
         <div className="flex items-center space-x-4">
           <Select className="bg-white" onValueChange={handleDateRangeChange}>
@@ -122,7 +350,7 @@ export default function ReservationsPage() {
           </Popover>
         </div>
       </div>
-      
+
       <div className="flex space-x-4 mb-4">
         <div className="flex-1">
           <Label htmlFor="search" className="sr-only">
@@ -132,9 +360,11 @@ export default function ReservationsPage() {
             id="search"
             className="bg-white"
             placeholder="Search by guest name or property..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
         </div>
-        <Select>
+        <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -154,30 +384,47 @@ export default function ReservationsPage() {
             <TableHead>Property</TableHead>
             <TableHead>Check-in</TableHead>
             <TableHead>Check-out</TableHead>
-            <TableHead>Guests</TableHead>
+            {/* <TableHead>Guests</TableHead> */}
             <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {reservations.map((reservation) => (
-            <TableRow key={reservation.id}>
-              <TableCell>{reservation.guestName}</TableCell>
-              <TableCell>{reservation.propertyName}</TableCell>
-              <TableCell>{reservation.checkIn}</TableCell>
-              <TableCell>{reservation.checkOut}</TableCell>
-              <TableCell>{reservation.guests}</TableCell>
+          {bookings?.map((booking) => (
+            <TableRow key={booking?._id}>
               <TableCell>
-                <span className={cn(
-                  "px-2 py-1 rounded-full text-xs",
-                  {
-                    "bg-green-100 text-green-800": reservation.status === "Confirmed",
-                    "bg-yellow-100 text-yellow-800": reservation.status === "Pending",
-                    "bg-red-100 text-red-800": reservation.status === "Cancelled"
+                {booking?.userId?.firstName} {booking?.userId?.lastName}
+              </TableCell>
+              <TableCell>{booking?.propertyId?.title}</TableCell>
+              <TableCell>
+                {new Date(booking?.checkIn).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </TableCell>
+              <TableCell>
+                {new Date(booking?.checkOut).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </TableCell>
+
+              <TableCell>
+                <Badge
+                  variant={
+                    booking.status === "pending"
+                      ? "outline"
+                      : booking.status === "confirmed"
+                      ? "default"
+                      : booking.status === "cancelled"
+                      ? "destructive"
+                      : "secondary"
                   }
-                )}>
-                  {reservation.status}
-                </span>
+                >
+                  {booking?.status}
+                </Badge>
               </TableCell>
               <TableCell>
                 <DropdownMenu>
@@ -190,9 +437,94 @@ export default function ReservationsPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem>View Details</DropdownMenuItem>
-                    <DropdownMenuItem>Modify Reservation</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">Cancel Reservation</DropdownMenuItem>
+                    {booking?.propertyId?.bookingType?.manual ? (
+                      booking?.status != "confirmed" &&
+                      booking?.status != "cancelled" &&
+                      booking?.status != "rejected" ? (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              openModal("accept", booking);
+                              // sendConfirmationToUser(
+                              //   booking?._id,
+                              //   booking?.userId?.email,
+                              //   booking?.hostId?.email,
+                              //   booking?.userId?.firstName +
+                              //     " " +
+                              //     booking?.userId?.lastName,
+                              //   booking?.hostId?.firstName +
+                              //     " " +
+                              //     booking?.hostId?.lastName
+                              // );
+                            }}
+                          >
+                            Accept Reservation
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => {
+                              openModal("reject", booking);
+                              // sendRejectionToUser(
+                              //   booking?._id,
+                              //   booking?.userId?.email,
+                              //   booking?.hostId?.email,
+                              //   booking?.userId?.firstName +
+                              //     " " +
+                              //     booking?.userId?.lastName,
+                              //   booking?.hostId?.firstName +
+                              //     " " +
+                              //     booking?.hostId?.lastName
+                              // );
+                            }}
+                          >
+                            Reject Reservation
+                          </DropdownMenuItem>
+                        </>
+                      ) : booking?.status == "confirmed" &&
+                        booking?.status != "rejected" ? (
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => {
+                            openModal("cancel", booking);
+                            // sendCancelToUser(
+                            //   booking?._id,
+                            //   booking?.userId?.email,
+                            //   booking?.hostId?.email,
+                            //   booking?.userId?.firstName +
+                            //     " " +
+                            //     booking?.userId?.lastName,
+                            //   booking?.hostId?.firstName +
+                            //     " " +
+                            //     booking?.hostId?.lastName
+                            // );
+                          }}
+                        >
+                          Cancel Reservation
+                        </DropdownMenuItem>
+                      ) : null
+                    ) : booking?.propertyId?.bookingType?.instantBook &&
+                      booking?.status == "confirmed" ? (
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => {
+                          openModal("cancel", booking);
+                          // sendCancelToUser(
+                          //   booking?._id,
+                          //   booking?.userId?.email,
+                          //   booking?.hostId?.email,
+                          //   booking?.userId?.firstName +
+                          //     " " +
+                          //     booking?.userId?.lastName,
+                          //   booking?.hostId?.firstName +
+                          //     " " +
+                          //     booking?.hostId?.lastName
+                          // );
+                        }}
+                      >
+                        Cancel Reservation
+                      </DropdownMenuItem>
+                    ) : null}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -201,5 +533,5 @@ export default function ReservationsPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
