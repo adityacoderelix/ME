@@ -84,7 +84,15 @@ function BookPageContent() {
     const data = JSON.parse(getLocalData);
     if (data) setIsAuth(true);
   };
-
+  function convertTo12HoursFormat(time24) {
+    // Split the time string into hours and minutes
+    let hours = time24;
+    // Determine AM or PM based on the 24-hour hour
+    let period = hours >= 12 ? "PM" : "AM";
+    // Convert the hour to 12-hour format
+    hours = hours % 12 || 12; // 0 becomes 12, otherwise use remainder
+    return `${hours}:00 ${period}`;
+  }
   useEffect(() => {
     auth();
   }, []);
@@ -102,7 +110,7 @@ function BookPageContent() {
     queryFn: () => fetchProperty(propertyId),
     enabled: !!propertyId,
   });
-
+  console.log("red lanter", property);
   const calculateTotal = () => {
     if (!property)
       return {
@@ -205,7 +213,7 @@ function BookPageContent() {
       console.error(err);
     }
   };
-  const createPaymentOrder = async (currency, amount) => {
+  const createPaymentOrder = async (bookingId, amount) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
@@ -217,8 +225,9 @@ function BookPageContent() {
           Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
+          bookingId: bookingId,
           userId: userId,
-          currency: currency,
+          currency: "INR",
           amount: amount,
         }),
       });
@@ -278,7 +287,29 @@ function BookPageContent() {
       console.error(err);
     }
   };
+  const updateConfirmStatus = async (bookingId) => {
+    try {
+      const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      const response = await fetch(`${API_URL}/booking/instant/confirm`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          userId: userId,
+        }),
+      });
+      const result = await response.json();
 
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handlePayment = async () => {
     if (typeof window.Razorpay === "undefined") {
       alert("Razorpay SDK is not loaded yet. Please try again in a moment.");
@@ -286,7 +317,23 @@ function BookPageContent() {
     }
 
     try {
-      const order_id = await createPaymentOrder("INR", totals.total * 100);
+      const propertyId = await property._id;
+      const propertyHostId = await property.host;
+      console.log(propertyId, date.from, date.to, propertyHostId);
+      const booking = await saveData(
+        propertyId,
+        totals.total * 100,
+        "INR",
+        date.from,
+        date.to,
+        propertyHostId
+      );
+      console.log("green lan", booking);
+
+      const order_id = await createPaymentOrder(
+        booking.data._id,
+        totals.total * 100
+      );
 
       const options = {
         key: "rzp_test_w0bKE5w5UPOPrY", // Replace with your actual test key
@@ -307,9 +354,17 @@ function BookPageContent() {
           const checkout = date.to.toISOString();
           const paymentId = response.razorpay_payment_id;
           const summaryParams = new URLSearchParams({
-            bookingId: response.razorpay_payment_id,
+            hostFirstName: property?.host?.firstName,
+            hostLastName: property?.host?.lastName,
+            bookingId: booking?.data?._id,
             propertyId: propertyId,
+            propertyType: property?.propertyType,
+            placeType: property?.placeType,
             propertyName: property?.title || "Property",
+            street: property?.address?.street,
+            city: property?.address?.city,
+            state: property?.address?.state,
+            country: property?.address?.country,
             propertyImage: property?.photos[0],
             checkin: date.from.toLocaleDateString(),
             checkout: date.to.toLocaleDateString(),
@@ -325,10 +380,16 @@ function BookPageContent() {
           );
           const hostEmail = await property.hostEmail;
           if (verify) {
-            const update = await updateBookingStatus(
-              booking.data._id,
-              hostEmail
-            );
+            if (property.bookingType.manual) {
+              console.log("not selected");
+              const update = await updateBookingStatus(
+                booking.data._id,
+                hostEmail
+              );
+            } else {
+              console.log("This got selected");
+              const confirm = await updateConfirmStatus(booking.data._id);
+            }
 
             router.push(`/booking-summary?${summaryParams.toString()}`);
           }
@@ -350,15 +411,6 @@ function BookPageContent() {
           checkOut: date.to.toISOString(),
         },
       };
-      const propertyHostId = await property.host;
-      const booking = await saveData(
-        options.notes.propertyId,
-        options.amount,
-        options.currency,
-        options.notes.checkIn,
-        options.notes.checkOut,
-        propertyHostId
-      );
 
       const rzp = new window.Razorpay(options);
 
@@ -461,11 +513,11 @@ function BookPageContent() {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-semibold mb-1">Check-in</h3>
-                  <p>{propertyCheckIn}</p>
+                  <p>{convertTo12HoursFormat(property?.checkinTime)}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Check-out</h3>
-                  <p>{propertyCheckOut}</p>
+                  <p>{convertTo12HoursFormat(property?.checkoutTime)}</p>
                 </div>
               </div>
             </div>
@@ -528,9 +580,16 @@ function BookPageContent() {
               >
                 Pay ₹{totals.total.toLocaleString()}
               </Button>
-              <p className="text-sm text-center mt-4 text-gray-500">
-                You won't be charged yet
-              </p>
+              {property.bookingType.manual ? (
+                <p className="text-sm text-center mt-4 text-gray-500">
+                  Payment does not confirm your booking. Please wait for a
+                  confirmation email from the Host.
+                </p>
+              ) : (
+                <p className="text-sm text-center mt-4 text-gray-500">
+                  Instant booking available.
+                </p>
+              )}
             </div>
           </div>
 
