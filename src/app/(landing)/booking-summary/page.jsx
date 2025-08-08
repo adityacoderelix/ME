@@ -42,6 +42,14 @@ export default function Page() {
     const numberOfGuests = searchParams.get("numberOfGuests");
     const totalAmount = searchParams.get("totalAmount");
     const nights = searchParams.get("nights");
+    const street = searchParams.get("street");
+    const city = searchParams.get("city");
+    const state = searchParams.get("state");
+    const country = searchParams.get("country");
+    const hostFirstName = searchParams.get("hostFirstName");
+    const hostLastName = searchParams.get("hostLastName");
+    const propertyType = searchParams.get("propertyType");
+    const placeType = searchParams.get("placeType");
 
     setQueryData({
       bookingId,
@@ -53,6 +61,14 @@ export default function Page() {
       numberOfGuests,
       totalAmount,
       nights,
+      street,
+      city,
+      state,
+      country,
+      hostFirstName,
+      hostLastName,
+      propertyType,
+      placeType,
     });
   }, [searchParams]);
   if (!queryData)
@@ -75,82 +91,186 @@ export default function Page() {
       </div>
     );
   }
+  console.log("a", queryData);
+  const checkInDate = new Date(queryData?.checkin);
+
+  const checkOutDate = new Date(queryData?.checkout);
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
   return (
     <div className="min-h-screen font-poppins pt-24">
       <header className="flow-root bg-offWhite shadow-sm">
-        <div className=" float-left max-w-7xl mx-auto py-4 ml-10 sm:px-6 lg:px-8">
-          <h1 className=" text-3xl font-semibold font-bricolage text-absoluteDark">
-            Thanks for choosing Us
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-stone">
-            Last updated: June 1, 2024
-          </p>
+        <div className=" max-w-7xl mx-auto py-4 ml-10 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
+              Your reservation is confirmed
+            </h2>
+            {/* <p className="text-gray-600">You're going to San Francisco!</p> */}
+            <p className=" text-gray-600 ">Thanks for choosing Us</p>
+          </div>
         </div>
-        <div className="float-right max-w-7xl mx-auto py-4 mr-10 sm:px-6 lg:px-8">
+        {/* <div className="float-right max-w-7xl mx-auto py-4 mr-10 sm:px-6 lg:px-8">
           <Link
             href={{
-              pathname: "/",
+              pathname: "/",  
             }}
           >
             <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
               Go Back Home
             </Button>
           </Link>
-        </div>
+        </div> */}
       </header>
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6">
-                <h2 className="text-lg leading-6 font-semibold text-primary">
-                  Booking Details
-                </h2>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 border rounded-xl p-4 shadow-lg">
+              <div>
+                <Image
+                  src="/sf-loft.jpg"
+                  alt="Cozy SF Loft"
+                  width={600}
+                  height={400}
+                  className="rounded-xl"
+                />
+                <h3 className="mt-4 text-lg font-medium">
+                  {queryData?.propertyImage}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {queryData?.placeType.charAt(0).toUpperCase() +
+                    queryData?.placeType.slice(1)}{" "}
+                  {queryData?.propertyType.charAt(0).toUpperCase() +
+                    queryData?.propertyType.slice(1)}{" "}
+                  by {queryData?.hostFirstName} {queryData?.hostLastName}
+                </p>
+
+                <div className="mt-4 text-sm">
+                  <p>
+                    {days[checkInDate?.getDay()]},{" "}
+                    <strong>
+                      {months[checkInDate?.getMonth()]} {checkInDate?.getDate()}
+                      , {checkInDate?.getFullYear()}
+                    </strong>
+                    <br />
+                    Check-in time is 4PM – 9PM
+                  </p>
+                  <p className="mt-2">
+                    {days[checkOutDate?.getDay()]},{" "}
+                    <strong>
+                      {months[checkOutDate?.getMonth()]}{" "}
+                      {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
+                    </strong>
+                    <br />
+                    Check out 11AM
+                  </p>
+                </div>
+
+                <button className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg">
+                  Complete
+                </button>
               </div>
-              <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-                <dl className="sm:divide-y sm:divide-gray-200">
-                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Booking Id
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {queryData.bookingId}
-                    </dd>
+
+              <div className="space-y-4 text-sm">
+                <div>
+                  <h4 className="font-medium text-gray-700">Address</h4>
+                  <p className="text-gray-500">
+                    {queryData?.street}, {queryData?.city}, {queryData?.state},{" "}
+                    {queryData?.country}
+                  </p>
+                  {/* <button className="text-red-400 text-xs mt-1">
+                    Get directions
+                  </button> */}
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">Guests</h4>
+                  <p className="text-gray-500">{queryData?.numberOfGuests}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">Amount</h4>
+                  <p className="text-gray-500">₹{queryData?.totalAmount}.00</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">Booking Id</h4>
+                  <p className="text-gray-500">{queryData?.bookingId}</p>
+                </div>
+
+                <button className="w-full border border-gray-300 py-2 rounded-lg">
+                  Change reservation
+                </button>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">
+                    {queryData?.hostFirstName} {queryData?.hostLastName} is your
+                    host
+                  </h4>
+                  <p className="text-gray-500">
+                    Contact {queryData?.hostFirstName} {queryData?.hostLastName}{" "}
+                    to coordinate arrival time and key exchange.
+                  </p>
+                  {/* <button className="text-red-400 text-xs mt-1">
+                    Message Host
+                  </button> */}
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">
+                    Know what to expect
+                  </h4>
+                  <p className="text-gray-500">
+                    Make sure to review the house rules and amenities.
+                  </p>
+                  <button className="text-red-400 text-xs mt-1">
+                    View House Rules
+                  </button>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-700">
+                    Customer support
+                  </h4>
+                  <p className="text-gray-500">
+                    Contact our support team 24/7 from anywhere in the world.
+                  </p>
+                  <div className="flex gap-2 mt-1">
+                    {/* <button className="text-red-400 text-xs">
+                    Visit Help Centre
+                  </button>
+                  <button className="text-red-400 text-xs">
+                    Contact Airbnb
+                  </button> */}
                   </div>
-                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Property Id
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {queryData.propertyId}
-                    </dd>
-                  </div>
-                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Property Name
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {queryData.propertyName}
-                    </dd>
-                  </div>
-                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">Date</dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {queryData.checkin} - {queryData.checkout}
-                    </dd>
-                  </div>
-                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Total Amount
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      ₹ {queryData.totalAmount}
-                    </dd>
-                  </div>
-                </dl>
+                </div>
               </div>
             </div>
-            <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+          </div>
+
+          <div className="px-4 py-6 sm:px-0">
+            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
                 <h3 className="text-lg leading-6 font-semibold text-primary">
                   Contact Us

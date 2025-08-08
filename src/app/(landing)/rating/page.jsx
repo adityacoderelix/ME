@@ -4,7 +4,7 @@ import StarRating from "@/components/star-rating";
 import { AlertCircleIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -17,7 +17,8 @@ export default function Ratings() {
   const [reviewData, setReviewData] = useState();
   const [isAuth, setIsAuth] = useState(false);
   const bookingId = searchParams.get("booking");
-  const [data, setData] = useState();
+  const [bookData, setBookData] = useState();
+  const router = useRouter();
   const verifyToken = async (emailToken) => {
     try {
       const getLocalData = await localStorage.getItem("token");
@@ -64,7 +65,7 @@ export default function Ratings() {
           return;
         }
         const result = await response.json();
-        setData(result.data.checkOut);
+
         return result.data;
       }
     } catch (err) {
@@ -87,7 +88,7 @@ export default function Ratings() {
     isFetching: isBookingFetching,
     isError: isBookingError,
   } = useQuery({
-    queryKey: ["property", bookingId],
+    queryKey: ["bookingId", bookingId],
     queryFn: () => getBookingId(bookingId),
     enabled: !!bookingId, // Only run if propertyId exists
     // Optional: Add staleTime, cacheTime etc.
@@ -123,6 +124,11 @@ export default function Ratings() {
             content: reviewData,
           }),
         });
+        if (!response.ok) {
+          toast.error("Failed to submit review");
+        }
+        toast.success("Submitted review");
+        router.push(`/stay/${bookingData?.propertyId?._id}`);
       }
     } catch (err) {
       console.error(err);
@@ -133,7 +139,7 @@ export default function Ratings() {
     setRating(value);
   };
   // setData(bookingData.checkOut);
-  console.log(data);
+  console.log(bookingData);
   const dat = new Date().toLocaleDateString();
   if (!isAuth) {
     return (
@@ -148,7 +154,7 @@ export default function Ratings() {
       </div>
     );
   }
-  if (dat != "7/29/2025") {
+  if (dat != "8/8/2025") {
     return (
       <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
         Your review date has expired. The review remains open only for the next

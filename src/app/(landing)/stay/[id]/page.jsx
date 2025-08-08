@@ -56,7 +56,7 @@ const fetchHostData = async (hostIdStr) => {
   return result.data;
 };
 
-// --- The Main Page Component ---
+// --- The Main Page Component --
 const fetchReview = async (propertyId, limit, skip) => {
   if (!propertyId) {
     throw new Error("Host ID is missing");

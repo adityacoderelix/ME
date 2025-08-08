@@ -410,7 +410,6 @@ export default function ReservationsPage() {
                   day: "numeric",
                 })}
               </TableCell>
-
               <TableCell>
                 <Badge
                   variant={

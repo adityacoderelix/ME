@@ -471,7 +471,6 @@ const ManageBookings = () => {
                     Total {booking.nights} nights
                   </div> */}
                 </div>
-
                 <div className="flex">
                   {
                     // today == "7/24/2025" && hour==new Date(booking.checkOut).getHours()+5 ? (
