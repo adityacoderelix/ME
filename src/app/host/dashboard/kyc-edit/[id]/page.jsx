@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { steps } from "./steps/steps";
-import { StepIndicator } from "./components/step-indicator";
+import { steps } from "../../kyc/steps/steps";
+import { StepIndicator } from "../../kyc/components/step-indicator";
 import { redirect, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { kycService } from "@/services/kycService";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -19,71 +18,88 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import confetti from "canvas-confetti";
+import { use } from "react";
 
-export default function KYC() {
-  const auth = useAuth();
+export default function KycEdit({ params }) {
+  const { id } = use(params);
   const router = useRouter();
+  const auth = useAuth();
+
   const queryClient = useQueryClient();
 
   const [isNextDisabled, setIsNextDisabled] = useState(true);
-  const [id, setId] = useState(null);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showKYCDialog, setShowKYCDialog] = useState(false);
   const [showCongratulationsDialog, setShowCongratulationsDialog] =
     useState(false);
-
-  const [formData, setFormData] = useState({
-    _id: id,
-    personalInfo: {
-      fatherName: "",
-      dob: null,
-      address: {
-        line1: "",
-        line2: "",
-        city: "",
-        state: "",
-        pincode: "",
-        country: "India",
-      },
-    },
-    documentInfo: {
-      documentType: null,
-      documentNumber: null,
-      documentFile: null,
-      isVerified: false,
-    },
-    gstInfo: {
-      gstNumber: "",
-      gstName: "",
-      isVerified: false,
-    },
-    acceptedTerms: {
-      general: false,
-      goa: false,
-    },
-    status: "incomplete",
-    hostEmail: auth.user && auth.user.email,
-  });
+  const [formData, setFormData] = useState([]);
 
   useEffect(() => {
-    const checkValidation = async () => {
-      const currentStepData = steps[currentStep];
+    const fetchFormData = async () => {
+      if (!id) return;
+      try {
+        setIsLoading(true);
+        const response = await kycService.getFormDataById(id);
+        const result = await response.data;
+        console.log("thi v", result);
 
-      if (
-        currentStepData.requiresValidation &&
-        typeof currentStepData.validate === "function"
-      ) {
-        const { isValid } = currentStepData.validate(formData);
-        setIsNextDisabled(!isValid);
-      } else {
-        setIsNextDisabled(false);
+        setFormData(result);
+        return result;
+      } catch (error) {
+        toast.error("Failed to fetch form data. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     };
+    fetchFormData();
+  }, [id, auth.user?.email]);
 
-    checkValidation();
-  }, [formData, currentStep]);
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      toast.loading("Updating your listing...");
+      await kycService.updateProperty(id, {
+        ...formData,
+        status: "processing",
+      });
 
+      toast.success("KYC updated successfully.");
+
+      router.push("/host/dashboard");
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
+  };
+
+  const saveData = async (isExiting = false) => {
+    setIsLoading(true);
+    try {
+      const dataToSave = {
+        ...formData,
+        status:
+          isExiting || currentStep < steps.length - 1
+            ? "incomplete"
+            : "processing",
+      };
+
+      const response = id
+        ? await kycService.updateProperty(id, dataToSave)
+        : await kycService.createProperty(dataToSave);
+
+      if (!id) setId(response._id);
+      setFormData(response);
+
+      queryClient.invalidateQueries({
+        queryKey: ["KYCStatus", auth.user.email],
+      });
+    } catch (error) {
+      toast.success("Updated your KYC profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const CurrentStepComponent = steps[currentStep].component;
 
   const validateCurrentStep = async () => {
@@ -118,34 +134,6 @@ export default function KYC() {
     }
   };
 
-  const saveData = async (isExiting = false) => {
-    setIsLoading(true);
-    try {
-      const dataToSave = {
-        ...formData,
-        status:
-          isExiting || currentStep < steps.length - 1
-            ? "incomplete"
-            : "processing",
-      };
-
-      const response = id
-        ? await kycService.updateProperty(id, dataToSave)
-        : await kycService.createProperty(dataToSave);
-
-      if (!id) setId(response._id);
-      setFormData(response);
-
-      queryClient.invalidateQueries({
-        queryKey: ["KYCStatus", auth.user.email],
-      });
-    } catch (error) {
-      toast.success("Updated your KYC profile");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleNext = async () => {
     if (steps[currentStep].requiresValidation) {
       const isValid = await validateCurrentStep();
@@ -157,72 +145,37 @@ export default function KYC() {
     }
   };
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      toast("Submitting your kyc...");
-      await kycService.updateProperty(id, {
-        ...formData,
-        status: "processing",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["KYCStatus", auth.user.email],
-      });
-
-      toast.success("KYC submitted successfully.");
-
-      setTimeout(() => {
-        setShowCongratulationsDialog(true);
-      }, 2000);
-
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      }, 2100);
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateFormData = (stepData) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      ...stepData,
-      _id: id,
-    }));
-  };
-  console.log("no way", formData);
-  useEffect(() => {
-    if (!auth) redirect("/login");
-  }, [auth]);
-
   const handleSaveAndExit = () => {
     setIsLoading(true);
     console.log("Saving data:", formData);
     router.push("/host/dashboard");
   };
 
-  const handleGoToDashboard = () => {
-    setShowKYCDialog(false);
-    router.push("/host/dashboard");
+  const updateFormData = (stepData) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      ...stepData,
+    }));
   };
+
+  useEffect(() => {
+    if (!auth) redirect("/login");
+  }, [auth]);
+
+  console.log("ddd", formData);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!formData && !isLoading) {
+    return <div>No Form data found.</div>;
+  }
 
   return (
     <div className="flex flex-col relative min-h-screen">
       <header className="bg-white w-screen z-50 top-0 fixed right-0 left-0 border-b border-b-gray-200 p-4">
         <div className="container max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <Link
-            className="px-6 py-2 border rounded-3xl border-black font-medium text-sm bg-gray-100 hover:bg-gray-200 transition-colors text-absoluteDark"
-            href={"/host/dashboard"}
-          >
-            Back to Dashboard
-          </Link>
+          <img className="h-7 w-auto" src="/images/logo.png" alt="Logo" />
           <StepIndicator currentStep={currentStep} totalSteps={steps.length} />
           <div className="gap-x-4 flex">
             <Button
@@ -259,22 +212,14 @@ export default function KYC() {
               onClick={handleSubmit}
               className="bg-primaryGreen rounded-3xl hover:bg-brightGreen py-5 px-6 h-12 text-white"
             >
-              Publish
+              Update
             </Button>
           ) : (
             <Button
               onClick={handleNext}
               className="bg-primaryGreen rounded-3xl transition-all hover:bg-brightGreen w-48 h-12 px-6 text-white"
-              disabled={isLoading || isNextDisabled}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Next"
-              )}
+              Next
             </Button>
           )}
         </div>

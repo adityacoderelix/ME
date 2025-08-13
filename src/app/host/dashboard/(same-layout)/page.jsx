@@ -37,92 +37,129 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ListingStageCard from "./ListingStageCard";
-
-
-
-
+import { kycService } from "../../../../services/kycService";
+import { useEffect } from "react";
 
 export default function Dashboard() {
- 
+  const [exist, setExist] = useState(false);
+  const [form, setForm] = useState();
+  useEffect(() => {
+    const checkIfKycProcessStarted = async () => {
+      try {
+        const getUserId = await localStorage.getItem("userId");
+        const userId = JSON.parse(getUserId);
+        if (userId) {
+          const response = await kycService.getFormData(userId);
+
+          console.log("doomd", response);
+          setExist(true);
+          setForm(response.data);
+          return result.data;
+        }
+      } catch (error) {
+        console.error("Could not get data");
+      }
+    };
+    checkIfKycProcessStarted();
+  }, []);
+
   return (
     <div className="space-y-4 grid grid-cols-1">
-      <div className={`grid grid-cols-1 gap-4 ${localStorage.getItem('kycStatus')==='submitted'?'md:grid-cols-3':'md:grid-cols-2'}`}>
-        
-      <div className="space-y-4">
-      <ListingStageCard />
-    </div>
+      <div
+        className={`grid grid-cols-1 gap-4 ${
+          exist ? "md:grid-cols-3" : "md:grid-cols-2"
+        }`}
+      >
+        <div className="space-y-4">
+          <ListingStageCard />
+        </div>
 
+        {exist ? (
+          <>
+            <Card className=" bg-white border-green-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                  Adjust Availability
+                </CardTitle>
+                <Calendar className="h-6 w-6 text-primaryGreen" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-stone mb-4">
+                  Sync in your calendar with us to adjust availability
+                </p>
+                <Link
+                  href={"/host/dashboard/calendar"}
+                  className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
+                >
+                  Go to Calendar
+                </Link>
+              </CardContent>
+            </Card>
 
-     {
-     localStorage.getItem('kycStatus')==='submitted'?
-     
-     <>
-      <Card className=" bg-white border-green-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
-              Adjust Availability
-            </CardTitle>
-            <Calendar className="h-6 w-6 text-primaryGreen" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-stone mb-4">
-             Sync in your calendar with us to adjust availability
-            </p>
-            <Link
-            href={"/host/dashboard/calendar"}
-              className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
-            >
-              Go to Calendar
-            </Link>
-          </CardContent>
-        </Card
-        >
-
-        <Card className=" bg-white border-green-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
-              Add Bank details
-            </CardTitle>
-            <Calendar className="h-6 w-6 text-primaryGreen" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-stone mb-4">
-              Add your bank details to receive payments
-            </p>
-            <Link
-            href={"/host/dashboard/bank-info"}
-              className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
-            >
-              Setup payments
-            </Link>
-          </CardContent>
-        </Card>
-
-        
-     
-     
-     </>:   
-     <Card className=" bg-white border-red-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
-              Complete KYC
-            </CardTitle>
-            <FileCheck className="h-6 w-6 text-red-300" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-stone mb-4">
-              Complete your KYC to unlock all features and start listing
-              properties.
-            </p>
-            <Link
-            href={"/host/dashboard/kyc"}
-              className="bg-red-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-red-500 hover:text-red-500 text-red-500 hover:bg-red-100"
-            >
-              Start KYC Process
-            </Link>
-          </CardContent>
-        </Card>
-    }
+            {/* <Card className=" bg-white border-green-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                  Add Bank details
+                </CardTitle>
+                <Calendar className="h-6 w-6 text-primaryGreen" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-stone mb-4">
+                  Add your bank details to receive payments
+                </p>
+                <Link
+                  href={"/host/dashboard/bank-info"}
+                  className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
+                >
+                  Setup payments
+                </Link>
+              </CardContent>
+            </Card> */}
+            <Card className=" bg-white border-red-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                  Continue with KYC
+                </CardTitle>
+                <FileCheck className="h-6 w-6 text-red-300" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-stone mb-4">
+                  Complete your KYC to unlock all features and start listing
+                  properties.
+                </p>
+                <Link
+                  href={{
+                    pathname: `/host/dashboard/kyc-edit/${form._id}`,
+                  }}
+                  className="bg-red-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-red-500 hover:text-red-500 text-red-500 hover:bg-red-100"
+                >
+                  Continue with KYC Process
+                </Link>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <Card className=" bg-white border-red-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                Complete KYC
+              </CardTitle>
+              <FileCheck className="h-6 w-6 text-red-300" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-stone mb-4">
+                Complete your KYC to unlock all features and start listing
+                properties.
+              </p>
+              <Link
+                href={"/host/dashboard/kyc"}
+                className="bg-red-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-red-500 hover:text-red-500 text-red-500 hover:bg-red-100"
+              >
+                Start KYC Process
+              </Link>
+            </CardContent>
+          </Card>
+        )}
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -172,8 +209,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
- 
     </div>
   );
 }

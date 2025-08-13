@@ -1,12 +1,48 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-import { Icons } from "@/components/ui/icons"
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Icons } from "@/components/ui/icons";
+import axios from "axios";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const updateHostFormDocVerificationStatus = async () => {
+  try {
+    const user = await localStorage.getItem("userId");
+    const userId = JSON.parse(user);
+    if (userId) {
+      const response = await axios.patch(
+        `${API_BASE_URL}/kyc/verify-gst-status`,
+        {
+          userId: userId, // from localStorage
+          isVerified: true,
+        }
+      );
+      if (response.status == 200) {
+        toast.success("Updated Form");
+        return;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export function GSTVerification({ updateFormData, formData }) {
   const [gstInfo, setGstInfo] = useState(
@@ -14,40 +50,62 @@ export function GSTVerification({ updateFormData, formData }) {
       gstNumber: "",
       gstName: "",
       isVerified: false,
-    },
-  )
-  const [showDialog, setShowDialog] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
+    }
+  );
+  const [showDialog, setShowDialog] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    const hasChanges = JSON.stringify(formData?.gstInfo) !== JSON.stringify(gstInfo)
+    const hasChanges =
+      JSON.stringify(formData?.gstInfo) !== JSON.stringify(gstInfo);
     if (hasChanges) {
-      updateFormData({ gstInfo })
+      updateFormData({ gstInfo });
     }
-  }, [gstInfo, updateFormData, formData])
+  }, [gstInfo, updateFormData, formData]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setGstInfo((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setGstInfo((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleVerify = () => {
-    setIsVerifying(true)
-    setTimeout(() => {
-      setGstInfo((prev) => ({ ...prev, isVerified: true }))
-      setIsVerifying(false)
-      setShowDialog(true)
-    }, 2000)
-  }
+  const handleVerify = async () => {
+    try {
+      setIsVerifying(true);
+      const getLocalData = await localStorage.getItem("userId");
+      const data = JSON.parse(getLocalData);
+
+      if (data) {
+        const response = await axios.post(`${API_BASE_URL}/kyc/verify/gst`, {
+          userId: data,
+          number: gstInfo.gstNumber,
+        });
+        if (response.status == 200) {
+          updateHostFormDocVerificationStatus();
+          setTimeout(() => {
+            setGstInfo((prev) => ({ ...prev, isVerified: true }));
+            setIsVerifying(false);
+            setShowDialog(true);
+          }, 2000);
+        }
+      }
+    } catch (error) {
+      console.error("Error in gst");
+    }
+  };
 
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bricolage">GST Verification</CardTitle>
+        <CardTitle className="text-2xl font-bricolage">
+          GST Verification
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="gstNumber" className="font-bricolage text-lg text-gray-700 font-semibold">
+          <Label
+            htmlFor="gstNumber"
+            className="font-bricolage text-lg text-gray-700 font-semibold"
+          >
             GST Number
           </Label>
           <Input
@@ -60,7 +118,10 @@ export function GSTVerification({ updateFormData, formData }) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gstName" className="font-bricolage text-lg text-gray-700 font-semibold">
+          <Label
+            htmlFor="gstName"
+            className="font-bricolage text-lg text-gray-700 font-semibold"
+          >
             Name associated with GST
           </Label>
           <Input
@@ -76,7 +137,12 @@ export function GSTVerification({ updateFormData, formData }) {
       <CardFooter>
         <Button
           onClick={handleVerify}
-          disabled={!gstInfo.gstNumber || !gstInfo.gstName || isVerifying}
+          disabled={
+            !gstInfo.gstNumber ||
+            !gstInfo.gstName ||
+            isVerifying ||
+            gstInfo.isVerified
+          }
           className="w-full"
         >
           {isVerifying ? (
@@ -97,13 +163,14 @@ export function GSTVerification({ updateFormData, formData }) {
           <div className="flex items-center justify-center py-4">
             <Icons.CheckCircle className="h-16 w-16 text-green-500" />
           </div>
-          <p className="text-center text-lg">Your GST details have been successfully verified.</p>
+          <p className="text-center text-lg">
+            Your GST details have been successfully verified.
+          </p>
           <DialogFooter>
             <Button onClick={() => setShowDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
-  )
+  );
 }
-
