@@ -6,7 +6,8 @@ import { steps } from "./steps/steps";
 import { StepIndicator } from "./components/step-indicator";
 import { redirect, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { kycService } from "@/services/kycService";
+import { kycService } from "../../../../services/kycService";
+import { propertyService } from "../../../../services/propertyService";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,7 +25,6 @@ export default function KYC() {
   const auth = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
-
   const [isNextDisabled, setIsNextDisabled] = useState(true);
   const [id, setId] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
@@ -32,12 +32,13 @@ export default function KYC() {
   const [showKYCDialog, setShowKYCDialog] = useState(false);
   const [showCongratulationsDialog, setShowCongratulationsDialog] =
     useState(false);
-
+  const [formCompleted, setFormCompleted] = useState(false);
   const [formData, setFormData] = useState({
     _id: id,
+    hostId: null,
     personalInfo: {
       fatherName: "",
-      dob: null,
+      dob: "",
       address: {
         line1: "",
         line2: "",
@@ -48,24 +49,39 @@ export default function KYC() {
       },
     },
     documentInfo: {
-      documentType: null,
-      documentNumber: null,
-      documentFile: null,
+      documentType: "",
       isVerified: false,
     },
     gstInfo: {
       gstNumber: "",
-      gstName: "",
+      panNumber: "",
       isVerified: false,
     },
     acceptedTerms: {
       general: false,
       goa: false,
     },
-    status: "incomplete",
+    status: "pending",
     hostEmail: auth.user && auth.user.email,
   });
 
+  useEffect(() => {
+    const fetchFormData = async () => {
+      try {
+        const user = await localStorage.getItem("userId");
+        const userId = JSON.parse(user);
+        const response = await kycService.getFormDataByUserId(userId);
+        const result = await response.data;
+
+        if (result.status == "completed") {
+          setFormCompleted(true);
+        }
+      } catch (error) {
+        console.error("Failed to fetch form data. Please try again.");
+      }
+    };
+    fetchFormData();
+  }, [id, auth.user?.email]);
   useEffect(() => {
     const checkValidation = async () => {
       const currentStepData = steps[currentStep];
@@ -120,18 +136,23 @@ export default function KYC() {
 
   const saveData = async (isExiting = false) => {
     setIsLoading(true);
+
     try {
       const dataToSave = {
         ...formData,
         status:
-          isExiting || currentStep < steps.length - 1
-            ? "incomplete"
-            : "processing",
+          isExiting || currentStep < steps.length ? "processing" : "pending",
       };
+      console.log("dataToSave", id);
 
+      if (id) {
+        console.log("ID present", id);
+      } else {
+        console.log("ID missing");
+      }
       const response = id
         ? await kycService.updateProperty(id, dataToSave)
-        : await kycService.createProperty(dataToSave);
+        : await kycService.createKycHostData(dataToSave);
 
       if (!id) setId(response._id);
       setFormData(response);
@@ -145,13 +166,16 @@ export default function KYC() {
       setIsLoading(false);
     }
   };
-
+  console.log("new form", formData);
   const handleNext = async () => {
+    console.log("enterd  next noew");
     if (steps[currentStep].requiresValidation) {
       const isValid = await validateCurrentStep();
       if (!isValid) return;
     }
+    console.log("reached here");
     await saveData();
+    console.log("passed save");
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -161,10 +185,13 @@ export default function KYC() {
     setIsLoading(true);
     try {
       toast("Submitting your kyc...");
+      console.log("finally", formData?.hostId);
       await kycService.updateProperty(id, {
         ...formData,
-        status: "processing",
+        status: "completed",
       });
+      console.log("finally", formData?.hostId);
+      // await propertyService.updateKyc(formData?.hostId);
 
       queryClient.invalidateQueries({
         queryKey: ["KYCStatus", auth.user.email],
@@ -197,14 +224,14 @@ export default function KYC() {
       _id: id,
     }));
   };
-  console.log("no way", formData);
+
   useEffect(() => {
     if (!auth) redirect("/login");
   }, [auth]);
 
   const handleSaveAndExit = () => {
     setIsLoading(true);
-    console.log("Saving data:", formData);
+
     router.push("/host/dashboard");
   };
 
@@ -212,7 +239,13 @@ export default function KYC() {
     setShowKYCDialog(false);
     router.push("/host/dashboard");
   };
-
+  if (formCompleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        You have already verified your KYC. &nbsp;{" "}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col relative min-h-screen">
       <header className="bg-white w-screen z-50 top-0 fixed right-0 left-0 border-b border-b-gray-200 p-4">

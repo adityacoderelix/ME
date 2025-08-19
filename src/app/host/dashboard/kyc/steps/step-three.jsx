@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import axios from "axios";
+import { toast } from "sonner";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const updateHostFormDocVerificationStatus = async () => {
+const updateHostFormDocVerificationStatus = async (gstInfo) => {
   try {
     const user = await localStorage.getItem("userId");
     const userId = JSON.parse(user);
@@ -31,6 +32,8 @@ const updateHostFormDocVerificationStatus = async () => {
         `${API_BASE_URL}/kyc/verify-gst-status`,
         {
           userId: userId, // from localStorage
+          panNumber: `******${gstInfo.panNumber.slice(-4)}`,
+          gstNumber: `******${gstInfo.gstNumber.slice(-4)}`,
           isVerified: true,
         }
       );
@@ -47,8 +50,6 @@ const updateHostFormDocVerificationStatus = async () => {
 export function GSTVerification({ updateFormData, formData }) {
   const [gstInfo, setGstInfo] = useState(
     formData?.gstInfo || {
-      gstNumber: "",
-      gstName: "",
       isVerified: false,
     }
   );
@@ -71,26 +72,39 @@ export function GSTVerification({ updateFormData, formData }) {
   const handleVerify = async () => {
     try {
       setIsVerifying(true);
-      const getLocalData = await localStorage.getItem("userId");
-      const data = JSON.parse(getLocalData);
+      if (gstInfo.panNumber == gstInfo.rePanNumber) {
+        const getLocalData = await localStorage.getItem("userId");
+        const data = JSON.parse(getLocalData);
 
-      if (data) {
-        const response = await axios.post(`${API_BASE_URL}/kyc/verify/gst`, {
-          userId: data,
-          number: gstInfo.gstNumber,
-        });
-        if (response.status == 200) {
-          updateHostFormDocVerificationStatus();
-          setTimeout(() => {
-            setGstInfo((prev) => ({ ...prev, isVerified: true }));
-            setIsVerifying(false);
-            setShowDialog(true);
-          }, 2000);
+        if (data) {
+          const response = await axios.post(`${API_BASE_URL}/kyc/verify/gst`, {
+            userId: data,
+            panNumber: gstInfo.rePanNumber,
+            gstNumber: gstInfo.gstNumber,
+          });
+          if (response.status == 200) {
+            setTimeout(() => {
+              setGstInfo((prev) => ({
+                ...prev,
+                panNumber: `******${gstInfo.panNumber.slice(-4)}`,
+                gstNumber: `******${gstInfo.gstNumber.slice(-4)}`,
+                isVerified: true,
+              }));
+              updateHostFormDocVerificationStatus(gstInfo);
+              setIsVerifying(false);
+              setShowDialog(true);
+            }, 2000);
+          }
         }
+      } else {
+        toast.error("Cross check pan number in both input fields.");
       }
     } catch (error) {
       console.error("Error in gst");
     }
+  };
+  const handleCopyPaste = (e) => {
+    e.preventDefault();
   };
 
   return (
@@ -101,6 +115,41 @@ export function GSTVerification({ updateFormData, formData }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label
+            htmlFor="gstName"
+            className="font-bricolage text-lg text-gray-700 font-semibold"
+          >
+            Business PAN Number
+          </Label>
+          <Input
+            id="gstName"
+            name="panNumber"
+            value={gstInfo.panNumber}
+            onChange={handleChange}
+            className="font-bricolage text-lg"
+            placeholder="Enter your business pan number"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label
+            htmlFor="gstName"
+            className="font-bricolage text-lg text-gray-700 font-semibold"
+          >
+            Re-Enter PAN Number
+          </Label>
+          <Input
+            id="gstName"
+            name="rePanNumber"
+            value={gstInfo.rePanNumber}
+            onChange={handleChange}
+            className="font-bricolage text-lg"
+            placeholder="Enter your business pan number"
+            // onCopy={handleCopyPaste}
+            // onPaste={handleCopyPaste}
+            // onCut={handleCopyPaste}
+          />
+        </div>
         <div className="space-y-2">
           <Label
             htmlFor="gstNumber"
@@ -117,29 +166,14 @@ export function GSTVerification({ updateFormData, formData }) {
             placeholder="Enter your GST number"
           />
         </div>
-        <div className="space-y-2">
-          <Label
-            htmlFor="gstName"
-            className="font-bricolage text-lg text-gray-700 font-semibold"
-          >
-            Name associated with GST
-          </Label>
-          <Input
-            id="gstName"
-            name="gstName"
-            value={gstInfo.gstName}
-            onChange={handleChange}
-            className="font-bricolage text-lg"
-            placeholder="Enter the name associated with your GST"
-          />
-        </div>
       </CardContent>
       <CardFooter>
         <Button
           onClick={handleVerify}
           disabled={
+            !gstInfo.panNumber ||
+            !gstInfo.rePanNumber ||
             !gstInfo.gstNumber ||
-            !gstInfo.gstName ||
             isVerifying ||
             gstInfo.isVerified
           }

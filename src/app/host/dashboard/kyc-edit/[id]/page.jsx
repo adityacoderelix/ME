@@ -1,5 +1,5 @@
 "use client";
-
+import { propertyService } from "../../../../../services/propertyService";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { steps } from "../../kyc/steps/steps";
@@ -34,8 +34,25 @@ export default function KycEdit({ params }) {
   const [showKYCDialog, setShowKYCDialog] = useState(false);
   const [showCongratulationsDialog, setShowCongratulationsDialog] =
     useState(false);
+  const [formCompleted, setFormCompleted] = useState(false);
   const [formData, setFormData] = useState([]);
+  useEffect(() => {
+    const fetchFormData = async () => {
+      try {
+        const user = await localStorage.getItem("userId");
+        const userId = JSON.parse(user);
+        const response = await kycService.getFormDataByUserId(userId);
+        const result = await response.data;
 
+        if (result.status == "completed") {
+          setFormCompleted(true);
+        }
+      } catch (error) {
+        console.error("Failed to fetch form data. Please try again.");
+      }
+    };
+    fetchFormData();
+  }, [id, auth.user?.email]);
   useEffect(() => {
     const fetchFormData = async () => {
       if (!id) return;
@@ -48,7 +65,7 @@ export default function KycEdit({ params }) {
         setFormData(result);
         return result;
       } catch (error) {
-        toast.error("Failed to fetch form data. Please try again.");
+        console.error("Failed to fetch form data. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -59,29 +76,48 @@ export default function KycEdit({ params }) {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      toast.loading("Updating your listing...");
+      toast("Submitting your kyc...");
+
       await kycService.updateProperty(id, {
         ...formData,
-        status: "processing",
+        status: "completed",
       });
 
-      toast.success("KYC updated successfully.");
+      // await propertyService.updateKyc(formData?.hostId);
 
-      router.push("/host/dashboard");
+      queryClient.invalidateQueries({
+        queryKey: ["KYCStatus", auth.user.email],
+      });
+
+      toast.success("KYC submitted successfully.");
+
+      setTimeout(() => {
+        setShowCongratulationsDialog(true);
+      }, 2000);
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }, 2100);
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const saveData = async (isExiting = false) => {
     setIsLoading(true);
     try {
+      console.log("curent st", currentStep);
+      console.log("len st", steps.length);
       const dataToSave = {
         ...formData,
         status:
-          isExiting || currentStep < steps.length - 1
-            ? "incomplete"
-            : "processing",
+          isExiting || currentStep < steps.length ? "processing" : "pending",
       };
 
       const response = id
@@ -163,8 +199,19 @@ export default function KycEdit({ params }) {
   }, [auth]);
 
   console.log("ddd", formData);
+  if (formCompleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        You have already verified your KYC. &nbsp;{" "}
+      </div>
+    );
+  }
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
+    );
   }
 
   if (!formData && !isLoading) {
