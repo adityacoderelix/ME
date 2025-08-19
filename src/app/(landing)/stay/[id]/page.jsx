@@ -167,7 +167,7 @@ export default function PropertyPage() {
     // Optional: Add staleTime, cacheTime etc.
     // staleTime: 5 * 60 * 1000, // 5 minutes
   });
-  console.log("nice mmm", reviewData);
+  console.log("rev", reviewData);
   // --- Log states for debugging ---
   // useEffect(() => {
   //   // console.log("Property Query:", { propertyId, isPropertyLoading, isPropertyFetching, isPropertyError, propertyError: propertyError?.message });

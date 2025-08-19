@@ -18,7 +18,9 @@ export default function ReviewSection({
   error,
   handleNext,
   handleBack,
-  refetch,
+  prev,
+  next,
+  property,
 }) {
   // const [reviews, setReviews] = useState<Review[] | null>(null);
 
@@ -236,6 +238,38 @@ export default function ReviewSection({
       <div className="h-3 bg-gray-200 rounded w-16 mx-auto"></div>
     </div>
   );
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-16 h-16 mb-4 text-gray-300">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+          />
+        </svg>
+      </div>
+      <h3 className="text-xl font-semibold mb-2">No reviews yet</h3>
+      <p className="text-gray-500 max-w-md">
+        This property hasn't received any reviews yet. Be the first to share
+        your experience!
+      </p>
+      <Link href={"/rating"}>
+        <button className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-blue-700 text-sm font-medium">
+          Write a review
+        </button>
+      </Link>
+    </div>
+  );
+  if (!reviews) {
+    return <EmptyState />;
+  }
   if (error) {
     // You might want to pass the error object to display a more specific message
     return (
@@ -266,33 +300,7 @@ export default function ReviewSection({
 
   // Add an EmptyState component after the TruncatedText component
   // Add this component before the return statement
-  const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 mb-4 text-gray-300">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-          />
-        </svg>
-      </div>
-      <h3 className="text-xl font-semibold mb-2">No reviews yet</h3>
-      <p className="text-gray-500 max-w-md">
-        This property hasn't received any reviews yet. Be the first to share
-        your experience!
-      </p>
-    </div>
-  );
-  if (reviews.data.length == 0) {
-    return <EmptyState />;
-  }
+
   // return (
   //   <div className="max-w-7xl mx-auto py-8 px-4 md:px-0">
   //     <div className="mb-8">
@@ -393,7 +401,7 @@ export default function ReviewSection({
   //     </div>
   //   </div>
   // );
-
+  console.log("nice ma", property);
   return (
     <section className="bg-white p-6 md:p-10 rounded-xl shadow-lg max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -402,14 +410,14 @@ export default function ReviewSection({
             Customer Reviews
           </h2>
           <div className="flex items-center gap-2 text-yellow-500 mt-1">
-            {Array(Math.round(reviews.averageRating))
+            {Array(Math.round(property?.averageRating))
               .fill(0)
               .map((_, i) => (
                 <StarIcon key={i} className="w-5 h-5 fill-yellow-500" />
               ))}
             <span className="text-sm text-gray-600 ml-2">
-              {Math.round(reviews.averageRating)} rating of{" "}
-              {reviews.reviewCount} reviews
+              {Math.round(property?.averageRating)} rating of{" "}
+              {property?.reviewCount} reviews
             </span>
           </div>
         </div>
@@ -421,7 +429,7 @@ export default function ReviewSection({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {reviews.data.map((r, i) => (
+        {reviews.data.slice(prev, next).map((r, i) => (
           <div
             key={i}
             className="bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col gap-2 relative"
@@ -461,7 +469,6 @@ export default function ReviewSection({
           className="flex justify-start cursor-pointer"
           onClick={() => {
             handleBack();
-            refetch();
           }}
         >
           <CircleArrowLeftIcon className="mr-3" />
@@ -471,7 +478,6 @@ export default function ReviewSection({
           className="flex justify-end cursor-pointer"
           onClick={() => {
             handleNext();
-            refetch();
           }}
         >
           Next

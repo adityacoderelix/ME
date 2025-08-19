@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   PocketIcon as Pool,
   Bath,
@@ -26,18 +26,34 @@ import {
   Snowflake,
   Briefcase,
 } from "lucide-react";
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface PropertyAmenitiesProps {
-  amenities: Array<string>,
-  showAmenitiesDialog: boolean,
-  setShowAmenitiesDialog: (show: boolean) => void
+  amenities: Array<string>;
+  showAmenitiesDialog: boolean;
+  setShowAmenitiesDialog: (show: boolean) => void;
+  rules: Array<string>;
+  custom: Array<string>;
+  safety: Object;
 }
 
-export default function PropertyAmenities({ amenities, showAmenitiesDialog, setShowAmenitiesDialog }: PropertyAmenitiesProps) {
-
-  console.log("values", amenities)
+export default function PropertyAmenities({
+  amenities,
+  showAmenitiesDialog,
+  setShowAmenitiesDialog,
+  rules,
+  custom,
+  safety,
+}: PropertyAmenitiesProps) {
+  console.log("values", amenities);
 
   // Static list of all possible amenities.
   // The id values match those returned by your network response.
@@ -48,7 +64,6 @@ export default function PropertyAmenities({ amenities, showAmenitiesDialog, setS
       icon: Waves,
       category: "standout",
       selected: false,
-     
     },
     {
       id: "hot-tub",
@@ -142,6 +157,13 @@ export default function PropertyAmenities({ amenities, showAmenitiesDialog, setS
       selected: false,
     },
     {
+      id: "pool",
+      title: "Pool",
+      icon: Pool,
+      category: "standout",
+      selected: false,
+    },
+    {
       id: "first-aid",
       title: "First aid kit",
       icon: FirstAid,
@@ -221,7 +243,9 @@ export default function PropertyAmenities({ amenities, showAmenitiesDialog, setS
   ];
 
   // Filter the amenities using the dynamic prop (matching by id)
-  const matchedAmenities = allAmenities.filter(amenity => amenities.includes(amenity.id));
+  const matchedAmenities = allAmenities.filter((amenity) =>
+    amenities.includes(amenity.id)
+  );
 
   // Group matched amenities by category for the dialog view
   const groupedAmenities = matchedAmenities.reduce((acc, amenity) => {
@@ -233,53 +257,106 @@ export default function PropertyAmenities({ amenities, showAmenitiesDialog, setS
   }, {} as Record<string, typeof matchedAmenities>);
 
   return (
-    <div className="border-b pb-6 mb-6">
-      <h2 className="text-xl font-medium mb-6">What this place offers</h2>
+    <>
+      <div className="border-b pb-6 mb-6">
+        <h2 className="text-xl font-medium mb-6">What this place offers</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {matchedAmenities.slice(0, 8).map((amenity, index) => (
-          <div key={index} className="flex items-center gap-4">
-            <amenity.icon className="h-6 w-6 text-gray-600" />
-            <span>{amenity.title}</span>
-          </div>
-        ))}
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {matchedAmenities.slice(0, 8).map((amenity, index) => (
+            <div key={index} className="flex items-center gap-4">
+              <amenity.icon className="h-6 w-6 text-gray-600" />
+              <span>{amenity.title}</span>
+            </div>
+          ))}
+        </div>
 
-      {matchedAmenities.length > 8 && (
-        <Button variant="outline" className="mt-6" onClick={() => setShowAmenitiesDialog(true)}>
-          Show all {matchedAmenities.length} amenities
-        </Button>
-      )}
+        {matchedAmenities.length > 8 && (
+          <Button
+            variant="outline"
+            className="mt-6"
+            onClick={() => setShowAmenitiesDialog(true)}
+          >
+            Show all {matchedAmenities.length} amenities
+          </Button>
+        )}
 
-      <Dialog open={showAmenitiesDialog} onOpenChange={setShowAmenitiesDialog}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl">What this place offers</DialogTitle>
-          </DialogHeader>
+        <Dialog
+          open={showAmenitiesDialog}
+          onOpenChange={setShowAmenitiesDialog}
+        >
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">
+                What this place offers
+              </DialogTitle>
+            </DialogHeader>
 
-          <div className="py-4">
-            {Object.entries(groupedAmenities).map(([category, items]) => (
-              <div key={category} className="mb-8">
-                <h3 className="text-lg font-medium mb-4">{category}</h3>
-                <div className="space-y-4">
-                  {items.map((amenity, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <amenity.icon className="h-6 w-6 text-gray-600" />
-                      <span>{amenity.title}</span>
-                    </div>
-                  ))}
+            <div className="py-4">
+              {Object.entries(groupedAmenities).map(([category, items]) => (
+                <div key={category} className="mb-8">
+                  <h3 className="text-lg font-medium mb-4">{category}</h3>
+                  <div className="space-y-4">
+                    {items.map((amenity, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <amenity.icon className="h-6 w-6 text-gray-600" />
+                        <span>{amenity.title}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <DialogFooter>
-            <Button onClick={() => setShowAmenitiesDialog(false)} className="w-full sm:w-auto">
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+            <DialogFooter>
+              <Button
+                onClick={() => setShowAmenitiesDialog(false)}
+                className="w-full sm:w-auto"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      {safety ? (
+        <div className="border-b pb-6 mb-6">
+          <h2 className="text-xl font-medium mb-6">Safety Details</h2>
+          {Object.entries(safety).map(([key, value]) =>
+            value.description ? <div>• {value.description}</div> : null
+          )}
+        </div>
+      ) : null}
+      {rules.length != 0 && custom.length != 0 ? (
+        <div className="border-b pb-6 mb-6">
+          <h2 className="text-xl font-medium mb-6">Stay Rules</h2>
+          {rules.map((item) =>
+            item.includes("_") ? (
+              <div className="pb-4">
+                •{" "}
+                {item.charAt(0).toUpperCase() +
+                  item.replace(/_/g, " ").slice(1)}
+              </div>
+            ) : null
+          )}
+          {custom.map((item) => (
+            <div className="pb-4">• {item}</div>
+          ))}
+        </div>
+      ) : rules.length != 0 ? (
+        <div className="border-b pb-6 mb-6">
+          <h2 className="text-xl font-medium mb-6">Stay Rules</h2>
+          {rules.map((item) => (
+            <div>{item}</div>
+          ))}
+        </div>
+      ) : custom.length != 0 ? (
+        <div className="border-b pb-6 mb-6">
+          <h2 className="text-xl font-medium mb-6">Stay Rules</h2>
+          {custom.map((item) => (
+            <div>{item}</div>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
 }

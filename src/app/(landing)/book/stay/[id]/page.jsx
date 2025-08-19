@@ -110,7 +110,7 @@ function BookPageContent() {
     queryFn: () => fetchProperty(propertyId),
     enabled: !!propertyId,
   });
-  console.log("red lanter", property);
+  console.log("property", property);
   const calculateTotal = () => {
     if (!property)
       return {
