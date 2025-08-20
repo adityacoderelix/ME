@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect, useRef } from "react"
-import { MapPin, Navigation, Loader2 } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { TextReveal } from "@/components/text-reveal"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
+import React, { useState, useEffect, useRef } from "react";
+import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { TextReveal } from "@/components/text-reveal";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 export function LocationForm({ updateFormData, formData }) {
   const [address, setAddress] = useState(
@@ -25,70 +31,79 @@ export function LocationForm({ updateFormData, formData }) {
       latitude: "",
       longitude: "",
       registrationNumber: "HOT",
-    },
-  )
-  const [registrationNumberError, setRegistrationNumberError] = useState("")
-  const [registrationNumberLoading, setRegistrationNumberLoading] = useState(false)
+    }
+  );
+  const [registrationNumberError, setRegistrationNumberError] = useState("");
+  const [registrationNumberLoading, setRegistrationNumberLoading] =
+    useState(false);
   // New state for valid registration number (false by default, or from formData)
-  const [validRegistrationNo, setValidRegistrationNo] = useState(formData?.validRegistrationNo || false)
+  const [validRegistrationNo, setValidRegistrationNo] = useState(
+    formData?.validRegistrationNo || false
+  );
 
   const [locationStatus, setLocationStatus] = useState({
     loading: false,
     error: null,
     showApproxLocation: false,
     permissionState: null,
-  })
-  const [mapCenter, setMapCenter] = useState({ lat: 15.2993, lng: 74.124 }) // Centered on Goa
-  const [searchValue, setSearchValue] = useState("")
-  const mapRef = useRef(null)
-  const mapInstanceRef = useRef(null)
-  const markerRef = useRef(null)
-  const autocompleteRef = useRef(null)
-  const googleMapsRef = useRef(null)
+  });
+  const [mapCenter, setMapCenter] = useState({ lat: 15.2993, lng: 74.124 }); // Centered on Goa
+  const [searchValue, setSearchValue] = useState("");
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
+  const autocompleteRef = useRef(null);
+  const googleMapsRef = useRef(null);
 
   useEffect(() => {
     if (!GOOGLE_MAPS_API_KEY) {
       setLocationStatus((prev) => ({
         ...prev,
-        error: "Google Maps API key is not configured. Please check your environment variables.",
-      }))
-      return
+        error:
+          "Google Maps API key is not configured. Please check your environment variables.",
+      }));
+      return;
     }
-    checkPermissionStatus()
-    loadGoogleMapsScript()
-  }, [])
+    checkPermissionStatus();
+    loadGoogleMapsScript();
+  }, []);
 
   const loadGoogleMapsScript = () => {
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`
-    script.async = true
-    script.defer = true
-    script.onload = initializeMap
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeMap;
     script.onerror = () => {
       setLocationStatus((prev) => ({
         ...prev,
-        error: "Failed to load Google Maps. Please check your internet connection and try again.",
-      }))
-    }
-    document.head.appendChild(script)
-  }
+        error:
+          "Failed to load Google Maps. Please check your internet connection and try again.",
+      }));
+    };
+    document.head.appendChild(script);
+  };
 
   const initializeMap = () => {
-    if (!mapRef.current) return
+    if (!mapRef.current) return;
 
-    googleMapsRef.current = window.google.maps
+    googleMapsRef.current = window.google.maps;
     mapInstanceRef.current = new googleMapsRef.current.Map(mapRef.current, {
       center: mapCenter,
       zoom: 12,
-    })
+    });
 
     markerRef.current = new googleMapsRef.current.Marker({
       map: mapInstanceRef.current,
       position: mapCenter,
       draggable: true,
-    })
+    });
 
-    googleMapsRef.current.event.addListener(markerRef.current, "dragend", handleMarkerDragEnd)
+    googleMapsRef.current.event.addListener(
+      markerRef.current,
+      "dragend",
+      handleMarkerDragEnd
+    );
 
     autocompleteRef.current = new googleMapsRef.current.places.Autocomplete(
       document.getElementById("address-input"),
@@ -96,33 +111,33 @@ export function LocationForm({ updateFormData, formData }) {
         componentRestrictions: { country: "IN" },
         bounds: new googleMapsRef.current.LatLngBounds(
           new googleMapsRef.current.LatLng(14.8, 73.6), // SW corner of Goa
-          new googleMapsRef.current.LatLng(15.8, 74.3), // NE corner of Goa
+          new googleMapsRef.current.LatLng(15.8, 74.3) // NE corner of Goa
         ),
         strictBounds: true,
-      },
-    )
+      }
+    );
 
-    autocompleteRef.current.addListener("place_changed", handlePlaceSelect)
-  }
+    autocompleteRef.current.addListener("place_changed", handlePlaceSelect);
+  };
 
   const handleMarkerDragEnd = () => {
-    const position = markerRef.current.getPosition()
-    const lat = position.lat()
-    const lng = position.lng()
+    const position = markerRef.current.getPosition();
+    const lat = position.lat();
+    const lng = position.lng();
 
-    setMapCenter({ lat, lng })
-    updateAddressFromCoordinates(lat, lng)
-  }
+    setMapCenter({ lat, lng });
+    updateAddressFromCoordinates(lat, lng);
+  };
 
   const updateAddressFromCoordinates = (lat, lng) => {
-    const geocoder = new googleMapsRef.current.Geocoder()
+    const geocoder = new googleMapsRef.current.Geocoder();
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
       if (status === "OK" && results[0]) {
-        const place = results[0]
-        updateAddressFromPlace(place)
+        const place = results[0];
+        updateAddressFromPlace(place);
       }
-    })
-  }
+    });
+  };
 
   const updateAddressFromPlace = (place) => {
     const newAddress = {
@@ -136,165 +151,192 @@ export function LocationForm({ updateFormData, formData }) {
       longitude: place.geometry.location.lng(),
       // Preserve the registration number if it was already entered
       registrationNumber: address.registrationNumber || "HOT",
-    }
+    };
 
     place.address_components.forEach((component) => {
-      if (component.types.includes("route")) newAddress.street = component.long_name
-      if (component.types.includes("sublocality_level_1")) newAddress.district = component.long_name
-      if (component.types.includes("locality")) newAddress.city = component.long_name
-      if (component.types.includes("administrative_area_level_1")) newAddress.state = component.long_name
-      if (component.types.includes("postal_code")) newAddress.pincode = component.long_name
-    })
+      if (component.types.includes("route"))
+        newAddress.street = component.long_name;
+      if (component.types.includes("sublocality_level_1"))
+        newAddress.district = component.long_name;
+      if (component.types.includes("locality"))
+        newAddress.city = component.long_name;
+      if (component.types.includes("administrative_area_level_1"))
+        newAddress.state = component.long_name;
+      if (component.types.includes("postal_code"))
+        newAddress.pincode = component.long_name;
+    });
 
-    setAddress(newAddress)
-    updateFormData({ address: newAddress })
-    setSearchValue(place.formatted_address)
-  }
+    setAddress(newAddress);
+    updateFormData({ address: newAddress });
+    setSearchValue(place.formatted_address);
+  };
 
   const handlePlaceSelect = () => {
-    const place = autocompleteRef.current.getPlace()
-    if (!place.geometry) return
+    const place = autocompleteRef.current.getPlace();
+    if (!place.geometry) return;
 
-    setMapCenter({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() })
-    updateMap(place.geometry.location.lat(), place.geometry.location.lng())
-    updateAddressFromPlace(place)
-  }
+    setMapCenter({
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    });
+    updateMap(place.geometry.location.lat(), place.geometry.location.lng());
+    updateAddressFromPlace(place);
+  };
 
   const updateMap = (lat, lng) => {
     if (mapInstanceRef.current && markerRef.current && googleMapsRef.current) {
-      mapInstanceRef.current.setCenter({ lat, lng })
-      mapInstanceRef.current.setZoom(15)
-      markerRef.current.setPosition({ lat, lng })
+      mapInstanceRef.current.setCenter({ lat, lng });
+      mapInstanceRef.current.setZoom(15);
+      markerRef.current.setPosition({ lat, lng });
     }
-  }
+  };
 
   const checkPermissionStatus = async () => {
     if (navigator.permissions) {
       try {
-        const permission = await navigator.permissions.query({ name: "geolocation" })
-        setLocationStatus((prev) => ({ ...prev, permissionState: permission.state }))
+        const permission = await navigator.permissions.query({
+          name: "geolocation",
+        });
+        setLocationStatus((prev) => ({
+          ...prev,
+          permissionState: permission.state,
+        }));
       } catch (error) {
-        console.error("Error checking geolocation permission:", error)
-        setLocationStatus((prev) => ({ ...prev, error: "Error checking location permission" }))
+        console.error("Error checking geolocation permission:", error);
+        setLocationStatus((prev) => ({
+          ...prev,
+          error: "Error checking location permission",
+        }));
       }
     }
-  }
+  };
 
   const getCurrentLocation = async () => {
     if (locationStatus.permissionState === "denied") {
-      setLocationStatus((prev) => ({ ...prev, error: "Location access denied" }))
-      return
+      setLocationStatus((prev) => ({
+        ...prev,
+        error: "Location access denied",
+      }));
+      return;
     }
 
-    setLocationStatus((prev) => ({ ...prev, loading: true, error: null }))
+    setLocationStatus((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
       const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
 
-      const { latitude, longitude } = position.coords
-      setMapCenter({ lat: latitude, lng: longitude })
-      updateMap(latitude, longitude)
-      updateAddressFromCoordinates(latitude, longitude)
+      const { latitude, longitude } = position.coords;
+      setMapCenter({ lat: latitude, lng: longitude });
+      updateMap(latitude, longitude);
+      updateAddressFromCoordinates(latitude, longitude);
 
-      setLocationStatus((prev) => ({ ...prev, loading: false }))
+      setLocationStatus((prev) => ({ ...prev, loading: false }));
     } catch (error) {
-      console.log(error)
-      setLocationStatus((prev) => ({ ...prev, loading: false, error: "Error getting current location" }))
+      console.log(error);
+      setLocationStatus((prev) => ({
+        ...prev,
+        loading: false,
+        error: "Error getting current location",
+      }));
     }
-  }
+  };
 
   // Function to check registration number with the backend
   const checkRegistrationNumber = async (number) => {
-    setRegistrationNumberLoading(true)
+    setRegistrationNumberLoading(true);
     try {
-
       // Assuming a GET request with a query parameter
-      const response = await fetch(`${API_BASE_URL}/property-registration-no/${number}`)
-      console.log(response)
-     
+      const response = await fetch(
+        `${API_BASE_URL}/property-registration-no/${number}`
+      );
+      console.log(response);
+
       if (!response.ok) {
-        const data = await response.json()
-        console.log(data)
-        setRegistrationNumberError(data?.message)
-        setValidRegistrationNo(false)
-        updateFormData({ validRegistrationNo: false })
+        const data = await response.json();
+        console.log(data);
+        setRegistrationNumberError(data?.message);
+        setValidRegistrationNo(false);
+        updateFormData({ validRegistrationNo: false });
       } else {
-        const data = await response.json()
+        const data = await response.json();
         if (!data.exists) {
-          setRegistrationNumberError(data?.message)
-          setValidRegistrationNo(false)
-          updateFormData({ validRegistrationNo: false })
+          setRegistrationNumberError(data?.message);
+          setValidRegistrationNo(false);
+          updateFormData({ validRegistrationNo: false });
         } else {
-          setRegistrationNumberError("")
-          setValidRegistrationNo(true)
-          updateFormData({ validRegistrationNo: true })
+          setRegistrationNumberError("");
+          setValidRegistrationNo(true);
+          updateFormData({ validRegistrationNo: true });
         }
       }
     } catch (error) {
-      console.error("Error checking registration number:", error)
-      setRegistrationNumberError("Error verifying registration number")
-      setValidRegistrationNo(false)
-      updateFormData({ validRegistrationNo: false })
+      console.error("Error checking registration number:", error);
+      setRegistrationNumberError("Error verifying registration number");
+      setValidRegistrationNo(false);
+      updateFormData({ validRegistrationNo: false });
     } finally {
-      setRegistrationNumberLoading(false)
+      setRegistrationNumberLoading(false);
     }
-  }
+  };
 
   // This function manages registration number input:
   // 1. It automatically ensures that the value always starts with "HOT"
   // 2. It limits the input to 10 characters.
   // 3. When 10 characters are reached, it validates the format using the regex and checks with the backend.
   const handleRegistrationInputChange = (e) => {
-    let value = e.target.value.toUpperCase()
+    let value = e.target.value.toUpperCase();
 
     // Ensure the fixed prefix "HOT" remains at the start.
     if (!value.startsWith("HOT")) {
-      value = "HOT" + value.replace(/^HOT/, "")
+      value = "HOT" + value.replace(/^HOT/, "");
     }
 
     // Limit total length to 10 characters.
     if (value.length > 10) {
-      value = value.slice(0, 10)
+      value = value.slice(0, 10);
     }
 
-    const newAddress = { ...address, registrationNumber: value }
-    setAddress(newAddress)
+    const newAddress = { ...address, registrationNumber: value };
+    setAddress(newAddress);
     // Reset validRegistrationNo to false on change until verified again.
-    setValidRegistrationNo(false)
-    updateFormData({ address: newAddress, validRegistrationNo: false })
+    setValidRegistrationNo(false);
+    updateFormData({ address: newAddress, validRegistrationNo: false });
 
     // Regex for validation: total 10 characters, starting with HOT and ending with at least one digit.
-    const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/
+    const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/;
     if (value.length === 10) {
       if (!regEx.test(value)) {
-        setRegistrationNumberError("Invalid registration number format")
+        setRegistrationNumberError("Invalid registration number format");
       } else {
         // Valid format: clear error then check existence on the backend.
-        setRegistrationNumberError("")
-        checkRegistrationNumber(value)
+        setRegistrationNumberError("");
+        checkRegistrationNumber(value);
       }
     } else {
       // Clear error if the input is incomplete.
-      setRegistrationNumberError("")
+      setRegistrationNumberError("");
     }
-  }
+  };
 
   // Retain manual input changes for other address fields.
   const handleManualInputChange = (key, value) => {
-    const newAddress = { ...address, [key]: value }
-    setAddress(newAddress)
-    updateFormData({ address: newAddress })
-  }
+    const newAddress = { ...address, [key]: value };
+    setAddress(newAddress);
+    updateFormData({ address: newAddress });
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <TextReveal>
         <div className="mb-8">
-          <h2 className="text-2xl font-bricolage font-semibold mb-2">Where's your place located?</h2>
+          <h2 className="text-2xl font-bricolage font-semibold mb-2">
+            Where's your place located?
+          </h2>
           <p className="text-gray-600">
-            Your address is only shared with guests after they've made a reservation.
+            Your address is only shared with guests after they've made a
+            reservation.
           </p>
         </div>
       </TextReveal>
@@ -351,12 +393,19 @@ export function LocationForm({ updateFormData, formData }) {
             </div>
           </TextReveal>
           <div className="mt-6">
-            <div ref={mapRef} className="h-[400px] rounded-lg overflow-hidden z-10" />
+            <div
+              ref={mapRef}
+              className="h-[400px] rounded-lg overflow-hidden z-10"
+            />
           </div>
-          <p className="mt-2 text-sm text-gray-600">You can drag the pin to adjust the location</p>
+          <p className="mt-2 text-sm text-gray-600">
+            You can drag the pin to adjust the location
+          </p>
         </div>
         <div className="md:w-1/2 space-y-4 mt-6 md:mt-0">
-          <Label className="text-lg font-semibold">Property Registration Number</Label>
+          <Label className="text-lg font-semibold">
+            Property Registration Number
+          </Label>
           <div className="relative">
             <Input
               value={address.registrationNumber || "HOT"}
@@ -383,8 +432,13 @@ export function LocationForm({ updateFormData, formData }) {
           </p>
 
           <hr />
-          <h3 className="text-lg font-semibold">Confirm or edit your address details</h3>
-          <Select value={address.country} onValueChange={(value) => handleManualInputChange("country", value)}>
+          <h3 className="text-lg font-semibold">
+            Confirm or edit your address details
+          </h3>
+          <Select
+            value={address.country}
+            onValueChange={(value) => handleManualInputChange("country", value)}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select country" />
             </SelectTrigger>
@@ -394,22 +448,39 @@ export function LocationForm({ updateFormData, formData }) {
           </Select>
 
           {[
-            { key: "street", placeholder: "Flat, house, etc." },
+            { key: "street", placeholder: "Street, area..." },
             { key: "district", placeholder: "District/locality" },
             { key: "city", placeholder: "City / town" },
             { key: "state", placeholder: "State/union territory" },
             { key: "pincode", placeholder: "PIN code" },
-          ].map(({ key, placeholder }) => (
-            <Input
-              key={key}
-              value={address[key] || ""}
-              onChange={(e) => handleManualInputChange(key, e.target.value)}
-              placeholder={placeholder}
-              className="w-full p-4 border rounded-lg"
-            />
-          ))}
+          ].map(({ key, placeholder }) =>
+            key == "pincode" ? (
+              <>
+                <Input
+                  key={key}
+                  value={address[key] || ""}
+                  onChange={(e) => handleManualInputChange(key, e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full p-4 border rounded-lg"
+                  maxLength={6}
+                  minLength={6}
+                />
+                <div className="text-left text-sm  text-muted-foreground">
+                  ( Pincode should be 6 digits number )
+                </div>
+              </>
+            ) : (
+              <Input
+                key={key}
+                value={address[key] || ""}
+                onChange={(e) => handleManualInputChange(key, e.target.value)}
+                placeholder={placeholder}
+                className="w-full p-4 border rounded-lg"
+              />
+            )
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
