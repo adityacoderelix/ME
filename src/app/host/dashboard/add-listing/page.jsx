@@ -5,7 +5,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-
 import confetti from "canvas-confetti";
 import { MembershipPopup } from "./membership-popup";
 
@@ -72,8 +71,9 @@ export default function HostOnboarding() {
     hostEmail: auth.user && auth.user.email,
     selectedRules: [],
     customRules: [],
+    checkinTime: "11",
+    checkoutTime: "14",
   });
-
   // Update the validation logic to include the registration number check for the Location step.
   useEffect(() => {
     const checkValidation = async () => {
@@ -83,7 +83,10 @@ export default function HostOnboarding() {
 
       // If the current step is the Location Form, ensure that the registration number has been validated.
       // (Assuming the Location Form step has a "name" property set to "LocationForm")
-      if (currentStepData.name === "LocationForm" && !formData.validRegistrationNo) {
+      if (
+        currentStepData.name === "LocationForm" &&
+        !formData.validRegistrationNo
+      ) {
         isValid = false;
       }
 
@@ -144,12 +147,11 @@ export default function HostOnboarding() {
             ? "incomplete"
             : "processing",
       };
-
+      console.log("id", id);
       const response = id
         ? await propertyService.updateProperty(id, dataToSave)
         : await propertyService.createProperty(dataToSave);
 
-      console.log(response);
       if (!id) setId(response._id);
       setFormData(response);
 
@@ -180,9 +182,10 @@ export default function HostOnboarding() {
     router.push("/host/dashboard");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (id) => {
     setIsLoading(true);
     try {
+      console.log(id);
       toast("Submitting your listing...");
       await propertyService.updateProperty(id, {
         ...formData,
@@ -253,7 +256,10 @@ export default function HostOnboarding() {
       </header>
       <main className="flex-grow container mx-auto py-24 px-4">
         <div className="mx-auto">
-          <CurrentStepComponent updateFormData={updateFormData} formData={formData} />
+          <CurrentStepComponent
+            updateFormData={updateFormData}
+            formData={formData}
+          />
         </div>
       </main>
       <footer className="bg-white w-screen z-10 bottom-0 fixed right-0 left-0 border-t-4 border-t-gray-200 p-4">
@@ -268,7 +274,7 @@ export default function HostOnboarding() {
           </Button>
           {currentStep === steps.length - 1 ? (
             <Button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit(id)}
               className="bg-primaryGreen rounded-3xl hover:bg-brightGreen py-5 px-6 h-12 text-white"
             >
               Publish
