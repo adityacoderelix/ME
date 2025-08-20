@@ -39,17 +39,15 @@ export default function AccountInfo() {
     fetchProfileInfo();
   }, [auth?.user?.email]);
 
-
   function formatDOB(dobString) {
     const date = new Date(dobString);
     if (isNaN(date.getTime())) {
       return "Invalid Date";
     }
     // Format options: month as long name, day as numeric, and year as numeric.
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return date.toLocaleDateString(undefined, options);
   }
-  
 
   // Trigger file input click when avatar is clicked
   const handleAvatarClick = () => {
@@ -106,13 +104,16 @@ export default function AccountInfo() {
     };
 
     try {
-      const res = await fetch(`${API_URL}/accounts?email=${profileData.email}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${API_URL}/accounts?email=${profileData.email}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Failed to save profile");
@@ -232,18 +233,15 @@ export default function AccountInfo() {
           </div>
           <hr />
 
-
           {/* Email Address (non-editable) */}
           <div>
             <h2 className="text-lg font-semibold mb-1">Email Address</h2>
             <p>{profileData.email}</p>
-           
-          
           </div>
           <hr />
 
           {/* Date of Birth (non-editable) */}
-         
+
           {/* Phone Number (editable) */}
           <div>
             <h2 className="text-lg font-semibold mb-1">Phone no.</h2>
@@ -306,7 +304,9 @@ export default function AccountInfo() {
                 className="h-10"
                 placeholder="Postal Code"
                 value={profileData.address?.postalCode || ""}
-                onChange={(e) => handleChangeAddress("postalCode", e.target.value)}
+                onChange={(e) =>
+                  handleChangeAddress("postalCode", e.target.value)
+                }
               />
               <Input
                 className="h-10"
