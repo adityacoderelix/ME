@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from "lucide-react";
 import { TextReveal } from "@/components/text-reveal";
-import axios from 'axios';
+import axios from "axios";
 
 const API_URL = "http://localhost:5005";
-
 
 interface Photo {
   id: string;
@@ -23,86 +22,99 @@ interface MakeItStandOutProps {
 
 export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
   const [photos, setPhotos] = useState<Photo[]>(
-    formData?.photos?.map((url: string) => ({ id: crypto.randomUUID(), url })) || []
+    formData?.photos?.map((url: string) => ({
+      id: crypto.randomUUID(),
+      url,
+    })) || []
   );
   const [draggedPhoto, setDraggedPhoto] = useState<Photo | null>(null);
   const draggedNodeRef = useRef<HTMLDivElement | null>(null);
   const [uploading, setUploading] = useState(false); // Optional: Show loading state
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  // const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) return;
 
-    setUploading(true);
-    const formData = new FormData();
-    Array.from(files).forEach(file => {
-      formData.append('images', file); // Match backend field name
-    });
+  //   setUploading(true);
+  //   const formData = new FormData();
+  //   Array.from(files).forEach((file) => {
+  //     formData.append("images", file); // Match backend field name
+  //   });
 
-    try {
-      const res = await axios.post(`${API_URL}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+  //   try {
+  //     const res = await axios.post(`${API_URL}/uploads/`, formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
 
-      const newPhotos = res.data.urls.map((url: string) => ({
-        id: crypto.randomUUID(),
-        url,
-      }));
-      const updatedPhotos = [...photos, ...newPhotos];
-      setPhotos(updatedPhotos);
-      updateFormData({ photos: updatedPhotos.map(photo => photo.url) });
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload photos');
-    } finally {
-      setUploading(false);
-    }
-  };
+  //     const newPhotos = res.data.urls.map((url: string) => ({
+  //       id: crypto.randomUUID(),
+  //       url,
+  //     }));
+  //     const updatedPhotos = [...photos, ...newPhotos];
+  //     setPhotos(updatedPhotos);
+  //     updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //     alert("Failed to upload photos");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
 
   const removePhoto = (id: string) => {
-    const updatedPhotos = photos.filter(photo => photo.id !== id);
+    const updatedPhotos = photos.filter((photo) => photo.id !== id);
     setPhotos(updatedPhotos);
-    updateFormData({ photos: updatedPhotos.map(photo => photo.url) });
+    updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, photo: Photo) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    photo: Photo
+  ) => {
     setDraggedPhoto(photo);
     draggedNodeRef.current = e.target as HTMLDivElement;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', photo.id);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", photo.id);
 
     requestAnimationFrame(() => {
       if (draggedNodeRef.current) {
-        draggedNodeRef.current.style.opacity = '0.5';
+        draggedNodeRef.current.style.opacity = "0.5";
       }
     });
   };
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   }, []);
 
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>, targetPhoto: Photo) => {
-    e.preventDefault();
-    if (draggedPhoto && draggedPhoto.id !== targetPhoto.id) {
-      setPhotos(prevPhotos => {
-        const newPhotos = [...prevPhotos];
-        const draggedIndex = newPhotos.findIndex(photo => photo.id === draggedPhoto.id);
-        const targetIndex = newPhotos.findIndex(photo => photo.id === targetPhoto.id);
-        newPhotos.splice(draggedIndex, 1);
-        newPhotos.splice(targetIndex, 0, draggedPhoto);
-        return newPhotos;
-      });
-    }
-  }, [draggedPhoto]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent<HTMLDivElement>, targetPhoto: Photo) => {
+      e.preventDefault();
+      if (draggedPhoto && draggedPhoto.id !== targetPhoto.id) {
+        setPhotos((prevPhotos) => {
+          const newPhotos = [...prevPhotos];
+          const draggedIndex = newPhotos.findIndex(
+            (photo) => photo.id === draggedPhoto.id
+          );
+          const targetIndex = newPhotos.findIndex(
+            (photo) => photo.id === targetPhoto.id
+          );
+          newPhotos.splice(draggedIndex, 1);
+          newPhotos.splice(targetIndex, 0, draggedPhoto);
+          return newPhotos;
+        });
+      }
+    },
+    [draggedPhoto]
+  );
 
   const handleDragEnd = useCallback(() => {
     if (draggedNodeRef.current) {
-      draggedNodeRef.current.style.opacity = '1';
+      draggedNodeRef.current.style.opacity = "1";
     }
     setDraggedPhoto(null);
-    updateFormData({ photos: photos.map(photo => photo.url) });
+    updateFormData({ photos: photos.map((photo) => photo.url) });
   }, [photos, updateFormData]);
 
   return (
@@ -120,7 +132,7 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
               type="file"
               accept="image/*"
               multiple
-              onChange={handlePhotoUpload}
+              // onChange={handlePhotoUpload}
               className="hidden"
               disabled={uploading} // Disable during upload
             />
@@ -131,7 +143,7 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
               <div className="text-center">
                 <span className="text-2xl">📷</span>
                 <p className="mt-2">
-                  {uploading ? 'Uploading...' : 'Click to upload photos'}
+                  {uploading ? "Uploading..." : "Click to upload photos"}
                 </p>
               </div>
             </Label>
@@ -149,7 +161,10 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
                   onDragEnd={handleDragEnd}
                   className="relative transition-transform duration-300 ease-in-out"
                   style={{
-                    transform: draggedPhoto && draggedPhoto.id === photo.id ? 'scale(1.05)' : 'scale(1)',
+                    transform:
+                      draggedPhoto && draggedPhoto.id === photo.id
+                        ? "scale(1.05)"
+                        : "scale(1)",
                   }}
                 >
                   <img
@@ -157,7 +172,8 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
                     alt={`Property photo`}
                     className="w-full h-40 object-cover rounded-lg transition-opacity duration-300 ease-in-out"
                     style={{
-                      opacity: draggedPhoto && draggedPhoto.id === photo.id ? 0.5 : 1,
+                      opacity:
+                        draggedPhoto && draggedPhoto.id === photo.id ? 0.5 : 1,
                     }}
                   />
                   <Button
