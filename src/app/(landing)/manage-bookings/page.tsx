@@ -221,7 +221,11 @@ const ManageBookings = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
+    );
   }
   const today = new Date().toLocaleDateString();
   const hour = new Date().getHours();
