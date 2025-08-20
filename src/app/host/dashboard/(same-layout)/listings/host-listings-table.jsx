@@ -39,6 +39,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import CheckInModal from "@/components/checkin-modal";
 import {
   Dialog,
   DialogContent,
@@ -131,6 +133,9 @@ export function HostListingsTable({ userEmail }) {
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedPropertyName, setSelectedPropertyName] = useState("");
   const router = useRouter();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
+
   const fetchListings = useCallback(async () => {
     setLoading(true);
     try {
@@ -157,6 +162,7 @@ export function HostListingsTable({ userEmail }) {
   const handleDeleteClick = useCallback((listing) => {
     setListingToDelete(listing);
     setDeleteDialogOpen(true);
+    fetchListings();
   }, []);
 
   const handleConfirmDelete = useCallback(async () => {
@@ -194,6 +200,7 @@ export function HostListingsTable({ userEmail }) {
     }
   }, [listingToDelete]);
 
+  console.log("all the ", selectedListing);
   const columns = React.useMemo(
     () => [
       {
@@ -326,6 +333,14 @@ export function HostListingsTable({ userEmail }) {
                 <DropdownMenuItem onClick={() => handleDeleteClick(listing)}>
                   Delete listing
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedListing(listing);
+                    setModalOpen(true);
+                  }}
+                >
+                  Add Time
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           );
@@ -442,6 +457,12 @@ export function HostListingsTable({ userEmail }) {
         </DropdownMenu>
       </div>
       <div className="rounded-md border">
+        <CheckInModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          propertyId={selectedListing?._id}
+          setOpen={setModalOpen}
+        />
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
