@@ -9,16 +9,26 @@ const queryClient = new QueryClient();
 
 const Layout = ({ children }) => {
   const [isAuth, setIsAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
-    if (data) setIsAuth(true);
+    if (data) {
+      setIsAuth(true);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     auth();
   }, []);
-
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
+    );
+  }
   if (!isAuth) {
     return (
       <>
