@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const propertyService = {
   getAllProperties: async (type = null) => {
@@ -18,7 +17,7 @@ export const propertyService = {
     }
   },
 
-  getAllStays: async (type = null) => {
+  getAllStays: async (type) => {
     try {
       const params = type ? { type } : {};
       const response = await axios.get(`${API_BASE_URL}/properties/dynamic`, {
@@ -43,7 +42,9 @@ export const propertyService = {
     }
   },
   createProperty: async (propertyData) => {
+    console.group("proper", propertyData);
     delete propertyData._id;
+    console.group("next", propertyData);
     try {
       const response = await axios.post(
         `${API_BASE_URL}/properties/create-listing-property/`,
@@ -59,6 +60,7 @@ export const propertyService = {
 
   updateProperty: async (id, propertyData) => {
     try {
+      console.group("back", propertyData);
       const response = await axios.put(
         `${API_BASE_URL}/properties/update-listing-property/${id}`,
         propertyData
@@ -71,6 +73,18 @@ export const propertyService = {
     }
   },
 
+  updateKyc: async (id) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/properties/update-kyc-property/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Failed to update property"
+      );
+    }
+  },
   getUserPropertyListings: async (userEmail, page = 1, limit = 10) => {
     try {
       const response = await axios.get(
