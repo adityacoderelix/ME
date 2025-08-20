@@ -74,7 +74,7 @@ export default function Dashboard() {
           <ListingStageCard />
         </div>
 
-        {exist ? (
+        {exist && form?.status == "processing" ? (
           <>
             <Card className=" bg-white border-green-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -134,6 +134,47 @@ export default function Dashboard() {
                   className="bg-red-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-red-500 hover:text-red-500 text-red-500 hover:bg-red-100"
                 >
                   Continue with KYC Process
+                </Link>
+              </CardContent>
+            </Card>
+          </>
+        ) : form?.status == "completed" ? (
+          <>
+            <Card className=" bg-white border-green-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                  Add Bank details
+                </CardTitle>
+                <Calendar className="h-6 w-6 text-primaryGreen" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-stone mb-4">
+                  Add your bank details to receive payments
+                </p>
+                <Link
+                  href={"/host/dashboard/bank-info"}
+                  className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
+                >
+                  Setup payments
+                </Link>
+              </CardContent>
+            </Card>
+            <Card className=" bg-white border-green-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium text-absoluteDark font-bricolage">
+                  Adjust Availability
+                </CardTitle>
+                <Calendar className="h-6 w-6 text-primaryGreen" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-stone mb-4">
+                  Sync in your calendar with us to adjust availability
+                </p>
+                <Link
+                  href={"/host/dashboard/calendar"}
+                  className="bg-green-50 border text-sm font-medium py-2 px-4 rounded mt-2  border-primaryGreen hover:text-green-500 text-primaryGreen hover:bg-green-100"
+                >
+                  Go to Calendar
                 </Link>
               </CardContent>
             </Card>
