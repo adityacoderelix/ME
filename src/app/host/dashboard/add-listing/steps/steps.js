@@ -6,7 +6,7 @@ import {
   validateBathroomSelector,
   validateOccupancySelector,
   validateAmenitiesSelector,
-  validateAddPhotos,
+  // validateAddPhotos,
   validateListingDetails,
   validateReservationSettings,
   validateSetPricing,
@@ -24,7 +24,7 @@ import { OccupancySelector } from "./(part-one)/step-six";
 
 import { StepTwoIntro } from "./(part-two)/intro";
 import { AmenitiesSelector } from "./(part-two)/step-one";
-import { AddPhotos } from "./(part-two)/step-two";
+// import { AddPhotos } from "./(part-two)/step-two";
 import { ListingDetails } from "./(part-two)/step-three";
 import Onboarding from "./Onboarding";
 
@@ -83,7 +83,6 @@ export const steps = [
     validate: validateOccupancySelector,
   },
 
-  
   {
     title: "Step 2 Intro",
     component: StepTwoIntro,
@@ -95,14 +94,14 @@ export const steps = [
     requiresValidation: true,
     validate: validateAmenitiesSelector,
   },
+  // {
+  //   title: "Step 2",
+  //   component: AddPhotos,
+  //   requiresValidation: true,
+  //   validate: validateAddPhotos,
+  // },
   {
     title: "Step 2",
-    component: AddPhotos,
-    requiresValidation: true,
-    validate: validateAddPhotos,
-  },
-  {
-    title: "Step 3",
     component: ListingDetails,
     requiresValidation: true,
     validate: validateListingDetails,
@@ -201,12 +200,12 @@ export const editSteps = [
     requiresValidation: true,
     validate: validateAmenitiesSelector,
   },
-  {
-    title: "Step 2",
-    component: AddPhotos,
-    requiresValidation: true,
-    validate: validateAddPhotos,
-  },
+  // {
+  //   title: "Step 2",
+  //   component: AddPhotos,
+  //   requiresValidation: true,
+  //   validate: validateAddPhotos,
+  // },
   {
     title: "Step 3",
     component: ListingDetails,
