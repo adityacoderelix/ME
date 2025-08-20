@@ -74,14 +74,31 @@ export default function ReservationsPage() {
     }
   };
 
-  const handleFilter = async () => {
+  const [bookings, setBookings] = useState();
+  const [localState, setLocalState] = useState();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [status, setStatus] = useState("all");
+  const getDate = (item) => {
+    const month = new Date(item).getMonth();
+    const year = new Date(item).getFullYear();
+    const day = new Date(item).getDate();
+    const newDate = new Date(Date.UTC(year, month, day));
+    return newDate.toISOString();
+  };
+  const fetchData = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
-    console.log(data);
+
+    const from = getDate(date.from);
+    const to = getDate(date.to);
+    console.log(from, to);
     if (data) {
       try {
         const response = await fetch(
-          `${API_URL}/booking/filter?search=&status=&from=&to=`,
+          `${API_URL}/booking/filter?search=${searchValue}&status=${status}&from=${from}&to=${to}`,
           {
             method: "GET",
             headers: {
@@ -99,38 +116,9 @@ export default function ReservationsPage() {
       }
     }
   };
-  const [bookings, setBookings] = useState();
-  const [localState, setLocalState] = useState();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState(null);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [searchValue, setSearchValue] = useState("");
-  const [status, setStatus] = useState();
-  const fetchData = async () => {
-    const getLocalData = await localStorage.getItem("token");
-    const data = JSON.parse(getLocalData);
-    console.log(data);
-    if (data) {
-      try {
-        const response = await fetch(`${API_URL}/booking/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${data}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const result = await response.json();
-        console.log(result);
-        const final = await result.data;
-        setBookings(final);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [searchValue, status, date]);
 
   const sendConfirmationToUser = async (
     bookingId,
@@ -170,7 +158,7 @@ export default function ReservationsPage() {
       console.error(err);
     }
   };
-  console.log("the searcgh", searchValue, status);
+
   const sendRejectionToUser = async (
     bookingId,
     userEmail,
@@ -369,7 +357,9 @@ export default function ReservationsPage() {
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all" selected>
+              All Status
+            </SelectItem>
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
