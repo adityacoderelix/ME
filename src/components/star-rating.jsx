@@ -31,7 +31,7 @@ export default function StarRating({ max = 5, onRatingChange, resetChange }) {
   };
   return (
     <>
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 align-middle">
         {Array.from({ length: max }, (_, index) => {
           const value = index + 1;
           return (
@@ -49,10 +49,13 @@ export default function StarRating({ max = 5, onRatingChange, resetChange }) {
             </>
           );
         })}
+        <button
+          className="mt-4 bg-white text-black border-0 underline hover:text-blue-700"
+          onClick={handleReset}
+        >
+          Reset
+        </button>
       </div>
-      <Button className="mt-4" onClick={handleReset}>
-        Reset
-      </Button>
     </>
   );
 }
