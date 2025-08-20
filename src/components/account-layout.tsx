@@ -11,16 +11,26 @@ interface LayoutProps {
 
 export default function AccountLayout({ children }: LayoutProps) {
   const [isAuth, setIsAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
   const authenticate = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
-    if (data) setIsAuth(true);
+    if (data) {
+      setIsAuth(true);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     authenticate();
   }, []);
-
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
+    );
+  }
   if (!isAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
