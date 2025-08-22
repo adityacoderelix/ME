@@ -56,7 +56,7 @@ export default function ReservationsPage() {
     const today = new Date();
     switch (range) {
       case "1d":
-        setDate({ from: today, to: today });
+        setDate({ from: today, to: addDays(today, 1) });
         break;
       case "1w":
         setDate({ from: today, to: addDays(today, 7) });
