@@ -26,8 +26,9 @@ import ConfirmCancelDialog from "@/components/dialog-modal";
 import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const moderate = process.env.MODERATE_POLICY_DAYS;
-const flexible = process.env.FLEXIBLE_POLICY_DAYS;
+const moderate = process.env.NEXT_PUBLIC_MODERATE_POLICY_DAYS;
+const flexible = process.env.NEXT_PUBLIC_FLEXIBLE_POLICY_DAYS;
+console.log("nn", moderate);
 interface FilterState {
   location: string;
   minPrice: string;
@@ -269,13 +270,44 @@ const ManageBookings = () => {
       console.error(err);
     }
   };
-  const diff = (date) => {
-    // // const futureDate = new Date(date);
-    //     //   const date1 = new Date();
-    //     // const differenceInDays = (futureDate - date1) / 86400000;
-    //     return setDifferenceDays(differenceInDays)
-  };
 
+  function diff(date) {
+    const futureDate = new Date(date);
+
+    const date2 = new Date().toLocaleDateString();
+    const date1 = new Date(date2);
+    const differenceInDays = (futureDate - date1) / 86400000;
+    console.log("o", differenceInDays);
+    return differenceInDays;
+  }
+
+  const StatusPill = ({ status }) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case "confirmed":
+          return "bg-green-100 text-green-800";
+        case "rejected":
+          return "bg-red-100 text-red-800";
+        case "cancelled":
+          return "bg-orange-100 text-orange-800";
+
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    return (
+      <span
+        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+          status
+        )}`}
+      >
+        {status === "processing"
+          ? "Pending"
+          : status?.charAt(0).toUpperCase() + status?.slice(1)}
+      </span>
+    );
+  };
   return (
     <main className="py-16 md:py-24">
       <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -477,7 +509,7 @@ const ManageBookings = () => {
                   </div>
 
                   <div className="space-y-4 lg:space-y-2 ">
-                    <Badge
+                    {/* agent        <Badge
                       variant="secondary"
                       className={`
                       ${
@@ -499,7 +531,8 @@ const ManageBookings = () => {
                     `}
                     >
                       {booking?.status}
-                    </Badge>
+                    </Badge> */}
+                    <StatusPill status={booking?.status} />
                   </div>
 
                   <div>
@@ -534,8 +567,8 @@ const ManageBookings = () => {
                     {booking?.status != "cancelled" &&
                     booking?.status != "rejected" ? (
                       booking?.cancellationPolicy != "strict" ? (
-                        // diff(booking?.checkOut) > moderate
-                        today == "8/4/2025" &&
+                        diff(new Date(booking?.checkIn).toLocaleDateString()) >
+                          moderate &&
                         booking?.cancellationPolicy == "moderate" ? (
                           <>
                             <Button
@@ -582,8 +615,7 @@ const ManageBookings = () => {
                               />
                             )}
                           </>
-                        ) : // diff(booking?.checkOut) > flexible
-                        today == "8/4/2025" &&
+                        ) : diff(booking?.checkIn) > flexible &&
                           booking?.cancellationPolicy == "flexible" ? (
                           <>
                             <Button
