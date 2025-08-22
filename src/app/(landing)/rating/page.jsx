@@ -154,7 +154,7 @@ export default function Ratings() {
       </div>
     );
   }
-  if (dat != "8/8/2025") {
+  if (dat != "8/21/2025") {
     return (
       <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
         Your review date has expired. The review remains open only for the next

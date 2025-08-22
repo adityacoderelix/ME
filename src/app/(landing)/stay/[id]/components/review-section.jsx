@@ -27,6 +27,7 @@ export default function ReviewSection({
   const [averageRating, setAverageRating] = useState(0);
   console.log("zzzz", reviews, isLoading);
   const router = useRouter();
+  const b = "68909384202eafcb9eaa7b33";
   // Modify the useEffect to allow for testing the empty state
   // Update the fetchReviews function in the useEffect hook
 
@@ -260,14 +261,10 @@ export default function ReviewSection({
         This property hasn't received any reviews yet. Be the first to share
         your experience!
       </p>
-      <Link href={"/rating"}>
-        <button className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-blue-700 text-sm font-medium">
-          Write a review
-        </button>
-      </Link>
     </div>
   );
-  if (!reviews) {
+  console.log("glanter", reviews);
+  if (reviews?.data?.length == 0) {
     return <EmptyState />;
   }
   if (error) {
@@ -421,7 +418,7 @@ export default function ReviewSection({
             </span>
           </div>
         </div>
-        <Link href={"/rating"}>
+        <Link href={`/rating?booking=${b}`}>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 text-sm font-medium">
             Write a review
           </button>

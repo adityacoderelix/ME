@@ -179,7 +179,7 @@ export default function HostOnboarding() {
 
   const handleSaveAndExit = async () => {
     await saveData(true);
-    router.push("/host/dashboard");
+    router.push("/host/dashboard/listings");
   };
 
   const handleSubmit = async (id) => {

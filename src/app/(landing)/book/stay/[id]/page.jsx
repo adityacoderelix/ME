@@ -99,7 +99,9 @@ function BookPageContent() {
 
   const [guests, setGuests] = useState(searchParams.get("guests") || "1");
   const [nights, setNights] = useState(searchParams.get("nights") || "0");
-
+  const adults = searchParams.get("adults");
+  const children = searchParams.get("children");
+  const infants = searchParams.get("infants");
   // Fetch property data using TanStack Query
   const {
     data: property,
@@ -194,7 +196,11 @@ function BookPageContent() {
         },
         body: JSON.stringify({
           userId: userId,
-
+          guests: guests,
+          nights: nights,
+          adults: adults,
+          children: children,
+          infants: infants,
           propertyId: propertyId,
           hostId: host,
           checkIn: checkin,

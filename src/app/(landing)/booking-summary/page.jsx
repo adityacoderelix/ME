@@ -27,7 +27,7 @@ export default function Page() {
     const data = JSON.parse(getLocalData);
     if (data) setIsAuth(true);
   };
-
+  const router = useRouter();
   useEffect(() => {
     auth();
   }, []);
@@ -50,7 +50,11 @@ export default function Page() {
     const hostLastName = searchParams.get("hostLastName");
     const propertyType = searchParams.get("propertyType");
     const placeType = searchParams.get("placeType");
-
+    const adults = searchParams.get("adults");
+    const children = searchParams.get("children");
+    const infants = searchParams.get("infants");
+    const checkinTime = searchParams.get("checkinTime");
+    const checkoutTime = searchParams.get("checkoutTime");
     setQueryData({
       bookingId,
       propertyId,
@@ -69,8 +73,14 @@ export default function Page() {
       hostLastName,
       propertyType,
       placeType,
+      adults,
+      children,
+      infants,
+      checkinTime,
+      checkoutTime,
     });
   }, [searchParams]);
+
   if (!queryData)
     return (
       <div className="min-h-screen font-poppins pt-24">
@@ -91,7 +101,7 @@ export default function Page() {
       </div>
     );
   }
-  console.log("a", queryData);
+
   const checkInDate = new Date(queryData?.checkin);
 
   const checkOutDate = new Date(queryData?.checkout);
@@ -118,7 +128,9 @@ export default function Page() {
     "November",
     "December",
   ];
-
+  const changeTime = (num) => {
+    return `${Number(num) - 12} p.m.`;
+  };
   return (
     <div className="min-h-screen font-poppins pt-24">
       <header className="flow-root bg-offWhite shadow-sm">
@@ -166,35 +178,85 @@ export default function Page() {
                   by {queryData?.hostFirstName} {queryData?.hostLastName}
                 </p>
 
-                <div className="mt-4 text-sm">
-                  <p>
-                    {days[checkInDate?.getDay()]},{" "}
-                    <strong>
-                      {months[checkInDate?.getMonth()]} {checkInDate?.getDate()}
-                      , {checkInDate?.getFullYear()}
-                    </strong>
-                    <br />
-                    Check-in time is 4PM – 9PM
-                  </p>
-                  <p className="mt-2">
-                    {days[checkOutDate?.getDay()]},{" "}
-                    <strong>
-                      {months[checkOutDate?.getMonth()]}{" "}
-                      {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
-                    </strong>
-                    <br />
-                    Check out 11AM
-                  </p>
-                </div>
+                <div className="mt-4 text-sm"></div>
 
-                <button className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg">
-                  Complete
+                <button
+                  className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg"
+                  onClick={() => router.push("/")}
+                >
+                  Back to Home
                 </button>
               </div>
 
               <div className="space-y-4 text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    {" "}
+                    <p>
+                      {days[checkInDate?.getDay()]},{" "}
+                      <strong>
+                        {months[checkInDate?.getMonth()]}{" "}
+                        {checkInDate?.getDate()}, {checkInDate?.getFullYear()}
+                      </strong>
+                      <br />
+                      Check-in :{" "}
+                      {queryData?.checkinTime > 11
+                        ? changeTime(queryData?.checkinTime)
+                        : `${queryData?.checkinTime} a.m.`}
+                    </p>
+                  </div>
+                  <div>
+                    <p>
+                      {days[checkOutDate?.getDay()]},{" "}
+                      <strong>
+                        {months[checkOutDate?.getMonth()]}{" "}
+                        {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
+                      </strong>
+                      <br />
+                      Check-out :{" "}
+                      {queryData?.checkoutTime > 11
+                        ? changeTime(queryData?.checkoutTime)
+                        : `${queryData?.checkoutTime} a.m.`}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Total Nights</h4>
+                    <p className="text-gray-500">{queryData?.nights}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Total Guests</h4>
+                    <p className="text-gray-500">{queryData?.numberOfGuests}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Adults</h4>
+                    <p className="text-gray-500">{queryData?.adults}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Children</h4>
+                    <p className="text-gray-500">{queryData?.children}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Infants</h4>
+                    <p className="text-gray-500">{queryData?.infants}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-700">Booking Id</h4>
+                    <p className="text-gray-500">{queryData?.bookingId}</p>
+                  </div>
+                </div>
+
                 <div>
-                  <h4 className="font-medium text-gray-700">Address</h4>
+                  <h4 className="font-medium text-gray-700">Total Amount</h4>
+                  <p className="text-gray-500">₹{queryData?.totalAmount}.00</p>
+                </div>
+
+                <button className="w-full border border-gray-300 py-2 rounded-lg">
+                  Change reservation
+                </button>
+                <div>
+                  <h4 className="font-medium text-gray-700">
+                    Property Address
+                  </h4>
                   <p className="text-gray-500">
                     {queryData?.street}, {queryData?.city}, {queryData?.state},{" "}
                     {queryData?.country}
@@ -203,26 +265,6 @@ export default function Page() {
                     Get directions
                   </button> */}
                 </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-700">Guests</h4>
-                  <p className="text-gray-500">{queryData?.numberOfGuests}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-700">Amount</h4>
-                  <p className="text-gray-500">₹{queryData?.totalAmount}.00</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-700">Booking Id</h4>
-                  <p className="text-gray-500">{queryData?.bookingId}</p>
-                </div>
-
-                <button className="w-full border border-gray-300 py-2 rounded-lg">
-                  Change reservation
-                </button>
-
                 <div>
                   <h4 className="font-medium text-gray-700">
                     {queryData?.hostFirstName} {queryData?.hostLastName} is your
@@ -250,12 +292,12 @@ export default function Page() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700">
+                  {/* <h4 className="font-medium text-gray-700">
                     Customer support
                   </h4>
                   <p className="text-gray-500">
                     Contact our support team 24/7 from anywhere in the world.
-                  </p>
+                  </p> */}
                   <div className="flex gap-2 mt-1">
                     {/* <button className="text-red-400 text-xs">
                     Visit Help Centre

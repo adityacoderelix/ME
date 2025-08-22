@@ -41,6 +41,7 @@ import { addDays, format, subMonths } from "date-fns";
 import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Mock data for reservations
 const reservations = [];
@@ -73,7 +74,7 @@ export default function ReservationsPage() {
         break;
     }
   };
-
+  const router = useRouter();
   const [bookings, setBookings] = useState();
   const [localState, setLocalState] = useState();
   const [modalOpen, setModalOpen] = useState(false);
@@ -425,7 +426,15 @@ export default function ReservationsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push(
+                          `/host/dashboard/booking-details?booking=${booking?._id}`
+                        );
+                      }}
+                    >
+                      View Details
+                    </DropdownMenuItem>
                     {booking?.propertyId?.bookingType?.manual ? (
                       booking?.status != "confirmed" &&
                       booking?.status != "cancelled" &&

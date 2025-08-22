@@ -87,12 +87,13 @@ export default function PropertyPage() {
   const [next, setNext] = useState(2);
   const [prev, setPrev] = useState(0);
   const handleNext = () => {
-    if (next != limit && next < reviewData.reviewCount) {
+    console.log("ggg", propertyData.reviewCount);
+    if (next != limit && next < propertyData.reviewCount) {
       setPrev(next);
       setNext(next + 2);
     } else {
       const nextSkip = skip + limit;
-      if (nextSkip < reviewData.reviewCount) {
+      if (nextSkip < propertyData.reviewCount) {
         setSkip(nextSkip);
         refetchReview();
       }

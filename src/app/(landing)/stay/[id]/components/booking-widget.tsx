@@ -26,6 +26,8 @@ interface BookingWidgetProps {
     infants: number;
     pets: number;
   };
+  checkinTime: string;
+  checkoutTime: string;
   showCalendar: boolean;
   showGuestsDropdown: boolean;
   onDateSelect: (range: DateRange | undefined) => void;
@@ -45,6 +47,8 @@ export default function BookingWidget({
   guests,
   showCalendar,
   showGuestsDropdown,
+  checkinTime,
+  checkoutTime,
   onDateSelect,
   onGuestChange,
   toggleCalendar,
@@ -337,16 +341,18 @@ export default function BookingWidget({
                       variant="outline"
                       size="icon"
                       className="h-8 w-8 rounded-full"
-                      onClick={() =>
-                        onGuestChange("infants", guests.infants + 1)
-                      }
+                      onClick={() => {
+                        if (guests.infants < 5) {
+                          onGuestChange("infants", guests.infants + 1);
+                        }
+                      }}
                     >
                       +
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                {/* <div className="flex justify-between items-center">
                   <div>
                     <div className="font-medium">Pets</div>
                     <div className="text-sm text-gray-600">
@@ -373,7 +379,7 @@ export default function BookingWidget({
                       +
                     </Button>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="text-sm text-gray-600 pt-2 border-t">
                   This place has a maximum of 2 guests, not including infants.
@@ -406,6 +412,11 @@ export default function BookingWidget({
                       : undefined,
                     guests: getTotalGuests(),
                     nights: nightsCount,
+                    adults: guests.adults,
+                    children: guests.children,
+                    infants: guests.infants,
+                    checkinTime: checkinTime,
+                    checkoutTime: checkoutTime,
                   },
                 }}
                 className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
