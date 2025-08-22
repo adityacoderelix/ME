@@ -28,7 +28,7 @@ import Link from "next/link";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const moderate = process.env.NEXT_PUBLIC_MODERATE_POLICY_DAYS;
 const flexible = process.env.NEXT_PUBLIC_FLEXIBLE_POLICY_DAYS;
-console.log("nn", moderate);
+
 interface FilterState {
   location: string;
   minPrice: string;

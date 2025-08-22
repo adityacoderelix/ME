@@ -418,7 +418,7 @@ export default function ReviewSection({
             </span>
           </div>
         </div>
-        <Link href={`/rating?booking=${b}`}>
+        <Link href={`/manage-bookings`}>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 text-sm font-medium">
             Write a review
           </button>
