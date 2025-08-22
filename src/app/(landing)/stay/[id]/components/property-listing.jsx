@@ -125,6 +125,8 @@ export default function PropertyListing({
             propertyId={propertyDetails?._id}
             propertyImages={propertyDetails?.photos}
             pricePerNight={propertyDetails?.basePrice}
+            checkinTime={propertyDetails?.checkinTime}
+            checkoutTime={propertyDetails?.checkoutTime}
             date={date}
             guests={guests}
             showCalendar={showCalendar}

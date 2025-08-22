@@ -375,8 +375,13 @@ function BookPageContent() {
             checkin: date.from.toLocaleDateString(),
             checkout: date.to.toLocaleDateString(),
             numberOfGuests: guests,
+            adults: adults,
+            children: children,
+            infants: infants,
             totalAmount: totals.total.toString(),
             nights: totals.nights.toString(),
+            checkinTime: property?.checkinTime,
+            checkoutTime: property?.checkoutTime,
           });
 
           const verify = await verifyPayment(

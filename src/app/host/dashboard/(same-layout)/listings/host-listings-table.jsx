@@ -172,7 +172,7 @@ export function HostListingsTable({ userEmail }) {
         const data = JSON.parse(getLocalData);
 
         const response = await fetch(
-          `${API_BASE_URL}/properties/user-property/${listingToDelete._id}`,
+          `${API_BASE_URL}/properties/host/user-property/${listingToDelete._id}`,
           {
             headers: {
               Authorization: `Bearer ${data}`,

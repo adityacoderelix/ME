@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import DialogModal from "@/components/dialog-modal";
 import AccountInfo from "@/components/account-info";
 import ConfirmCancelDialog from "@/components/dialog-modal";
+import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const moderate = process.env.MODERATE_POLICY_DAYS;
@@ -370,23 +371,57 @@ const ManageBookings = () => {
             <div></div>
           </div>
 
-          {filteredBookings.map((booking) => (
-            <Card key={booking?._id} className="p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-4">
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <Image
-                    alt="Property"
-                    className="rounded-lg object-cover w-full lg:w-24 h-48 lg:h-24"
-                    height={96}
-                    src="/placeholder.svg"
-                    width={96}
-                  />
-                  <div className="space-y-2">
-                    <h3 className="font-medium">{booking?.property}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Located at {booking?.propertyId?.address.city}
-                    </p>
-                    {/* <div className="flex items-center gap-2">
+          {filteredBookings.map((booking) => {
+            const summaryParams = new URLSearchParams({
+              hostFirstName: booking?.hostId?.firstName,
+              hostLastName: booking?.hostId?.lastName,
+              bookingId: booking?._id,
+              propertyId: booking?.propertyId?._id,
+              propertyType: booking?.propertyId?.propertyType,
+              placeType: booking?.propertyId?.placeType,
+              propertyName: booking?.propertyId?.title || "Property",
+              street: booking?.propertyId?.address?.street,
+              city: booking?.propertyId?.address?.city,
+              state: booking?.propertyId?.address?.state,
+              country: booking?.propertyId?.address?.country,
+              propertyImage: booking?.propertyId?.photos[0],
+              checkin: new Date(booking?.checkIn).toLocaleDateString(),
+              checkout: new Date(booking?.checkOut).toLocaleDateString(),
+              numberOfGuests: booking?.guests,
+              adults: booking?.adults,
+              children: booking?.children,
+              infants: booking?.infants,
+              totalAmount: booking?.price.toString(),
+              nights: booking?.nights.toString(),
+              checkinTime: booking?.propertyId?.checkinTime,
+              checkoutTime: booking?.propertyId?.checkoutTime,
+            });
+            return (
+              <Card key={booking?._id} className="p-4">
+                <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    <Image
+                      alt="Property"
+                      className="rounded-lg object-cover w-full lg:w-24 h-48 lg:h-24"
+                      height={96}
+                      src="/placeholder.svg"
+                      width={96}
+                    />
+                    {}
+                    <div className="space-y-2">
+                      <h3 className="font-medium">{booking?.property}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Located at {booking?.propertyId?.address.city},{" "}
+                        {booking?.propertyId?.address.state}
+                        <Link
+                          href={`/booking-summary?${summaryParams.toString()}`}
+                        >
+                          <div className="text-red-500 pointer">
+                            View Details
+                          </div>
+                        </Link>
+                      </p>
+                      {/* <div className="flex items-center gap-2">
                       <Avatar className="w-6 h-6">
                         <AvatarImage alt="Host" src="/placeholder.svg" />
                         <AvatarFallback>H</AvatarFallback>
@@ -403,48 +438,48 @@ const ManageBookings = () => {
                         </div>
                       </div>
                     </div> */}
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-4 lg:space-y-2">
-                  <div className="flex items-center gap-2">
-                    {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
-                    <div className="text-sm">
-                      <div className="text-muted-foreground">Check in</div>
-                      <div>
-                        {new Date(booking?.checkIn).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
+                  <div className="space-y-4 lg:space-y-2">
+                    <div className="flex items-center gap-2">
+                      {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
+                      <div className="text-sm">
+                        <div className="text-muted-foreground">Check in</div>
+                        <div>
+                          {new Date(booking?.checkIn).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
+                      <div className="text-sm">
+                        <div className="text-muted-foreground">Check out</div>
+                        <div>
+                          {new Date(booking?.checkOut).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {/* <Calendar className="w-4 h-4 text-muted-foreground" /> */}
-                    <div className="text-sm">
-                      <div className="text-muted-foreground">Check out</div>
-                      <div>
-                        {new Date(booking?.checkOut).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="space-y-4 lg:space-y-2 ">
-                  <Badge
-                    variant="secondary"
-                    className={`
+                  <div className="space-y-4 lg:space-y-2 ">
+                    <Badge
+                      variant="secondary"
+                      className={`
                       ${
                         booking?.status === "Confirmed"
                           ? "bg-green-100 text-green-700"
@@ -462,141 +497,142 @@ const ManageBookings = () => {
                       }
                       hover:bg-opacity-80
                     `}
-                  >
-                    {booking?.status}
-                  </Badge>
-                </div>
-
-                <div>
-                  <div className="font-medium">
-                    ₹{booking?.price?.toLocaleString()}
+                    >
+                      {booking?.status}
+                    </Badge>
                   </div>
-                  {/* <div className="text-sm text-muted-foreground">
+
+                  <div>
+                    <div className="font-medium">
+                      ₹{booking?.price?.toLocaleString()}
+                    </div>
+                    {/* <div className="text-sm text-muted-foreground">
                     Total {booking.nights} nights
                   </div> */}
-                </div>
-                <div className="flex">
-                  {
-                    // today == "7/24/2025" && hour==new Date(booking.checkOut).getHours()+5 ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-primaryGreen text-white py-3 rounded-md w-half mr-4"
-                        onClick={() => {
-                          router.push(`/rating?booking=${booking._id}`);
-                          setShowDialog(true);
-                        }}
-                      >
-                        Review Now
-                      </Button>
-                    </>
-                    // )
-                    // : (
-                    //   ""
-                    // )
-                  }
-                  {booking?.status != "cancelled" &&
-                  booking?.status != "rejected" ? (
-                    booking?.cancellationPolicy != "strict" ? (
-                      // diff(booking?.checkOut) > moderate
-                      today == "8/4/2025" &&
-                      booking?.cancellationPolicy == "moderate" ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-primaryGreen text-white py-3 rounded-md w-half"
-                            onClick={() => {
-                              setBookingToCancel(booking); // store selected booking
-                              setCancelDialogOpen(true); // open the dialog
-                              // cancelBooking(
-                              //   booking?._id,
-                              //   booking?.userId?.email,
-                              //   booking?.hostId?.email,
-                              //   booking?.userId?.firstName +
-                              //     " " +
-                              //     booking?.userId?.lastName,
-                              //   booking?.hostId?.firstName +
-                              //     " " +
-                              //     booking?.hostId?.lastName
-                              // );
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          {bookingToCancel && (
-                            <ConfirmCancelDialog
-                              choice={"Cancel"}
-                              open={cancelDialogOpen}
-                              onClose={() => {
-                                setCancelDialogOpen(false);
-                                setBookingToCancel(null);
+                  </div>
+                  <div className="flex">
+                    {
+                      // today == "7/24/2025" && hour==new Date(booking.checkOut).getHours()+5 ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-primaryGreen text-white py-3 rounded-md w-half mr-4"
+                          onClick={() => {
+                            router.push(`/rating?booking=${booking._id}`);
+                            setShowDialog(true);
+                          }}
+                        >
+                          Review Now
+                        </Button>
+                      </>
+                      // )
+                      // : (
+                      //   ""
+                      // )
+                    }
+                    {booking?.status != "cancelled" &&
+                    booking?.status != "rejected" ? (
+                      booking?.cancellationPolicy != "strict" ? (
+                        // diff(booking?.checkOut) > moderate
+                        today == "8/4/2025" &&
+                        booking?.cancellationPolicy == "moderate" ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-primaryGreen text-white py-3 rounded-md w-half"
+                              onClick={() => {
+                                setBookingToCancel(booking); // store selected booking
+                                setCancelDialogOpen(true); // open the dialog
+                                // cancelBooking(
+                                //   booking?._id,
+                                //   booking?.userId?.email,
+                                //   booking?.hostId?.email,
+                                //   booking?.userId?.firstName +
+                                //     " " +
+                                //     booking?.userId?.lastName,
+                                //   booking?.hostId?.firstName +
+                                //     " " +
+                                //     booking?.hostId?.lastName
+                                // );
                               }}
-                              onConfirm={async () => {
-                                await cancelBooking(
-                                  bookingToCancel._id,
-                                  bookingToCancel.userId.email,
-                                  bookingToCancel.hostId.email,
-                                  `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
-                                  `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
-                                );
-                                setCancelDialogOpen(false);
-                                setBookingToCancel(null);
+                            >
+                              Cancel
+                            </Button>
+                            {bookingToCancel && (
+                              <ConfirmCancelDialog
+                                choice={"Cancel"}
+                                open={cancelDialogOpen}
+                                onClose={() => {
+                                  setCancelDialogOpen(false);
+                                  setBookingToCancel(null);
+                                }}
+                                onConfirm={async () => {
+                                  await cancelBooking(
+                                    bookingToCancel._id,
+                                    bookingToCancel.userId.email,
+                                    bookingToCancel.hostId.email,
+                                    `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
+                                    `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
+                                  );
+                                  setCancelDialogOpen(false);
+                                  setBookingToCancel(null);
+                                }}
+                              />
+                            )}
+                          </>
+                        ) : // diff(booking?.checkOut) > flexible
+                        today == "8/4/2025" &&
+                          booking?.cancellationPolicy == "flexible" ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-primaryGreen text-white py-3 rounded-md w-half"
+                              onClick={() => {
+                                setBookingToCancel(booking); // store selected booking
+                                setCancelDialogOpen(true); // open the dialog
                               }}
-                            />
-                          )}
-                        </>
-                      ) : // diff(booking?.checkOut) > flexible
-                      today == "8/4/2025" &&
-                        booking?.cancellationPolicy == "flexible" ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-primaryGreen text-white py-3 rounded-md w-half"
-                            onClick={() => {
-                              setBookingToCancel(booking); // store selected booking
-                              setCancelDialogOpen(true); // open the dialog
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          {bookingToCancel && (
-                            <ConfirmCancelDialog
-                              choice={"Cancel"}
-                              open={cancelDialogOpen}
-                              onClose={() => {
-                                setCancelDialogOpen(false);
-                                setBookingToCancel(null);
-                              }}
-                              onConfirm={async () => {
-                                await cancelBooking(
-                                  bookingToCancel._id,
-                                  bookingToCancel.userId.email,
-                                  bookingToCancel.hostId.email,
-                                  `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
-                                  `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
-                                );
-                                setCancelDialogOpen(false);
-                                setBookingToCancel(null);
-                              }}
-                            />
-                          )}
-                        </>
+                            >
+                              Cancel
+                            </Button>
+                            {bookingToCancel && (
+                              <ConfirmCancelDialog
+                                choice={"Cancel"}
+                                open={cancelDialogOpen}
+                                onClose={() => {
+                                  setCancelDialogOpen(false);
+                                  setBookingToCancel(null);
+                                }}
+                                onConfirm={async () => {
+                                  await cancelBooking(
+                                    bookingToCancel._id,
+                                    bookingToCancel.userId.email,
+                                    bookingToCancel.hostId.email,
+                                    `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
+                                    `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
+                                  );
+                                  setCancelDialogOpen(false);
+                                  setBookingToCancel(null);
+                                }}
+                              />
+                            )}
+                          </>
+                        ) : (
+                          ""
+                        )
                       ) : (
                         ""
                       )
                     ) : (
                       ""
-                    )
-                  ) : (
-                    ""
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
     </main>
