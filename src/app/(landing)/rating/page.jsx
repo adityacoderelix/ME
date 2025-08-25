@@ -18,6 +18,37 @@ export default function Ratings() {
   const [isAuth, setIsAuth] = useState(false);
   const bookingId = searchParams.get("booking");
   const [bookData, setBookData] = useState();
+  const allowedtoReview = searchParams.get("active");
+  const [reviewed, setReviewed] = useState(false);
+
+  const checkIfAlreadyReviewed = async () => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(
+          `${API_URL}/review/checking/${bookingId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) {
+          return;
+        }
+
+        const final = await response.json();
+        console.log("jl", response);
+        setReviewed(final.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const router = useRouter();
   const verifyToken = async (emailToken) => {
     try {
@@ -81,6 +112,10 @@ export default function Ratings() {
     }
   }, [emailToken]);
 
+  useEffect(() => {
+    checkIfAlreadyReviewed();
+  }, []);
+
   const {
     data: bookingData,
     isLoading: isBookingLoading, // Renamed for clarity
@@ -94,6 +129,10 @@ export default function Ratings() {
     // Optional: Add staleTime, cacheTime etc.
     // staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  const today = new Date();
+  const checkoutDate = new Date(bookingData?.checkOut);
+  const differenceInDays = (today - checkoutDate) / (1000 * 60 * 60 * 24);
   const handleRatingChange = (value) => {
     setRating(value);
   };
@@ -140,6 +179,14 @@ export default function Ratings() {
   };
   // setData(bookingData.checkOut);
   console.log(bookingData);
+  console.log("bb", reviewed, bookingId);
+  if (isBookingLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
+    );
+  }
   const dat = new Date().toLocaleDateString();
   if (!isAuth) {
     return (
@@ -154,7 +201,29 @@ export default function Ratings() {
       </div>
     );
   }
-  if (dat != "8/21/2025") {
+
+  if (!bookingId && !emailToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        Use valid url link. &nbsp;{" "}
+      </div>
+    );
+  }
+  if (reviewed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        You have already submitted a review for this booking. &nbsp;{" "}
+      </div>
+    );
+  }
+  if (today < checkoutDate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
+        You can review only after checkout. &nbsp;{" "}
+      </div>
+    );
+  }
+  if (today < checkoutDate && differenceInDays >= 14) {
     return (
       <div className="min-h-screen flex items-center justify-center font-poppins pt-24">
         Your review date has expired. The review remains open only for the next

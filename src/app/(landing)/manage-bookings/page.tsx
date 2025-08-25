@@ -139,6 +139,7 @@ const ManageBookings = () => {
     maxPrice: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+
   const fetchData = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
@@ -279,6 +280,63 @@ const ManageBookings = () => {
     const differenceInDays = (futureDate - date1) / 86400000;
     console.log("o", differenceInDays);
     return differenceInDays;
+  }
+
+  console.log("blackpa", new Date());
+  function canShowReview(booking) {
+    if (!booking?.checkOut || !booking?.propertyId?.checkoutTime) return false;
+
+    const checkoutDate = new Date(booking?.checkOut);
+    const today = new Date();
+
+    const differenceInDays = (today - checkoutDate) / (1000 * 60 * 60 * 24);
+
+    if (today > checkoutDate && differenceInDays <= 14) {
+      const isSameDay = today.toDateString() === checkoutDate.toDateString();
+      if (!isSameDay) {
+        return true;
+      } else {
+        const checkoutWithTime = new Date(checkoutDate);
+        checkoutWithTime.setHours(booking?.propertyId?.checkoutTime, 0, 0, 0);
+
+        const fiveHoursLater = new Date(
+          checkoutWithTime.getTime() + 5 * 60 * 60 * 1000
+        );
+
+        if (today >= fiveHoursLater) {
+          return true;
+        }
+      }
+    }
+    // console.log("dta", today.toDateString(), checkoutDate.toDateString());
+
+    // const isSameDay = today.toDateString() === checkoutDate.toDateString();
+
+    // if (isSameDay) {
+    //   const checkoutWithTime = new Date(checkoutDate);
+    //   checkoutWithTime.setHours(booking?.propertyId?.checkoutTime, 0, 0, 0);
+
+    //   const fiveHoursLater = new Date(
+    //     checkoutWithTime.getTime() + 5 * 60 * 60 * 1000
+    //   );
+
+    //   if (today >= fiveHoursLater) {
+    //     return true;
+    //   }
+    // }
+
+    return false;
+  }
+
+  function diffHours(date, time) {
+    const futureDate = new Date(date).toLocaleDateString();
+    const futureHours = new Date(futureDate).setHours(time, 0);
+
+    const date2 = new Date();
+    const date1 = new Date(date2);
+    const differenceInHours = (futureHours - date1) / 3600000;
+    console.log("dyb", futureDate, time, date2, differenceInHours);
+    return differenceInHours;
   }
 
   const StatusPill = ({ status }) => {
@@ -544,26 +602,28 @@ const ManageBookings = () => {
                   </div> */}
                   </div>
                   <div className="flex">
-                    {
-                      // today == "7/24/2025" && hour==new Date(booking.checkOut).getHours()+5 ? (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-primaryGreen text-white py-3 rounded-md w-half mr-4"
-                          onClick={() => {
-                            router.push(`/rating?booking=${booking._id}`);
-                            setShowDialog(true);
-                          }}
-                        >
-                          Review Now
-                        </Button>
-                      </>
-                      // )
-                      // : (
-                      //   ""
-                      // )
-                    }
+                    {booking?.status == "confirmed" &&
+                    booking?.reviewed == false ? (
+                      canShowReview(booking) ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-primaryGreen text-white py-3 rounded-md w-half mr-4"
+                            onClick={() => {
+                              router.push(
+                                `/rating?booking=${
+                                  booking._id
+                                }&${summaryParams.toString()}&active=${true}`
+                              );
+                              setShowDialog(true);
+                            }}
+                          >
+                            Review Now
+                          </Button>
+                        </>
+                      ) : null
+                    ) : null}
                     {booking?.status != "cancelled" &&
                     booking?.status != "rejected" ? (
                       booking?.cancellationPolicy != "strict" ? (
@@ -615,7 +675,10 @@ const ManageBookings = () => {
                               />
                             )}
                           </>
-                        ) : diff(booking?.checkIn) > flexible &&
+                        ) : diffHours(
+                            booking?.checkIn,
+                            booking?.propertyId?.checkinTime
+                          ) > flexible &&
                           booking?.cancellationPolicy == "flexible" ? (
                           <>
                             <Button

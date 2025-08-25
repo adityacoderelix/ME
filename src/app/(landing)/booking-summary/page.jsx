@@ -181,7 +181,7 @@ export default function Page() {
                 <div className="mt-4 text-sm"></div>
 
                 <button
-                  className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg"
+                  className="mt-4 w-full bg-primaryGreen hover:bg-brightGreen text-white py-2 rounded-full"
                   onClick={() => router.push("/")}
                 >
                   Back to Home
