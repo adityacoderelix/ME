@@ -26,6 +26,7 @@ interface BookingWidgetProps {
     infants: number;
     pets: number;
   };
+  unavailableDates: Array<string>;
   checkinTime: string;
   checkoutTime: string;
   showCalendar: boolean;
@@ -53,6 +54,7 @@ export default function BookingWidget({
   onGuestChange,
   toggleCalendar,
   toggleGuestsDropdown,
+  unavailableDates,
 }: BookingWidgetProps) {
   const [totalPrice, setTotalPrice] = useState(pricePerNight);
   const [nightsCount, setNightsCount] = useState(1);
@@ -159,6 +161,7 @@ export default function BookingWidget({
       console.error(err);
     }
   };
+  console.log("formu", unavailableDates);
   return (
     <Card className="border rounded-xl sticky shadow-lg">
       <CardContent className="p-0">
@@ -229,7 +232,10 @@ export default function BookingWidget({
                   selected={date}
                   onSelect={onDateSelect}
                   numberOfMonths={2}
-                  disabled={{ before: new Date() }}
+                  disabled={[
+                    { before: new Date() }, // disable past dates
+                    ...unavailableDates.map((d) => new Date(d)), // disable specific unavailable dates
+                  ]}
                   classNames={{
                     day_selected:
                       "bg-black text-white hover:bg-black hover:text-white",

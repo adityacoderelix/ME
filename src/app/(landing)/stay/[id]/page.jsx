@@ -14,7 +14,7 @@ import ReviewSection from "./components/review-section";
 // Import the skeleton for HostProfile if you want a more granular loading state,
 // but the refactored HostProfile handles its own skeleton.
 // import { HostProfileSkeleton } from "./components/host-profile";
-
+import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // --- API Fetching Functions ---
@@ -86,6 +86,9 @@ export default function PropertyPage() {
   // --- Query 1: Fetch Property Data ---
   const [next, setNext] = useState(2);
   const [prev, setPrev] = useState(0);
+
+  const [unavailableDates, setUnavailableDates] = useState([]);
+
   const handleNext = () => {
     console.log("ggg", propertyData.reviewCount);
     if (next != limit && next < propertyData.reviewCount) {
@@ -108,6 +111,26 @@ export default function PropertyPage() {
       refetchReview();
     }
   };
+  useEffect(() => {
+    async function fetchDates() {
+      try {
+        const response = await axios.get(
+          `${API_URL}/booking/unavailable-dates/${propertyId}`
+        );
+
+        if (response.status != 200) {
+          throw new Error(
+            `Failed to fetch host data (status: ${response.status})`
+          );
+        }
+
+        setUnavailableDates(response.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchDates();
+  }, [propertyId]);
 
   const {
     data: propertyData,
@@ -168,7 +191,7 @@ export default function PropertyPage() {
     // Optional: Add staleTime, cacheTime etc.
     // staleTime: 5 * 60 * 1000, // 5 minutes
   });
-  console.log("rev", propertyData);
+  console.log("rev", unavailableDates);
   // --- Log states for debugging ---
   // useEffect(() => {
   //   // console.log("Property Query:", { propertyId, isPropertyLoading, isPropertyFetching, isPropertyError, propertyError: propertyError?.message });
@@ -260,6 +283,7 @@ export default function PropertyPage() {
               hostData={hostData}
               propertyDetails={propertyData}
               isLoading={isPropertyLoading}
+              unavailableDates={unavailableDates}
             />
             {/* Review Section */}
             {/* Pass relevant review data and potentially property ID */}

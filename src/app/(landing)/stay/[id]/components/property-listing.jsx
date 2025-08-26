@@ -15,6 +15,7 @@ export default function PropertyListing({
   hostData,
   propertyDetails,
   isLoading,
+  unavailableDates,
 }) {
   console.log("Host data", hostData);
   console.log("propertyDetails data", propertyDetails);
@@ -135,6 +136,7 @@ export default function PropertyListing({
             onGuestChange={handleGuestChange}
             toggleCalendar={toggleCalendar}
             toggleGuestsDropdown={toggleGuestsDropdown}
+            unavailableDates={unavailableDates}
           />
         </div>
       </div>

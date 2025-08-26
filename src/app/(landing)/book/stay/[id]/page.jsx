@@ -20,7 +20,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, ChevronLeft, Check } from "lucide-react";
 import Link from "next/link";
-
+import axios from "axios";
 // Add Razorpay to Window interface
 // declare global {
 //   interface Window {
@@ -95,6 +95,18 @@ function BookPageContent() {
   }
   useEffect(() => {
     auth();
+  }, []);
+
+  useEffect(() => {
+    async function checkAvailableDates() {
+      const res = await axios.post(
+        `${API_URL}/booking/check-availability/${propertyId}`,
+        {
+          selectedDates,
+        }
+      );
+    }
+    checkAvailableDates();
   }, []);
 
   const [guests, setGuests] = useState(searchParams.get("guests") || "1");
