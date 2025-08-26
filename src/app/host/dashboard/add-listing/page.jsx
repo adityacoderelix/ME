@@ -66,6 +66,11 @@ export default function HostOnboarding() {
       instantBook: false,
       flashBook: false,
     },
+    cancellationType: {
+      moderate: true,
+      flexible: false,
+      strict: false,
+    },
     host: null,
     status: "incomplete",
     hostEmail: auth.user && auth.user.email,

@@ -102,6 +102,7 @@ function BookPageContent() {
   const adults = searchParams.get("adults");
   const children = searchParams.get("children");
   const infants = searchParams.get("infants");
+
   // Fetch property data using TanStack Query
   const {
     data: property,
@@ -181,7 +182,8 @@ function BookPageContent() {
     currency,
     checkin,
     checkout,
-    host
+    host,
+    cancel
   ) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
@@ -207,7 +209,6 @@ function BookPageContent() {
           checkOut: checkout,
           price: amount,
           currency: currency,
-          // cancellationPolicy:a,
         }),
       });
       if (!response.ok) {
@@ -326,13 +327,20 @@ function BookPageContent() {
       const propertyId = await property._id;
       const propertyHostId = await property.host;
       console.log(propertyId, date.from, date.to, propertyHostId);
+      const found = Object.entries(property?.cancellationType).find(
+        ([key, value]) => value === true
+      );
+      const extract = JSON.stringify(found);
+      const parsed = JSON.parse(extract);
+      const cancel = parsed[0];
       const booking = await saveData(
         propertyId,
         totals.total * 100,
         "INR",
         date.from,
         date.to,
-        propertyHostId
+        propertyHostId,
+        cancel
       );
       console.log("green lan", booking);
 
@@ -478,6 +486,10 @@ function BookPageContent() {
     "No parties",
     "No pets",
   ];
+  const found = Object.entries(property?.cancellationType).find(
+    ([key, value]) => value === true
+  );
+
   const propertyCheckIn = property?.checkInTime || "2:00 PM";
   const propertyCheckOut = property?.checkOutTime || "11:00 AM";
   if (isAuth) {
@@ -550,13 +562,13 @@ function BookPageContent() {
                 Cancellation policy
               </h2>
               <p className="text-gray-700">
-                Free cancellation for 48 hours. After that, cancel before 2:00
-                PM on{" "}
+                This property has {found} cancellation policy.
+                {/* {property?.cancellationPolicy}
                 {date.from.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                 })}{" "}
-                and get a full refund, minus the first night and service fee.
+                and get a full refund, minus the first night and service fee. */}
               </p>
               <Link
                 href="/cancellation-policy"

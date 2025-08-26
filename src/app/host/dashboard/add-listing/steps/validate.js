@@ -137,7 +137,13 @@ export const validateListingDetails = (formData) => {
     errorMessage: "",
   };
 };
-
+export const validateCancellationSettings = (formData) => {
+  // Add specific validation for reservation settings if needed
+  return {
+    isValid: true,
+    errorMessage: "",
+  };
+};
 export const validateReservationSettings = (formData) => {
   // Add specific validation for reservation settings if needed
   return {

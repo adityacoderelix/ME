@@ -1,65 +1,63 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 import {
   PlusSquare,
   FileEdit,
   CheckSquare,
   ListChecks,
   RefreshCw, // refresh icon from lucide-react
-} from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-
+} from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const stageConfig = {
   noListings: {
-    title: 'No Listings Present',
+    title: "No Listings Present",
     description:
-      'Start by adding your first property listing to attract potential guests.',
-    ctaText: 'Add listing',
-    ctaLink: '/host/dashboard/add-listing',
+      "Start by adding your first property listing to attract potential guests.",
+    ctaText: "Add listing",
+    ctaLink: "/host/dashboard/add-listing",
     icon: PlusSquare,
-    color: 'text-red-300 bg-red-100 border-red-500',
+    color: "text-red-300 bg-red-100 border-red-500",
   },
   incompleteListings: {
-    title: 'Listing In Progress',
+    title: "Listing In Progress",
     description:
-      'Continue setting up your property listing to attract potential guests.',
-    ctaText: 'Continue setup',
-    ctaLink: '/host/dashboard/add-listing',
+      "Continue setting up your property listing to attract potential guests.",
+    ctaText: "Continue setup",
+    ctaLink: "/host/dashboard/add-listing",
     icon: FileEdit,
-    color: 'text-primaryGreen bg-green-100 border-primaryGreen',
+    color: "text-primaryGreen bg-green-100 border-primaryGreen",
   },
   pendingListings: {
-    title: 'Listings Pending',
-    description:
-      'Your listings are under review. Please wait for approval.',
-    ctaText: 'Add more listing',
-    ctaLink: '/host/dashboard/add-listing',
+    title: "Listings Pending",
+    description: "Your listings are under review. Please wait for approval.",
+    ctaText: "Add more listing",
+    ctaLink: "/host/dashboard/add-listing",
     icon: ListChecks,
-    color: 'text-primaryGreen bg-green-100 border-primaryGreen',
+    color: "text-primaryGreen bg-green-100 border-primaryGreen",
   },
   activeListings: {
-    title: 'Listings Active',
+    title: "Listings Active",
     description:
-      'Your listings are active. Add more properties to increase your reach.',
-    ctaText: 'Add new listing',
-    ctaLink: '/host/dashboard/add-listing',
+      "Your listings are active. Add more properties to increase your reach.",
+    ctaText: "Add new listing",
+    ctaLink: "/host/dashboard/add-listing",
     icon: CheckSquare,
-    color: 'text-primaryGreen bg-green-100 border-primaryGreen',
+    color: "text-primaryGreen bg-green-100 border-primaryGreen",
   },
   mixedListings: {
-    title: 'Listings Overview',
-    description: 'Continue adding more listings.',
-    ctaText: 'Add more listing',
-    ctaLink: '/host/dashboard/add-listing',
+    title: "Listings Overview",
+    description: "Continue adding more to the property listings.",
+    ctaText: "Add more listing",
+    ctaLink: "/host/dashboard/add-listing",
     icon: ListChecks,
-    color: 'text-primaryGreen bg-green-100 border-primaryGreen',
+    color: "text-primaryGreen bg-green-100 border-primaryGreen",
   },
 };
 
@@ -85,13 +83,13 @@ export default function ListingStageCard() {
   const auth = useAuth();
 
   const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ['listingStatus', auth?.user?.email],
+    queryKey: ["listingStatus", auth?.user?.email],
     queryFn: async () => {
       const response = await fetch(
         `${API_URL}/prop-listing/status?email=${auth.user.email}`
       );
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
       return response.json();
     },
@@ -105,7 +103,7 @@ export default function ListingStageCard() {
   if (isLoading) return <SkeletonCard />;
 
   if (error) {
-    console.error('Error fetching listing status:', error);
+    console.error("Error fetching listing status:", error);
     return null; // Optionally render an error UI.
   }
 
