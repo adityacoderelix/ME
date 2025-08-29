@@ -38,6 +38,7 @@ interface BookingWidgetProps {
   ) => void;
   toggleCalendar: () => void;
   toggleGuestsDropdown: () => void;
+  activation: boolean;
 }
 
 export default function BookingWidget({
@@ -55,6 +56,7 @@ export default function BookingWidget({
   toggleCalendar,
   toggleGuestsDropdown,
   unavailableDates,
+  activation,
 }: BookingWidgetProps) {
   const [totalPrice, setTotalPrice] = useState(pricePerNight);
   const [nightsCount, setNightsCount] = useState(1);
@@ -184,7 +186,11 @@ export default function BookingWidget({
                       CHECK-IN
                     </div>
                     <div className="mt-1 text-base">
-                      {date?.from ? formatDate(date.from) : "Add date"}
+                      {activation
+                        ? date?.from
+                          ? formatDate(date.from)
+                          : "Add date"
+                        : "Add Date"}
                     </div>
                   </div>
                 </PopoverTrigger>
@@ -194,7 +200,11 @@ export default function BookingWidget({
                       CHECKOUT
                     </div>
                     <div className="mt-1 text-base">
-                      {date?.to ? formatDate(date.to) : "Add date"}
+                      {activation
+                        ? date?.to
+                          ? formatDate(date.to)
+                          : "Add date"
+                        : "Add date"}
                     </div>
                   </div>
                 </PopoverTrigger>
@@ -229,7 +239,7 @@ export default function BookingWidget({
                 <Calendar
                   mode="range"
                   defaultMonth={date?.from}
-                  selected={date}
+                  selected={activation ? date : undefined}
                   onSelect={onDateSelect}
                   numberOfMonths={2}
                   disabled={[
@@ -406,29 +416,35 @@ export default function BookingWidget({
           )}
           <div onClick={() => createReserveRecord()}>
             {isAuth || isValid ? (
-              <Link
-                href={{
-                  pathname: `/book/stay/${propertyId}`,
-                  query: {
-                    checkin: date?.from
-                      ? format(date.from, "yyyy-MM-dd")
-                      : undefined,
-                    checkout: date?.to
-                      ? format(date.to, "yyyy-MM-dd")
-                      : undefined,
-                    guests: getTotalGuests(),
-                    nights: nightsCount,
-                    adults: guests.adults,
-                    children: guests.children,
-                    infants: guests.infants,
-                    checkinTime: checkinTime,
-                    checkoutTime: checkoutTime,
-                  },
-                }}
-                className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
-              >
-                {date?.from && date?.to ? "Reserve" : "Check availability"}
-              </Link>
+              activation ? (
+                <Link
+                  href={{
+                    pathname: `/book/stay/${propertyId}`,
+                    query: {
+                      checkin: date?.from
+                        ? format(date.from, "yyyy-MM-dd")
+                        : undefined,
+                      checkout: date?.to
+                        ? format(date.to, "yyyy-MM-dd")
+                        : undefined,
+                      guests: getTotalGuests(),
+                      nights: nightsCount,
+                      adults: guests.adults,
+                      children: guests.children,
+                      infants: guests.infants,
+                      checkinTime: checkinTime,
+                      checkoutTime: checkoutTime,
+                    },
+                  }}
+                  className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                >
+                  {date?.from && date?.to ? "Reserve" : "Check availability"}
+                </Link>
+              ) : (
+                <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
+                  {"Check availability"}
+                </Button>
+              )
             ) : (
               <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
                 {date?.from && date?.to ? "Reserve" : "Check availability"}

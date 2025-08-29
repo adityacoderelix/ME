@@ -35,9 +35,10 @@ export default function PropertyListing({
   const [showCalendar, setShowCalendar] = useState(false);
   const [showGuestsDropdown, setShowGuestsDropdown] = useState(false);
   const [showAmenitiesDialog, setShowAmenitiesDialog] = useState(false);
-
+  const [activation, setActivation] = useState(false);
   const handleDateSelect = (range) => {
     setDate(range);
+    setActivation(true);
     if (range?.from && range?.to) {
       setShowCalendar(false);
     }
@@ -137,6 +138,7 @@ export default function PropertyListing({
             toggleCalendar={toggleCalendar}
             toggleGuestsDropdown={toggleGuestsDropdown}
             unavailableDates={unavailableDates}
+            activation={activation}
           />
         </div>
       </div>

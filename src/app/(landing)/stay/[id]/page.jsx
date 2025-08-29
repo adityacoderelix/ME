@@ -123,7 +123,7 @@ export default function PropertyPage() {
             `Failed to fetch host data (status: ${response.status})`
           );
         }
-
+        console.log("bbbbbbb", response);
         setUnavailableDates(response.data.data);
       } catch (err) {
         console.error(err);

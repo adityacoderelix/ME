@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, ChevronLeft, Check } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+import { toast } from "sonner";
 // Add Razorpay to Window interface
 // declare global {
 //   interface Window {
@@ -70,6 +71,7 @@ function BookPageContent() {
   const params = useParams();
   const propertyId = params.id;
   const [isAuth, setIsAuth] = useState(false);
+  const checkinDate = searchParams.get("checkin");
   const [date, setDate] = useState({
     from: searchParams.get("checkin")
       ? new Date(searchParams.get("checkin"))
@@ -78,7 +80,7 @@ function BookPageContent() {
       ? new Date(searchParams.get("checkout"))
       : new Date("2025-03-28"),
   });
-
+  const [unavailableDates, setUnavailableDates] = useState([]);
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
@@ -97,17 +99,17 @@ function BookPageContent() {
     auth();
   }, []);
 
-  useEffect(() => {
-    async function checkAvailableDates() {
-      const res = await axios.post(
-        `${API_URL}/booking/check-availability/${propertyId}`,
-        {
-          selectedDates,
-        }
-      );
-    }
-    checkAvailableDates();
-  }, []);
+  // useEffect(() => {
+  //   async function checkAvailableDates() {
+  //     const res = await axios.post(
+  //       `${API_URL}/booking/check-availability/${propertyId}`,
+  //       {
+  //         selectedDates,
+  //       }
+  //     );
+  //   }
+  //   checkAvailableDates();
+  // }, []);
 
   const [guests, setGuests] = useState(searchParams.get("guests") || "1");
   const [nights, setNights] = useState(searchParams.get("nights") || "0");
@@ -420,6 +422,7 @@ function BookPageContent() {
             } else {
               console.log("This got selected");
               const confirm = await updateConfirmStatus(booking.data._id);
+              await updateBookingStatus(booking.data._id, hostEmail);
             }
 
             router.push(`/booking-summary?${summaryParams.toString()}`);
@@ -455,7 +458,23 @@ function BookPageContent() {
       alert("Payment initialization failed. Please try again.");
     }
   };
+  async function fetchDates() {
+    try {
+      const response = await axios.get(
+        `${API_URL}/booking/check-dates/${propertyId}`
+      );
 
+      if (response.status != 200) {
+        throw new Error(
+          `Failed to fetch host data (status: ${response.status})`
+        );
+      }
+      console.log("oppo", response);
+      setUnavailableDates(response.data.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   if (isLoading) {
     return <BookingPageSkeleton />;
   }
@@ -610,7 +629,20 @@ function BookPageContent() {
 
             <div className="mb-8">
               <Button
-                onClick={handlePayment}
+                onClick={() => {
+                  fetchDates();
+                  console.log(
+                    "unnnn",
+                    unavailableDates.includes(checkinDate),
+                    unavailableDates,
+                    checkinDate
+                  );
+                  if (unavailableDates.includes(checkinDate)) {
+                    toast.error("Sorry, someone has already booked");
+                  } else {
+                    handlePayment();
+                  }
+                }}
                 className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
               >
                 Pay ₹{totals.total.toLocaleString()}
