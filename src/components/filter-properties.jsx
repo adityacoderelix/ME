@@ -7,32 +7,17 @@ import { propertyService } from "../services/propertyService";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-export default function FilterProperties({ propertyType }) {
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function FilterProperties({ properties }) {
+  const [loading, setLoading] = useState(false);
+
   const [includeTaxes, setIncludeTaxes] = useState(true);
   const [showMore, setShowMore] = useState(false);
-  const [selectedType, setSelectedType] = useState(propertyType);
   const [isChecked, setIsChecked] = useState(false);
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        setLoading(true);
-        const data = await propertyService.getAllStays(selectedType);
-        setProperties(data.properties);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, [selectedType]);
   console.log("new pr", properties);
+  if (!properties) {
+    setLoading(true);
+  }
   if (loading) {
     return (
       <div className="grid grid-cols-1 max-w-[1760px]  px-4 sm:px-6 lg:px-[72px] py-8 sm:py-16 lg:py-[128px]  bg-white mx-auto sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -43,13 +28,13 @@ export default function FilterProperties({ propertyType }) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="text-center py-8 text-red-500">{error}</div>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-[400px]">
+  //       <div className="text-center py-8 text-red-500">{error}</div>
+  //     </div>
+  //   );
+  // }
 
   const displayedProperties = showMore ? properties : properties.slice(0, 8);
 
@@ -86,11 +71,7 @@ export default function FilterProperties({ propertyType }) {
               <div className="text-gray-500 text-lg mb-2">
                 No properties to show
               </div>
-              <p className="text-gray-400 text-sm">
-                {selectedType
-                  ? `No properties found for type "${selectedType}"`
-                  : "Check back later for new properties"}
-              </p>
+              <p className="text-gray-400 text-sm"></p>
             </div>
           ) : (
             <>
