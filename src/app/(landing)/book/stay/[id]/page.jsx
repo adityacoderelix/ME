@@ -471,6 +471,7 @@ function BookPageContent() {
       }
       console.log("oppo", response);
       setUnavailableDates(response.data.data);
+      return response.data.data;
     } catch (err) {
       console.error(err);
     }
@@ -629,18 +630,13 @@ function BookPageContent() {
 
             <div className="mb-8">
               <Button
-                onClick={() => {
-                  fetchDates();
-                  console.log(
-                    "unnnn",
-                    unavailableDates.includes(checkinDate),
-                    unavailableDates,
-                    checkinDate
-                  );
-                  if (unavailableDates.includes(checkinDate)) {
+                onClick={async () => {
+                  const date = await fetchDates();
+
+                  if (date.includes(checkinDate)) {
                     toast.error("Sorry, someone has already booked");
                   } else {
-                    handlePayment();
+                    await handlePayment();
                   }
                 }}
                 className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"

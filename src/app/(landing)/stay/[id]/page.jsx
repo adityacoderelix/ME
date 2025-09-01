@@ -115,7 +115,7 @@ export default function PropertyPage() {
     async function fetchDates() {
       try {
         const response = await axios.get(
-          `${API_URL}/booking/unavailable-dates/${propertyId}`
+          `${API_URL}/booking/check-dates/${propertyId}`
         );
 
         if (response.status != 200) {
