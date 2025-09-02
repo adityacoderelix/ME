@@ -110,12 +110,13 @@ const propertyTypes = [
   },
 ];
 
-export default function FilterStaysBar() {
+export default function FilterStaysBar({ selectProperty, setSelectProperty }) {
   const scrollContainerRef = useRef(null);
   const [includeTaxes, setIncludeTaxes] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
+
   const router = useRouter();
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -164,10 +165,18 @@ export default function FilterStaysBar() {
           className="flex space-x-8  md:space-x-8 flex-shrink-0 overflow-x-hidden   px-2 py-2  max-w-full md:max-w-[70vw] lg:[65vw] "
         >
           {propertyTypes.map((type, index) => (
-            <Link href={`/property-type/${type.route}`}>
+            <div
+              key={index}
+              className={`rounded-md p-2 transition-colors ${
+                selectProperty === type?.route?.toLowerCase()
+                  ? "border-2 border-primaryGreen-100"
+                  : "bg-transparent"
+              }`}
+            >
               <button
                 key={index}
                 className="text-center  flex flex-col w-32 justify-center   items-center"
+                onClick={() => setSelectProperty(type?.route?.toLowerCase())}
               >
                 <Image
                   width={48}
@@ -181,7 +190,7 @@ export default function FilterStaysBar() {
                   {type.label}
                 </span>
               </button>
-            </Link>
+            </div>
           ))}
         </div>
         {propertyTypes.length > 6 && (
@@ -209,10 +218,10 @@ export default function FilterStaysBar() {
       </div>
 
       <div className="hidden md:flex flex-row font-poppins items-center gap-4">
-        <button className=" py-2.5 px-8 ring-1 ring-lightGray text-absoluteDark rounded-full hover:ring-absoluteDark transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2">
+        {/* <button className=" py-2.5 px-8 ring-1 ring-lightGray text-absoluteDark rounded-full hover:ring-absoluteDark transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2">
           <SlidersHorizontal className="w-4 h-4" />
           <span>Filters</span>
-        </button>
+        </button> */}
 
         <div
           className={`${

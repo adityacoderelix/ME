@@ -19,28 +19,61 @@ import {
 import { Search, Minus, Plus, HomeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CustomCommandInput } from "./ui/custom-command-input";
+import { toast } from "sonner";
+import FilterStaysBar from "./filter-stays-bar";
 
 interface SearchFilterProps {
   isScrolled: boolean;
+  fromDate: string;
+  toDate: string;
+  location: string;
+  guest: string;
+  active: boolean;
+  grownup: string;
+  child: string;
+  baby: string;
+  property: string;
 }
+const safeParseDate = (
+  dateString: string | undefined | null
+): Date | undefined => {
+  if (!dateString) return undefined;
 
-export default function SearchFilter({ isScrolled }: SearchFilterProps) {
+  const date = new Date(dateString);
+  // Check if the date is valid
+  return isNaN(date.getTime()) ? undefined : date;
+};
+export default function SearchFilter({
+  isScrolled,
+  fromDate,
+  toDate,
+  location,
+  guest,
+  active,
+  grownup,
+  child,
+  baby,
+  property,
+}: SearchFilterProps) {
   const [destination, setDestination] = React.useState("");
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = React.useState(active ? location : "");
   const [dateRange, setDateRange] = React.useState<{
     from: Date | undefined;
     to: Date | undefined;
   }>({
-    from: undefined,
-    to: undefined,
+    from: active ? safeParseDate(fromDate) : undefined,
+    to: active ? safeParseDate(toDate) : undefined,
   });
   const [openDestination, setOpenDestination] = React.useState(false);
   const [openDatePicker, setOpenDatePicker] = React.useState(false);
   const [openGuests, setOpenGuests] = React.useState(false);
+  const [selectProperty, setSelectProperty] = React.useState(
+    property ? property : ""
+  );
   const [guests, setGuests] = React.useState({
-    adults: 0,
-    children: 0,
-    infants: 0,
+    adults: active ? grownup : 0,
+    children: active ? child : 0,
+    infants: active ? baby : 0,
   });
   const router = useRouter();
   const handleGuestChange = (
@@ -51,13 +84,58 @@ export default function SearchFilter({ isScrolled }: SearchFilterProps) {
       ...prev,
       [type]:
         operation === "increment"
-          ? prev[type] + 1
-          : Math.max(0, prev[type] - 1),
+          ? Number(prev[type]) + 1
+          : Number(Math.max(0, prev[type] - 1)),
     }));
   };
-  console.log("geaz", guests, dateRange);
-  const totalGuests = guests.adults + guests.children + guests.infants;
-  const totalAdults = guests.adults + guests.children;
+  // Track hydration
+  const [hydrated, setHydrated] = React.useState(false);
+
+  // Load from localStorage on mount
+  React.useEffect(() => {
+    const saved = localStorage.getItem("searchFilters");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      if (parsed.dateRange) {
+        setDateRange({
+          from: parsed.dateRange.from
+            ? new Date(parsed.dateRange.from)
+            : undefined,
+          to: parsed.dateRange.to ? new Date(parsed.dateRange.to) : undefined,
+        });
+      }
+      if (parsed.searchTerm) setSearchTerm(parsed.searchTerm);
+      if (parsed.selectProperty) setSelectProperty(parsed.selectProperty);
+      if (parsed.guests) setGuests(parsed.guests);
+    }
+    setHydrated(true); // mark as hydrated after first load
+  }, []);
+
+  // Save to localStorage ONLY after hydration
+  React.useEffect(() => {
+    if (!hydrated) return; // skip first run until state is restored
+
+    localStorage.setItem(
+      "searchFilters",
+      JSON.stringify({
+        dateRange: {
+          from: dateRange.from ? dateRange.from.toISOString() : null,
+          to: dateRange.to ? dateRange.to.toISOString() : null,
+        },
+        searchTerm,
+        selectProperty,
+        guests,
+      })
+    );
+  }, [dateRange, searchTerm, selectProperty, guests, hydrated]);
+
+  const totalGuests = active
+    ? Number(guests.adults) + Number(guests.children) + Number(guests.infants)
+    : guests.adults + guests.children + guests.infants;
+  const totalAdults = active
+    ? Number(guests.adults) + Number(guests.children)
+    : guests.adults + guests.children;
   const destinations = React.useMemo(
     () => [
       {
@@ -125,270 +203,302 @@ export default function SearchFilter({ isScrolled }: SearchFilterProps) {
   };
 
   const submit = () => {
+    if (!dateRange.from && !dateRange.to) {
+      toast.error("Enter check in and check out date");
+      return;
+    } else if (!dateRange.from) {
+      toast.error("Enter check in date");
+      return;
+    } else if (!dateRange.to) {
+      toast.error("Enter check out date");
+      return;
+    }
     router.push(
-      `/property-type?location=${searchTerm}&from=${dateRange.from?.toLocaleDateString()}&to=${dateRange?.to?.toLocaleDateString()}&adults=${totalAdults}`
+      `/property-type?propertyType=${selectProperty}&location=${searchTerm}&from=${dateRange.from?.toLocaleDateString()}&to=${dateRange?.to?.toLocaleDateString()}&adults=${totalAdults}&senior=${
+        guests?.adults
+      }&children=${guests?.children}&infants=${guests?.infants}`
     );
   };
   return (
-    <div
-      className={`transition-all duration-300 ${
-        isScrolled
-          ? "opacity-100 -translate-y-full"
-          : "opacity-100 translate-y-0 "
-      } hidden md:flex font-poppins items-center gap-1 relative bg-white rounded-full border-[1px] z-50 border-gray-200 shadow-md max-w-full ${
-        isScrolled ? "md:w-[500px]" : "md:w-[850px]"
-      }  pl-2 py-1  mx-auto`}
-    >
-      {/* Destination Search */}
-      <Popover open={openDestination} onOpenChange={setOpenDestination}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            role="combobox"
-            aria-expanded={openDestination}
-            className={`w-full ${
-              isScrolled ? "sm:w-[100px]" : "sm:w-[250px]"
-            } justify-start px-4 h-14 transition-all duration-200 ease-in-out`}
-          >
-            <div className="flex flex-col justify-start items-start">
-              <span className="text-sm font-bricolage font-medium">
-                Anywhere
-              </span>
-              <span
-                className={`text-sm ${
-                  isScrolled ? "hidden" : "inline-block"
-                } text-muted-foreground font-normal`}
-              >
-                {destination
-                  ? filteredDestinations.find((d) => d.value === destination)
-                      ?.label || "Search destinations"
-                  : "Search destinations"}
-              </span>
-            </div>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-[300px] font-poppins mt-2 transition-all duration-200 ease-in-out"
-          align="start"
-        >
-          <Command className="bg-white">
-            <Input
-              placeholder="Search Goa destinations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <CommandEmpty className="hidden">
-              No destination found.
-            </CommandEmpty>
-            <CommandGroup>
-              {filteredDestinations.map((dest) => (
-                <button
-                  key={dest.value}
-                  className="flex items-center w-full p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  onClick={() => {
-                    setDestination(dest.value);
-                    setOpenDestination(false);
-                    setSearchTerm("");
-                  }}
+    <>
+      <div
+        className={`transition-all duration-300 ${
+          isScrolled
+            ? "opacity-100 -translate-y-full"
+            : "opacity-100 translate-y-0 "
+        } hidden md:flex font-poppins items-center gap-1 relative bg-white rounded-full border-[1px] z-30 border-gray-200 shadow-md max-w-full ${
+          isScrolled ? "md:w-[500px]" : "md:w-[850px]"
+        }  pl-2 py-1  mx-auto`}
+      >
+        {/* Destination Search */}
+        <Popover open={openDestination} onOpenChange={setOpenDestination}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              role="combobox"
+              aria-expanded={openDestination}
+              className={`w-full ${
+                isScrolled ? "sm:w-[100px]" : "sm:w-[250px]"
+              } justify-start px-4 h-14 transition-all duration-200 ease-in-out`}
+            >
+              <div className="flex flex-col justify-start items-start">
+                <span className="text-sm font-bricolage font-medium">
+                  Anywhere
+                </span>
+                <span
+                  className={`text-sm ${
+                    isScrolled ? "hidden" : "inline-block"
+                  } text-muted-foreground font-normal`}
                 >
-                  <div className="p-3 flex justify-center items-center rounded-sm bg-lightGreen/20">
-                    <HomeIcon className="size-4 text-primaryGreen" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm mb-1">{dest.label}</div>
-                    <div className="text-sm text-gray-500">
-                      {dest.description}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      <div className="h-8 bg-border md:block" />
-
-      {/* Date Range Picker */}
-      <Popover open={openDatePicker} onOpenChange={setOpenDatePicker}>
-        <PopoverTrigger asChild>
-          <div className="flex">
-            <Button
-              variant="ghost"
-              className="w-[125px] justify-start px-4 h-14 transition-all duration-200 ease-in-out"
-            >
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-bricolage font-medium">
-                  Check in
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  {dateRange?.from ? formatDate(dateRange.from) : "Add dates"}
+                  {destination
+                    ? filteredDestinations.find((d) => d.value === destination)
+                        ?.label || "Search destinations"
+                    : "Search destinations"}
                 </span>
               </div>
             </Button>
-            <Button
-              variant="ghost"
-              className="w-[125px] justify-start px-4 h-14 transition-all duration-200 ease-in-out"
-            >
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-bricolage font-medium">
-                  Check out
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  {dateRange?.to ? formatDate(dateRange.to) : "Add dates"}
-                </span>
-              </div>
-            </Button>
-          </div>
-        </PopoverTrigger>
-        <PopoverContent
-          className="bg-white mt-2 font-poppins w-auto p-0 transition-all duration-200 ease-in-out"
-          align="start"
-        >
-          <Calendar
-            mode="range"
-            selected={dateRange}
-            onSelect={(newDateRange) => {
-              setDateRange({
-                from: newDateRange?.from,
-                to: newDateRange?.to ?? undefined,
-              });
-              if (newDateRange?.from && newDateRange?.to) {
-                setOpenDatePicker(false);
-              }
-            }}
-            numberOfMonths={2}
-            disabled={(date) => date < new Date()}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-
-      <div className="w-px h-8 bg-border md:block" />
-
-      {/* Guests Selection */}
-      <Popover open={openGuests} onOpenChange={setOpenGuests}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            className={`${
-              isScrolled ? "w-[100px]" : "w-[250px] "
-            } justify-start px-4 h-14 transition-all duration-200 ease-in-out`}
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[300px] font-poppins mt-2 transition-all duration-200 ease-in-out"
+            align="start"
           >
-            <div className="flex flex-col items-start">
-              <span className="text-sm font-bricolage font-medium">
-                {isScrolled ? "Guests" : "Who"}
-              </span>
-              <span
-                className={`${
-                  isScrolled ? "hidden" : "inline-block"
-                } text-sm font-normal text-muted-foreground`}
+            <Command className="bg-white">
+              <Input
+                placeholder="Search Goa destinations..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <CommandEmpty className="hidden">
+                No destination found.
+              </CommandEmpty>
+              <CommandGroup>
+                {filteredDestinations.map((dest) => (
+                  <button
+                    key={dest.value}
+                    className="flex items-center w-full p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    onClick={() => {
+                      setDestination(dest.value);
+                      setOpenDestination(false);
+                      setSearchTerm("");
+                    }}
+                  >
+                    <div className="p-3 flex justify-center items-center rounded-sm bg-lightGreen/20">
+                      <HomeIcon className="size-4 text-primaryGreen" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">
+                        {dest.label}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {dest.description}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        <div className="h-8 bg-border md:block" />
+
+        {/* Date Range Picker */}
+        <Popover open={openDatePicker} onOpenChange={setOpenDatePicker}>
+          <PopoverTrigger asChild>
+            <div className="flex">
+              <Button
+                variant="ghost"
+                className="w-[125px] justify-start px-4 h-14 transition-all duration-200 ease-in-out"
               >
-                {totalGuests > 0
-                  ? `${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`
-                  : "Add guests"}
-              </span>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-bricolage font-medium">
+                    Check in
+                  </span>
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {dateRange?.from ? formatDate(dateRange.from) : "Add dates"}
+                  </span>
+                </div>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-[125px] justify-start px-4 h-14 transition-all duration-200 ease-in-out"
+              >
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-bricolage font-medium">
+                    Check out
+                  </span>
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {dateRange?.to ? formatDate(dateRange.to) : "Add dates"}
+                  </span>
+                </div>
+              </Button>
             </div>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-[320px] p-6 transition-all duration-200 ease-in-out"
-          align="start"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium text-absoluteDark">Adults</div>
-                <div className="text-sm text-muted-foreground">
-                  Ages 13 or above
+          </PopoverTrigger>
+          <PopoverContent
+            className="bg-white mt-2 font-poppins w-auto p-0 transition-all duration-200 ease-in-out"
+            align="start"
+          >
+            <Calendar
+              mode="range"
+              selected={dateRange}
+              onSelect={(newDateRange) => {
+                setDateRange({
+                  from: newDateRange?.from,
+                  to: newDateRange?.to ?? undefined,
+                });
+                if (newDateRange?.from && newDateRange?.to) {
+                  setOpenDatePicker(false);
+                }
+              }}
+              numberOfMonths={2}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // strip time
+                return date < today;
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
+        <div className="w-px h-8 bg-border md:block" />
+
+        {/* Guests Selection */}
+        <Popover open={openGuests} onOpenChange={setOpenGuests}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              className={`${
+                isScrolled ? "w-[100px]" : "w-[250px] "
+              } justify-start px-4 h-14 transition-all duration-200 ease-in-out`}
+            >
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-bricolage font-medium">
+                  {isScrolled ? "Guests" : "Who"}
+                </span>
+                <span
+                  className={`${
+                    isScrolled ? "hidden" : "inline-block"
+                  } text-sm font-normal text-muted-foreground`}
+                >
+                  {totalGuests > 0
+                    ? `${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`
+                    : "Add guests"}
+                </span>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[320px] p-6 transition-all duration-200 ease-in-out"
+            align="start"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-absoluteDark">Adults</div>
+                  <div className="text-sm text-muted-foreground">
+                    Ages 13 or above
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("adults", "decrement")}
+                    disabled={guests.adults === 0}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center">{guests.adults}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("adults", "increment")}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("adults", "decrement")}
-                  disabled={guests.adults === 0}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center">{guests.adults}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("adults", "increment")}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Children</div>
+                  <div className="text-sm text-muted-foreground">Ages 2-12</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("children", "decrement")}
+                    disabled={guests.children === 0}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center">{guests.children}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("children", "increment")}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Infants</div>
+                  <div className="text-sm text-muted-foreground">Under 2</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("infants", "decrement")}
+                    disabled={guests.infants === 0}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center">{guests.infants}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleGuestChange("infants", "increment")}
+                    className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">Children</div>
-                <div className="text-sm text-muted-foreground">Ages 2-12</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("children", "decrement")}
-                  disabled={guests.children === 0}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center">{guests.children}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("children", "increment")}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">Infants</div>
-                <div className="text-sm text-muted-foreground">Under 2</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("infants", "decrement")}
-                  disabled={guests.infants === 0}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center">{guests.infants}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleGuestChange("infants", "increment")}
-                  className="transition-all h-8 w-8 bg-[#eee] rounded-full duration-200 ease-in-out"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
 
-      {/* Search Button */}
-      <Button
-        size="icon"
-        className="h-12 w-12 absolute right-2 shrink-0 bg-primaryGreen hover:bg-brightGreen text-white rounded-full transition-all duration-200 ease-in-out"
-        onClick={() => submit()}
+        {/* Search Button */}
+        <Button
+          size="icon"
+          className="h-12 w-12 absolute right-2 shrink-0 bg-primaryGreen hover:bg-brightGreen text-white rounded-full transition-all duration-200 ease-in-out"
+          onClick={() => submit()}
+        >
+          <Search className="h-6 w-6" />
+          <span className="sr-only">Search</span>
+        </Button>
+      </div>
+      <div
+        className={`hidden lg:block px-6 bg-white transition-all duration-300 ${
+          isScrolled
+            ? "md:opacity-100 md:-translate-y-3/4 border-b border-gray-100 shadow-sm"
+            : "opacity-100 translate-y-0 "
+        }`}
       >
-        <Search className="h-6 w-6" />
-        <span className="sr-only">Search</span>
-      </Button>
-    </div>
+        <FilterStaysBar
+          selectProperty={selectProperty}
+          setSelectProperty={setSelectProperty}
+        />
+      </div>
+    </>
   );
 }
