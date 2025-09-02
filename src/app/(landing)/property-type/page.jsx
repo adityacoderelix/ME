@@ -11,7 +11,7 @@ export default function FarmHouse() {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const guests = searchParams.get("adults");
-  const destination = searchParams.get("from");
+  const location = searchParams.get("location");
   const [data, setData] = useState([]);
   useEffect(() => {
     async function fetchDates() {
@@ -20,6 +20,7 @@ export default function FarmHouse() {
           `${API_URL}/properties/search-properties`,
           {
             params: {
+              location: location,
               from: from ? new Date(from).toISOString() : undefined,
               to: to ? new Date(to).toISOString() : undefined,
               guests: guests,

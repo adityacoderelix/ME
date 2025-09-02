@@ -4,6 +4,7 @@ import * as React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Command,
   CommandEmpty,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Search, Minus, Plus, HomeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { CustomCommandInput } from "./ui/custom-command-input";
 
 interface SearchFilterProps {
   isScrolled: boolean;
@@ -124,7 +126,7 @@ export default function SearchFilter({ isScrolled }: SearchFilterProps) {
 
   const submit = () => {
     router.push(
-      `/property-type?from=${dateRange.from?.toLocaleDateString()}&to=${dateRange?.to?.toLocaleDateString()}&adults=${totalAdults}`
+      `/property-type?location=${searchTerm}&from=${dateRange.from?.toLocaleDateString()}&to=${dateRange?.to?.toLocaleDateString()}&adults=${totalAdults}`
     );
   };
   return (
@@ -170,9 +172,10 @@ export default function SearchFilter({ isScrolled }: SearchFilterProps) {
           align="start"
         >
           <Command className="bg-white">
-            <CommandInput
+            <Input
               placeholder="Search Goa destinations..."
-              onValueChange={(value) => setSearchTerm(value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
             <CommandEmpty className="hidden">
               No destination found.
