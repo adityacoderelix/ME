@@ -201,11 +201,13 @@ export default function Page() {
                   <div>
                     {" "}
                     <p>
-                      {days[checkInDate?.getDay()]},{" "}
+                      {/* {days[checkInDate?.getDay()]},{" "}
                       <strong>
                         {months[checkInDate?.getMonth()]}{" "}
                         {checkInDate?.getDate()}, {checkInDate?.getFullYear()}
                       </strong>
+                      <br /> */}
+                      <strong>{checkInDate.toDateString()}</strong>
                       <br />
                       Check-in :{" "}
                       {queryData?.checkinTime > 12
@@ -215,11 +217,13 @@ export default function Page() {
                   </div>
                   <div>
                     <p>
-                      {days[checkOutDate?.getDay()]},{" "}
+                      {/* {days[checkOutDate?.getDay()]},{" "}
                       <strong>
                         {months[checkOutDate?.getMonth()]}{" "}
                         {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
                       </strong>
+                      <br /> */}
+                      <strong>{checkOutDate.toDateString()}</strong>
                       <br />
                       Check-out :{" "}
                       {queryData?.checkoutTime > 12
