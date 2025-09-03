@@ -80,6 +80,7 @@ function BookPageContent() {
       ? new Date(searchParams.get("checkout"))
       : new Date("2025-03-28"),
   });
+
   const [unavailableDates, setUnavailableDates] = useState([]);
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
@@ -117,6 +118,12 @@ function BookPageContent() {
   const children = searchParams.get("children");
   const infants = searchParams.get("infants");
 
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [guestData, setGuestData] = useState({
+    adults: [],
+    children: [],
+  });
+  const [formErrors, setFormErrors] = useState({});
   // Fetch property data using TanStack Query
   const {
     data: property,
@@ -162,7 +169,105 @@ function BookPageContent() {
   };
 
   const totals = calculateTotal();
+  const fetchForm = async () => {
+    // Get user data from localStorage
 
+    const firstName = property?.host?.firstName || "";
+    const lastName = property?.host?.lastName || "";
+
+    // Initialize guest data arrays based on the number of adults and children
+    const initialAdults = Array.from(
+      { length: parseInt(adults) },
+      (_, index) => ({
+        name: index === 0 ? `${firstName} ${lastName}`.trim() : "",
+        age: index === 0 ? 13 : 13,
+      })
+    );
+
+    const initialChildren = Array.from({ length: parseInt(children) }, () => ({
+      name: "",
+      age: 2,
+    }));
+
+    setGuestData({
+      adults: initialAdults,
+      children: initialChildren,
+    });
+
+    setFormErrors({});
+    setShowGuestModal(true);
+
+    // Return the form data if needed elsewhere
+    return {
+      adults: initialAdults,
+      children: initialChildren,
+    };
+  };
+
+  // Add this function to handle form validation and submission
+  const handleConfirmGuestInfo = async () => {
+    const errors = {};
+
+    // Validate adults
+    guestData.adults.forEach((adult, index) => {
+      if (!adult.name.trim()) {
+        errors[`adult-name-${index}`] = "Name is required";
+      }
+      if (adult.age < 13) {
+        errors[`adult-age-${index}`] = "Age must be 13 or above";
+      }
+    });
+
+    // Validate children
+    guestData.children.forEach((child, index) => {
+      if (!child.name.trim()) {
+        errors[`child-name-${index}`] = "Name is required";
+      }
+      if (child.age < 2 || child.age > 12) {
+        errors[`child-age-${index}`] = "Age must be between 2 and 12";
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    // If validation passes, close modal and proceed with payment
+    setShowGuestModal(false);
+
+    // Check dates again and proceed with payment
+
+    const date = await fetchDates();
+    if (date.includes(checkinDate)) {
+      toast.error("Sorry, someone has already booked");
+    } else {
+      await handlePayment();
+    }
+  };
+
+  // Add this function to update guest data
+  const updateGuestData = (type, index, field, value) => {
+    // For the first adult, only allow age to be changed, not name
+    if (type === "adults" && index === 0 && field === "name") {
+      return; // Don't update the name for the first adult
+    }
+
+    setGuestData((prev) => {
+      const newData = { ...prev };
+      newData[type][index][field] = value;
+      return newData;
+    });
+
+    // Clear error for this field when user starts typing
+    if (formErrors[`${type}-${field}-${index}`]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[`${type}-${field}-${index}`];
+        return newErrors;
+      });
+    }
+  };
   // Load Razorpay SDK
   useEffect(() => {
     const loadRazorpayScript = () => {
@@ -197,7 +302,8 @@ function BookPageContent() {
     checkin,
     checkout,
     host,
-    cancel
+    cancel,
+    guestData
   ) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
@@ -223,6 +329,7 @@ function BookPageContent() {
           checkOut: checkout,
           price: amount,
           currency: currency,
+          guestData: guestData,
         }),
       });
       if (!response.ok) {
@@ -284,7 +391,7 @@ function BookPageContent() {
       return result;
     } catch (err) {}
   };
-  const updateBookingStatus = async (bookingId, host) => {
+  const updateBookingStatus = async (bookingId, host, manual) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
@@ -299,6 +406,7 @@ function BookPageContent() {
           bookingId: bookingId,
           hostEmail: host,
           userId: userId,
+          manual: manual,
         }),
       });
       const result = await response.json();
@@ -354,7 +462,8 @@ function BookPageContent() {
         date.from,
         date.to,
         propertyHostId,
-        cancel
+        cancel,
+        guestData
       );
       console.log("green lan", booking);
 
@@ -404,6 +513,7 @@ function BookPageContent() {
             nights: totals.nights.toString(),
             checkinTime: property?.checkinTime,
             checkoutTime: property?.checkoutTime,
+            instant: property?.bookingType?.manual ? false : true,
           });
 
           const verify = await verifyPayment(
@@ -417,12 +527,17 @@ function BookPageContent() {
               console.log("not selected");
               const update = await updateBookingStatus(
                 booking.data._id,
-                hostEmail
+                hostEmail,
+                property.bookingType.manual
               );
             } else {
               console.log("This got selected");
               const confirm = await updateConfirmStatus(booking.data._id);
-              await updateBookingStatus(booking.data._id, hostEmail);
+              await updateBookingStatus(
+                booking.data._id,
+                hostEmail,
+                property.bookingType.manual
+              );
             }
 
             router.push(`/booking-summary?${summaryParams.toString()}`);
@@ -627,17 +742,207 @@ function BookPageContent() {
                 </li>
               </ul>
             </div>
+            {showGuestModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-between items-center p-6 border-b">
+                    <h2 className="text-xl font-semibold">Guest Information</h2>
+                    <button
+                      onClick={() => setShowGuestModal(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
 
+                  <div className="p-6">
+                    {/* Adults section */}
+                    {guestData.adults.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-medium mb-4">
+                          Adults ({adults})
+                        </h3>
+                        {guestData.adults.map((adult, index) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+                          >
+                            <div>
+                              <label className="block text-sm font-medium mb-1">
+                                {index === 0
+                                  ? "Primary Guest Name"
+                                  : `Adult ${index + 1} Name`}
+                              </label>
+                              <input
+                                type="text"
+                                value={adult.name}
+                                onChange={(e) =>
+                                  updateGuestData(
+                                    "adults",
+                                    index,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className={`w-full p-2 border rounded ${
+                                  formErrors[`adult-name-${index}`]
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                                }`}
+                                placeholder="Full name"
+                                readOnly={index === 0} // Make first adult name read-only
+                              />
+                              {index === 0 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  User Name cannot be edited
+                                </p>
+                              )}
+                              {formErrors[`adult-name-${index}`] && (
+                                <p className="text-red-500 text-xs mt-1">
+                                  {formErrors[`adult-name-${index}`]}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">
+                                Age
+                              </label>
+                              <input
+                                type="number"
+                                min="13"
+                                value={adult.age}
+                                onChange={(e) =>
+                                  updateGuestData(
+                                    "adults",
+                                    index,
+                                    "age",
+                                    parseInt(e.target.value) || 13
+                                  )
+                                }
+                                className={`w-full p-2 border rounded ${
+                                  formErrors[`adult-age-${index}`]
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                                }`}
+                              />
+                              {formErrors[`adult-age-${index}`] && (
+                                <p className="text-red-500 text-xs mt-1">
+                                  {formErrors[`adult-age-${index}`]}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Children section */}
+                    {guestData.children.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-medium mb-4">
+                          Children ({children})
+                        </h3>
+                        {guestData.children.map((child, index) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+                          >
+                            <div>
+                              <label className="block text-sm font-medium mb-1">
+                                Child {index + 1} Name
+                              </label>
+                              <input
+                                type="text"
+                                value={child.name}
+                                onChange={(e) =>
+                                  updateGuestData(
+                                    "children",
+                                    index,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className={`w-full p-2 border rounded ${
+                                  formErrors[`child-name-${index}`]
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                                }`}
+                                placeholder="Full name"
+                              />
+                              {formErrors[`child-name-${index}`] && (
+                                <p className="text-red-500 text-xs mt-1">
+                                  {formErrors[`child-name-${index}`]}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">
+                                Age
+                              </label>
+                              <input
+                                type="number"
+                                min="2"
+                                max="12"
+                                value={child.age}
+                                onChange={(e) =>
+                                  updateGuestData(
+                                    "children",
+                                    index,
+                                    "age",
+                                    parseInt(e.target.value) || 2
+                                  )
+                                }
+                                className={`w-full p-2 border rounded ${
+                                  formErrors[`child-age-${index}`]
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                                }`}
+                              />
+                              {formErrors[`child-age-${index}`] && (
+                                <p className="text-red-500 text-xs mt-1">
+                                  {formErrors[`child-age-${index}`]}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end p-6 border-t">
+                    <button
+                      onClick={() => setShowGuestModal(false)}
+                      className="mr-4 px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmGuestInfo}
+                      className="px-6 py-2 bg-primaryGreen text-white rounded hover:bg-brightGreen"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="mb-8">
               <Button
                 onClick={async () => {
-                  const date = await fetchDates();
-
-                  if (date.includes(checkinDate)) {
-                    toast.error("Sorry, someone has already booked");
-                  } else {
-                    await handlePayment();
-                  }
+                  await fetchForm();
                 }}
                 className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
               >

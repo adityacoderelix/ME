@@ -55,6 +55,7 @@ export default function Page() {
     const infants = searchParams.get("infants");
     const checkinTime = searchParams.get("checkinTime");
     const checkoutTime = searchParams.get("checkoutTime");
+    const instant = searchParams.get("instant");
     setQueryData({
       bookingId,
       propertyId,
@@ -78,6 +79,7 @@ export default function Page() {
       infants,
       checkinTime,
       checkoutTime,
+      instant,
     });
   }, [searchParams]);
 
@@ -136,9 +138,15 @@ export default function Page() {
       <header className="flow-root bg-offWhite shadow-sm">
         <div className=" max-w-7xl mx-auto py-4 ml-10 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
-              Your reservation is confirmed
-            </h2>
+            {queryData?.instant == "true" ? (
+              <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
+                Your reservation is confirmed
+              </h2>
+            ) : (
+              <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
+                Wait for host email for confirmation
+              </h2>
+            )}
             {/* <p className="text-gray-600">You're going to San Francisco!</p> */}
             <p className=" text-gray-600 ">Thanks for choosing Us</p>
           </div>
@@ -200,7 +208,7 @@ export default function Page() {
                       </strong>
                       <br />
                       Check-in :{" "}
-                      {queryData?.checkinTime > 11
+                      {queryData?.checkinTime > 12
                         ? changeTime(queryData?.checkinTime)
                         : `${queryData?.checkinTime} a.m.`}
                     </p>
@@ -214,7 +222,7 @@ export default function Page() {
                       </strong>
                       <br />
                       Check-out :{" "}
-                      {queryData?.checkoutTime > 11
+                      {queryData?.checkoutTime > 12
                         ? changeTime(queryData?.checkoutTime)
                         : `${queryData?.checkoutTime} a.m.`}
                     </p>

@@ -39,6 +39,7 @@ interface BookingWidgetProps {
   toggleCalendar: () => void;
   toggleGuestsDropdown: () => void;
   activation: boolean;
+  allowedGuests: string;
 }
 
 export default function BookingWidget({
@@ -57,6 +58,7 @@ export default function BookingWidget({
   toggleGuestsDropdown,
   unavailableDates,
   activation,
+  allowedGuests,
 }: BookingWidgetProps) {
   const [totalPrice, setTotalPrice] = useState(pricePerNight);
   const [nightsCount, setNightsCount] = useState(1);
@@ -296,7 +298,7 @@ export default function BookingWidget({
                       size="icon"
                       className="h-8 w-8 rounded-full"
                       onClick={() => onGuestChange("adults", guests.adults + 1)}
-                      disabled={getTotalGuests() >= 2}
+                      disabled={getTotalGuests() >= allowedGuests}
                     >
                       +
                     </Button>
@@ -328,7 +330,7 @@ export default function BookingWidget({
                       onClick={() =>
                         onGuestChange("children", guests.children + 1)
                       }
-                      disabled={getTotalGuests() >= 2}
+                      disabled={getTotalGuests() >= allowedGuests}
                     >
                       +
                     </Button>
@@ -416,7 +418,7 @@ export default function BookingWidget({
           )}
           <div onClick={() => createReserveRecord()}>
             {isAuth || isValid ? (
-              activation ? (
+              date?.from && date?.to ? (
                 <Link
                   href={{
                     pathname: `/book/stay/${propertyId}`,
@@ -441,7 +443,12 @@ export default function BookingWidget({
                   {date?.from && date?.to ? "Reserve" : "Check availability"}
                 </Link>
               ) : (
-                <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
+                <Button
+                  className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                  onClick={() => {
+                    toast.error("Enter both check in and check out dates");
+                  }}
+                >
                   {"Check availability"}
                 </Button>
               )
@@ -451,7 +458,7 @@ export default function BookingWidget({
               </Button>
             )}
           </div>
-          {date?.from && date?.to && (
+          {(date?.from || date?.to) && (
             <>
               <div className="text-center text-sm text-gray-600 mt-2">
                 You won't be charged yet

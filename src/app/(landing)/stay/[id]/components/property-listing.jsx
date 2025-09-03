@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PropertyDescription from "./property-description";
 import PropertyAmenities from "./property-amenities";
 import PropertySleepingArrangements from "./property-sleeping-arrangements";
+import { toast } from "sonner";
 
 export default function PropertyListing({
   hostData,
@@ -39,6 +40,7 @@ export default function PropertyListing({
   const handleDateSelect = (range) => {
     setDate(range);
     setActivation(true);
+
     if (range?.from && range?.to) {
       setShowCalendar(false);
     }
@@ -139,6 +141,7 @@ export default function PropertyListing({
             toggleGuestsDropdown={toggleGuestsDropdown}
             unavailableDates={unavailableDates}
             activation={activation}
+            allowedGuests={propertyDetails?.guests}
           />
         </div>
       </div>
