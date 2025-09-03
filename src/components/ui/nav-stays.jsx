@@ -52,7 +52,7 @@ export default function Navbar() {
         isScrolled ? "pt-2  h-20" : "pt-3"
       }`}
     >
-      <header className="px-4 bg-white  md:px-6">
+      <header className="px-4  md:px-6">
         <div className="container max-w-[1400px] flex h-12 md:h-16 w-full items-center mx-auto">
           <div></div>{" "}
           <Link className="flex items-center gap-2 text-[#3B5D2D]" href="/">

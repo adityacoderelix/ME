@@ -260,10 +260,15 @@ export default function ReservationsPage() {
 
     setModalOpen(false);
   };
-
+  function checkLength(value) {
+    if (value?.length > 15) {
+      return value.substring(0, 15) + "…";
+    }
+    return value;
+  }
   console.log(bookings);
   return (
-    <div className=" space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">
           Bookings
@@ -294,7 +299,7 @@ export default function ReservationsPage() {
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1d">Today</SelectItem>
+              {/* <SelectItem value="1d">Today</SelectItem> */}
               <SelectItem value="1w">Next 7 days</SelectItem>
               <SelectItem value="1m">Next 30 days</SelectItem>
               <SelectItem value="3m">Last 3 months</SelectItem>
@@ -368,7 +373,7 @@ export default function ReservationsPage() {
         </Select>
       </div>
 
-      <Table>
+      <Table className="w-full">
         <TableHeader>
           <TableRow>
             <TableHead>Guest Name</TableHead>
@@ -384,9 +389,21 @@ export default function ReservationsPage() {
           {bookings?.map((booking) => (
             <TableRow key={booking?._id}>
               <TableCell>
-                {booking?.userId?.firstName} {booking?.userId?.lastName}
+                <span
+                  title={
+                    booking?.userId?.firstName + " " + booking?.userId?.lastName
+                  }
+                >
+                  {checkLength(
+                    booking?.userId?.firstName + " " + booking?.userId?.lastName
+                  )}
+                </span>
               </TableCell>
-              <TableCell>{booking?.propertyId?.title}</TableCell>
+              <TableCell>
+                <span title={booking?.propertyId?.title}>
+                  {checkLength(booking?.propertyId?.title)}
+                </span>
+              </TableCell>
               <TableCell>
                 {new Date(booking?.checkIn).toLocaleDateString("en-US", {
                   year: "numeric",
