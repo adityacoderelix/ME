@@ -4,17 +4,14 @@ import LocationWiseStays from "@/components/location-wise-stays";
 import Newsletter from "@/components/newsletter";
 import StaysProperties from "@/components/stays-properties";
 
-
-export default function Stays(){
-    return (
-      <main className='py-32 md:pt-36'>
-      <StaysProperties/>
+export default function Stays() {
+  return (
+    <main className="py-32 md:pt-36">
+      <StaysProperties />
       <LocationWiseStays />
       <SpotWiseStays />
       {/* <Testimonials /> */}
       <Newsletter />
-
-      </main>
-
-    )
+    </main>
+  );
 }

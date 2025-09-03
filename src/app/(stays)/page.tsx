@@ -1,5 +1,3 @@
-
-
 import Hero from "@/components/hero-section";
 import StaysProperties from "@/components/stays-properties";
 import BecomePartner from "@/components/become-partner";
@@ -11,20 +9,17 @@ import Newsletter from "@/components/newsletter";
 
 export default function Component() {
   return (
+    <div>
+      <Hero />
+      <StaysProperties />
+      <BecomePartner />
 
-      <div>
-        <Hero />
-        <StaysProperties />
-        <BecomePartner />
-      
-        <LocationWiseStays />
-        <SpotWiseStays />
+      <LocationWiseStays />
+      <SpotWiseStays />
 
-        {/* <Testimonials /> */}
-        <Blogs />
-        <Newsletter />
-      </div>
-
-
+      {/* <Testimonials /> */}
+      <Blogs />
+      <Newsletter />
+    </div>
   );
 }

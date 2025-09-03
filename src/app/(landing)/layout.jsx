@@ -1,27 +1,25 @@
-"use client"
+"use client";
 
 import Navbar from "@/components/ui/navbar";
 import FooterWrapper from "@/components/footer-wrapper";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
-
 
 export default function Layout({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <div className="font-poppins">
+        <div>
+          <Navbar />
+          {children}
 
-    <div className="font-poppins">
-      
-      <div>
-        <Navbar />
-        {children}
-        <FooterWrapper />
-        <BottomNavigation />
+          <FooterWrapper />
+          <BottomNavigation />
+        </div>
       </div>
-    </div>
     </QueryClientProvider>
-
   );
 }
