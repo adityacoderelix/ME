@@ -418,43 +418,49 @@ export default function BookingWidget({
           )}
           <div onClick={() => createReserveRecord()}>
             {isAuth || isValid ? (
-              date?.from && date?.to ? (
-                <Link
-                  href={{
-                    pathname: `/book/stay/${propertyId}`,
-                    query: {
-                      checkin: date?.from
-                        ? format(date.from, "yyyy-MM-dd")
-                        : undefined,
-                      checkout: date?.to
-                        ? format(date.to, "yyyy-MM-dd")
-                        : undefined,
-                      guests: getTotalGuests(),
-                      nights: nightsCount,
-                      adults: guests.adults,
-                      children: guests.children,
-                      infants: guests.infants,
-                      checkinTime: checkinTime,
-                      checkoutTime: checkoutTime,
-                    },
-                  }}
-                  className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
-                >
-                  {date?.from && date?.to ? "Reserve" : "Check availability"}
-                </Link>
+              activation ? (
+                date?.from && date?.to ? (
+                  <Link
+                    href={{
+                      pathname: `/book/stay/${propertyId}`,
+                      query: {
+                        checkin: date?.from
+                          ? format(date.from, "yyyy-MM-dd")
+                          : undefined,
+                        checkout: date?.to
+                          ? format(date.to, "yyyy-MM-dd")
+                          : undefined,
+                        guests: getTotalGuests(),
+                        nights: nightsCount,
+                        adults: guests.adults,
+                        children: guests.children,
+                        infants: guests.infants,
+                        checkinTime: checkinTime,
+                        checkoutTime: checkoutTime,
+                      },
+                    }}
+                    className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                  >
+                    Reserve
+                  </Link>
+                ) : (
+                  <Button
+                    className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                    onClick={() => {
+                      toast.error("Enter both check in and check out dates");
+                    }}
+                  >
+                    {"Check availability"}
+                  </Button>
+                )
               ) : (
-                <Button
-                  className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
-                  onClick={() => {
-                    toast.error("Enter both check in and check out dates");
-                  }}
-                >
-                  {"Check availability"}
+                <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
+                  Check availability
                 </Button>
               )
             ) : (
               <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
-                {date?.from && date?.to ? "Reserve" : "Check availability"}
+                Check availability
               </Button>
             )}
           </div>

@@ -32,6 +32,37 @@ export default function Page() {
     auth();
   }, []);
 
+  function parseDateSafe(value) {
+    if (!value) return null;
+
+    // If it's an integer (epoch ms)
+    if (/^\d+$/.test(value)) {
+      return new Date(Number(value));
+    }
+
+    // If it's an ISO string (YYYY-MM-DDTHH:mm:ss.sssZ)
+    const parsed = Date.parse(value);
+    if (!isNaN(parsed)) {
+      return new Date(parsed);
+    }
+
+    // If it's just YYYY-MM-DD (date only, no time)
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (match) {
+      const [, y, m, d] = match;
+      return new Date(Number(y), Number(m) - 1, Number(d));
+    }
+
+    // ✅ Handle MM/DD/YYYY (like your case)
+    const usMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value);
+    if (usMatch) {
+      const [, m, d, y] = usMatch;
+      return new Date(Number(y), Number(m) - 1, Number(d));
+    }
+
+    return null; // Fallback
+  }
+
   useEffect(() => {
     const bookingId = searchParams.get("bookingId");
     const propertyId = searchParams.get("propertyId");
@@ -104,9 +135,9 @@ export default function Page() {
     );
   }
 
-  const checkInDate = new Date(queryData?.checkin);
+  const checkInDate = parseDateSafe(queryData?.checkin);
+  const checkOutDate = parseDateSafe(queryData?.checkout);
 
-  const checkOutDate = new Date(queryData?.checkout);
   const days = [
     "Sunday",
     "Monday",
@@ -133,6 +164,11 @@ export default function Page() {
   const changeTime = (num) => {
     return `${Number(num) - 12} p.m.`;
   };
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
   return (
     <div className="min-h-screen font-poppins pt-24">
       <header className="flow-root bg-offWhite shadow-sm">
@@ -207,7 +243,7 @@ export default function Page() {
                         {checkInDate?.getDate()}, {checkInDate?.getFullYear()}
                       </strong>
                       <br /> */}
-                      <strong>{checkInDate.toDateString()}</strong>
+                      <strong>{fmt.format(checkInDate)}</strong>
                       <br />
                       Check-in :{" "}
                       {queryData?.checkinTime > 12
@@ -223,7 +259,7 @@ export default function Page() {
                         {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
                       </strong>
                       <br /> */}
-                      <strong>{checkOutDate.toDateString()}</strong>
+                      <strong>{fmt.format(checkOutDate)}</strong>
                       <br />
                       Check-out :{" "}
                       {queryData?.checkoutTime > 12
