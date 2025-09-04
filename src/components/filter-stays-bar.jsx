@@ -110,7 +110,17 @@ const propertyTypes = [
   },
 ];
 
-export default function FilterStaysBar({ selectProperty, setSelectProperty }) {
+export default function FilterStaysBar({
+  selectProperty,
+  setSelectProperty,
+  location,
+  from,
+  to,
+  adults,
+  senior,
+  children,
+  infants,
+}) {
   const scrollContainerRef = useRef(null);
   const [includeTaxes, setIncludeTaxes] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -167,20 +177,25 @@ export default function FilterStaysBar({ selectProperty, setSelectProperty }) {
           {propertyTypes.map((type, index) => (
             <div
               key={index}
-              className={`rounded-md p-2 transition-colors ${
-                selectProperty === type?.route?.toLowerCase()
-                  ? "border-2 border-primaryGreen-100"
-                  : "bg-transparent"
-              }`}
+              className={`rounded-md p-2 transition-colors 
+              `}
             >
-              <button
+              <Link
                 key={index}
-                className="text-center  flex flex-col w-32 justify-center   items-center"
-                onClick={() => setSelectProperty(type?.route?.toLowerCase())}
+                className="text-center  flex flex-col w-10 justify-center   items-center"
+                href={`/filter?propertyType=${
+                  type?.route ? type?.route : ""
+                }&location=${location ? location : ""}&from=${
+                  from ? from : ""
+                }&to=${to ? to : ""}&adults=${adults ? adults : ""}&senior=${
+                  senior ? senior : ""
+                }&children=${children ? children : ""}&infants=${
+                  infants ? infants : ""
+                }`}
               >
                 <Image
-                  width={48}
-                  height={48}
+                  width={30}
+                  height={30}
                   src={type.icon}
                   alt={type.label}
                   className="md:w-16  w-8 h-8  object-contain "
@@ -189,7 +204,7 @@ export default function FilterStaysBar({ selectProperty, setSelectProperty }) {
                 <span className="text-xs font-normal text-[#333]">
                   {type.label}
                 </span>
-              </button>
+              </Link>
             </div>
           ))}
         </div>

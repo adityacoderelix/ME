@@ -106,7 +106,6 @@ export default function SearchFilter({
         });
       }
       if (parsed.searchTerm) setSearchTerm(parsed.searchTerm);
-      if (parsed.selectProperty) setSelectProperty(parsed.selectProperty);
       if (parsed.guests) setGuests(parsed.guests);
     }
     setHydrated(true); // mark as hydrated after first load
@@ -124,7 +123,6 @@ export default function SearchFilter({
           to: dateRange.to ? dateRange.to.toISOString() : null,
         },
         searchTerm,
-        selectProperty,
         guests,
       })
     );
@@ -203,20 +201,16 @@ export default function SearchFilter({
   };
 
   const submit = () => {
-    if (!dateRange.from && !dateRange.to) {
-      toast.error("Enter check in and check out date");
-      return;
-    } else if (!dateRange.from) {
-      toast.error("Enter check in date");
-      return;
-    } else if (!dateRange.to) {
-      toast.error("Enter check out date");
-      return;
-    }
     router.push(
-      `/property-type?propertyType=${selectProperty}&location=${searchTerm}&from=${dateRange.from?.toLocaleDateString()}&to=${dateRange?.to?.toLocaleDateString()}&adults=${totalAdults}&senior=${
-        guests?.adults
-      }&children=${guests?.children}&infants=${guests?.infants}`
+      `/filter?propertyType=${selectProperty ? selectProperty : ""}&location=${
+        searchTerm ? searchTerm : ""
+      }&from=${dateRange.from ? dateRange.from?.toLocaleDateString() : ""}&to=${
+        dateRange?.to ? dateRange?.to?.toLocaleDateString() : ""
+      }&adults=${totalAdults ? totalAdults : ""}&senior=${
+        guests?.adults ? guests?.adults : ""
+      }&children=${guests?.children ? guests?.children : ""}&infants=${
+        guests?.infants ? guests?.infants : ""
+      }`
     );
   };
   return (
@@ -382,7 +376,9 @@ export default function SearchFilter({
                   } text-sm font-normal text-muted-foreground`}
                 >
                   {totalGuests > 0
-                    ? `${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`
+                    ? `${Number(totalGuests)} guest${
+                        Number(totalGuests) !== 1 ? "s" : ""
+                      }`
                     : "Add guests"}
                 </span>
               </div>
