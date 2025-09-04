@@ -69,6 +69,12 @@ export default function PropertyListing({
         <div className="lg:col-span-2">
           <div className="border-b pb-6 mb-6">
             <div className="flex items-center gap-4 mt-6">
+              {propertyDetails.placeType[0].toUpperCase() +
+                propertyDetails.placeType.slice(1)}{" "}
+              {propertyDetails.propertyType[0].toUpperCase() +
+                propertyDetails.propertyType.slice(1)}
+            </div>
+            <div className="flex items-center gap-4 mt-6">
               {propertyDetails.guests} Guests | {propertyDetails.beds} Beds |{" "}
               {propertyDetails.bedrooms} Bedroom | {propertyDetails.bathrooms}{" "}
               Bathroom
@@ -108,7 +114,10 @@ export default function PropertyListing({
             </div>
           </div>
           {/* <PropertyHighlights /> */}
-          <PropertyDescription description={propertyDetails?.description} />
+          <PropertyDescription
+            description={propertyDetails?.description}
+            property={propertyDetails}
+          />
           <PropertyAmenities
             amenities={propertyDetails?.amenities}
             showAmenitiesDialog={showAmenitiesDialog}
