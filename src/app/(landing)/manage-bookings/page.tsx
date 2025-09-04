@@ -167,13 +167,13 @@ const ManageBookings = () => {
   console.log("booking", bookings);
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
-      console.log(booking.propertyId.address.city);
+      console.log(booking.propertyId?.address?.city);
       const checkIn = new Date(booking.checkIn);
       const checkOut = new Date(booking.checkOut);
 
       const isUpcoming = checkIn.toDateString() > new Date().toDateString();
       const isPast = checkOut.toDateString() < new Date().toDateString();
-      const isCancelled = booking.status === "Cancelled";
+      const isCancelled = booking?.status === "cancelled";
 
       const matchesTab =
         activeTab === "all" ||
@@ -183,7 +183,7 @@ const ManageBookings = () => {
 
       const matchesLocation =
         !appliedFilters.location ||
-        booking.propertyId.address.city
+        booking?.propertyId?.address?.city
           .toLowerCase()
           .includes(appliedFilters.location.toLowerCase());
 
@@ -230,8 +230,8 @@ const ManageBookings = () => {
       </div>
     );
   }
-  const today = new Date().toLocaleDateString();
-  const hour = new Date().getHours();
+  // const today = new Date().toLocaleDateString();
+  // const hour = new Date().getHours();
 
   const cancelBooking = async (
     bookingId,
@@ -275,9 +275,9 @@ const ManageBookings = () => {
   function diff(date) {
     const futureDate = new Date(date);
 
-    const date2 = new Date().toLocaleDateString();
-    const date1 = new Date(date2);
-    const differenceInDays = (futureDate - date1) / 86400000;
+    // const date2 = new Date().toLocaleDateString();
+    const date1 = new Date().setHours(0, 0, 0, 0);
+    const differenceInDays = (futureDate.getTime() - date1) / 86400000;
     console.log("o", differenceInDays);
     return differenceInDays;
   }
@@ -329,13 +329,13 @@ const ManageBookings = () => {
   }
 
   function diffHours(date, time) {
-    const futureDate = new Date(date).toLocaleDateString();
+    const futureDate = new Date(date);
     const futureHours = new Date(futureDate).setHours(time, 0);
 
-    const date2 = new Date();
-    const date1 = new Date(date2);
+    // const date2 = new Date();
+    const date1 = new Date().setHours(0, 0, 0, 0);
     const differenceInHours = (futureHours - date1) / 3600000;
-    console.log("dyb", futureDate, time, date2, differenceInHours);
+    // console.log("dyb", futureDate, time, date2, differenceInHours);
     return differenceInHours;
   }
 
@@ -366,6 +366,11 @@ const ManageBookings = () => {
       </span>
     );
   };
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
   return (
     <main className="py-16 md:py-24">
       <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -475,8 +480,8 @@ const ManageBookings = () => {
               state: booking?.propertyId?.address?.state,
               country: booking?.propertyId?.address?.country,
               propertyImage: booking?.propertyId?.photos[0],
-              checkin: new Date(booking?.checkIn).toLocaleDateString(),
-              checkout: new Date(booking?.checkOut).toLocaleDateString(),
+              checkin: new Date(booking?.checkIn).getTime(),
+              checkout: new Date(booking?.checkOut).getTime(),
               numberOfGuests: booking?.guests,
               adults: booking?.adults,
               children: booking?.children,
@@ -501,8 +506,8 @@ const ManageBookings = () => {
                     <div className="space-y-2">
                       <h3 className="font-medium">{booking?.property}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Located at {booking?.propertyId?.address.city},{" "}
-                        {booking?.propertyId?.address.state}
+                        Located at {booking?.propertyId?.address?.city},{" "}
+                        {booking?.propertyId?.address?.state}
                         <Link
                           href={`/booking-summary?${summaryParams.toString()}`}
                         >
@@ -537,14 +542,7 @@ const ManageBookings = () => {
                       <div className="text-sm">
                         <div className="text-muted-foreground">Check in</div>
                         <div>
-                          {new Date(booking?.checkIn).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
+                          {fmt.format(new Date(booking?.checkIn).getTime())}
                         </div>
                       </div>
                     </div>
@@ -553,14 +551,7 @@ const ManageBookings = () => {
                       <div className="text-sm">
                         <div className="text-muted-foreground">Check out</div>
                         <div>
-                          {new Date(booking?.checkOut).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
+                          {fmt.format(new Date(booking?.checkOut).getTime())}
                         </div>
                       </div>
                     </div>
@@ -594,9 +585,7 @@ const ManageBookings = () => {
                   </div>
 
                   <div>
-                    <div className="font-medium">
-                      ₹{booking?.price?.toLocaleString()}
-                    </div>
+                    <div className="font-medium">₹{booking?.price}</div>
                     {/* <div className="text-sm text-muted-foreground">
                     Total {booking.nights} nights
                   </div> */}
@@ -627,8 +616,7 @@ const ManageBookings = () => {
                     {booking?.status != "cancelled" &&
                     booking?.status != "rejected" ? (
                       booking?.cancellationPolicy != "strict" ? (
-                        diff(new Date(booking?.checkIn).toLocaleDateString()) >
-                          moderate &&
+                        diff(new Date(booking?.checkIn).getTime()) > moderate &&
                         booking?.cancellationPolicy == "moderate" ? (
                           <>
                             <Button
