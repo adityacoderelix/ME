@@ -157,7 +157,7 @@ export default function StayCard({ property, includeTaxes }) {
             </p>
             <p className="text-gray-600">
               <span className="text-absoluteDark text-base font-semibold">
-                ₹{calculatePrice(property?.basePrice)}&nbsp;
+                ₹{property?.basePrice}&nbsp;
               </span>
               <Link href={`/stay/${property?._id}`}>per night</Link>
             </p>
