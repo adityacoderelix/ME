@@ -49,8 +49,7 @@ export const validateLocationForm = (formData) => {
 
   // The form is valid only if all address fields are filled,
   // a registration number is provided, and it has been verified.
-  const isValid =
-    isAddressValid && isRegistrationNumberProvided && validRegistrationNo;
+  const isValid = isAddressValid && isRegistrationNumberProvided;
 
   let errorMessage = "";
   if (!isRegistrationNumberProvided) {

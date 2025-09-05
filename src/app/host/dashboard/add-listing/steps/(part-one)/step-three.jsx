@@ -289,9 +289,9 @@ export function LocationForm({ updateFormData, formData }) {
     let value = e.target.value.toUpperCase();
 
     // Ensure the fixed prefix "HOT" remains at the start.
-    if (!value.startsWith("HOT")) {
-      value = "HOT" + value.replace(/^HOT/, "");
-    }
+    // if (!value.startsWith("HOT")) {
+    //   value = "HOT" + value.replace(/^HOT/, "");
+    // }
 
     // Limit total length to 10 characters.
     if (value.length > 10) {
@@ -305,7 +305,8 @@ export function LocationForm({ updateFormData, formData }) {
     updateFormData({ address: newAddress, validRegistrationNo: false });
 
     // Regex for validation: total 10 characters, starting with HOT and ending with at least one digit.
-    const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/;
+    const regEx = /^(?=.{10}$)(?:[A-Z0-9]*)(\d+)$/;
+    //  const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/;
     if (value.length === 10) {
       if (!regEx.test(value)) {
         setRegistrationNumberError("Invalid registration number format");
