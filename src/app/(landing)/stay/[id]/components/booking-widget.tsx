@@ -111,7 +111,7 @@ export default function BookingWidget({
   };
 
   const calculateServicFee = (basePrice: number) => {
-    const serviceFee = Math.round((basePrice * 14) / 100);
+    const serviceFee = Math.round((basePrice * 12) / 100);
     // const priceWithServiceFee = basePrice + serviceFee;
 
     // Format number in Indian style

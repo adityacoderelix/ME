@@ -146,7 +146,8 @@ function BookPageContent() {
         total: 0,
       };
 
-    const nightlyRate = property.basePrice || 20000;
+    const nightlyRate = property.basePrice;
+    //|| 20000;
     const cleaningFee = 0;
     const nightsCount =
       nights && Number(nights) > 0
@@ -155,7 +156,7 @@ function BookPageContent() {
             (date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)
           );
     const subtotal = nightlyRate * nightsCount;
-    const serviceFee = Math.round(subtotal * 0.14); // 14% service fee like Airbnb
+    const serviceFee = Math.round(subtotal * 0.12); // 12% service fee like Airbnb
     const taxes = Math.round(subtotal * 0.18); // 18% GST in India
 
     return {
@@ -457,7 +458,7 @@ function BookPageContent() {
       const cancel = parsed[0];
       const booking = await saveData(
         propertyId,
-        totals.total * 100,
+        totals.total,
         "INR",
         date.from,
         date.to,
