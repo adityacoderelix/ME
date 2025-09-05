@@ -175,16 +175,18 @@ export default function Page() {
         <div className=" max-w-7xl mx-auto py-4 ml-10 sm:px-6 lg:px-8">
           <div className="text-center">
             {queryData?.instant == "true" ? (
-              <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
+              <h2 className="flex justify-center text-3xl pb-2 font-semibold font-bricolage text-absoluteDark mt-4">
                 Your reservation is confirmed
               </h2>
             ) : (
-              <h2 className="text-3xl font-semibold font-bricolage text-absoluteDark mt-4">
+              <h2 className="flex justify-center text-3xl pb-2 font-semibold font-bricolage text-absoluteDark mt-4">
                 Wait for host email for confirmation
               </h2>
             )}
             {/* <p className="text-gray-600">You're going to San Francisco!</p> */}
-            <p className=" text-gray-600 ">Thanks for choosing Us</p>
+            <p className="flex justify-center text-gray-600 ">
+              Thanks for choosing Us
+            </p>
           </div>
         </div>
         {/* <div className="float-right max-w-7xl mx-auto py-4 mr-10 sm:px-6 lg:px-8">
@@ -211,9 +213,7 @@ export default function Page() {
                   height={400}
                   className="rounded-xl"
                 />
-                <h3 className="mt-4 text-lg font-medium">
-                  {queryData?.propertyImage}
-                </h3>
+                <h3 className="mt-4 text-lg font-medium"></h3>
                 <p className="text-gray-600 text-sm">
                   {queryData?.placeType.charAt(0).toUpperCase() +
                     queryData?.placeType.slice(1)}{" "}
