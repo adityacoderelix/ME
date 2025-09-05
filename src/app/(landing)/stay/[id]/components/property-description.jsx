@@ -109,7 +109,6 @@ export default function PropertyDescription({ description, property }) {
         <div className="border-b pb-6 mb-6">
           <h2 className="text-xl font-medium mb-6">Cancellation Policy</h2>
           <p className="text-gray-800 mb-4">
-            {Object.keys(property?.cancellationType).includes(true)}
             {Object.entries(property?.cancellationType).map(([key, value]) =>
               value == true ? (
                 <div className="">
