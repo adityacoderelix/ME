@@ -8,23 +8,24 @@ import { SearchSheet } from "@/components/search-sheet";
 import FilterStaysBar from "./filter-stays-bar";
 import Image from "next/image";
 import { FilterSheet } from "./filter-sheet";
-
-export function MobileNavbar() {
-  const { setIsOpen } = useSheet();
+import Link from "next/link";
+export function MobileNavbar({ openModal }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
-    <div className=" md:hidden fixed w-screen top-0 left-0 right-0 z-50 bg-white">
+    <div className="lg:hidden fixed w-screen top-0 left-0 right-0 z-50 bg-white">
       <div className="border-b">
         <div className="flex flex-col max-w-7xl mx-auto">
           <div className="flex items-center h-16 px-4">
-            <Image
-              width={20}
-              height={20}
-              className="h-5 w-auto mr-3"
-              src="/logo.png"
-              alt="Logo"
-            />
+            <Link href="/">
+              <Image
+                width={20}
+                height={20}
+                className="h-5 w-auto mr-3"
+                src="/logo.png"
+                alt="Logo"
+              />
+            </Link>
             <div className="flex-1 flex items-center">
               <Button
                 variant="outline"
@@ -39,7 +40,7 @@ export function MobileNavbar() {
               variant="outline"
               size="sm"
               className="flex items-center border rounded-full gap-2 h-10 w-10"
-              onClick={() => setIsOpen(true)}
+              onClick={openModal}
             >
               <SlidersHorizontal className="h-4 w-4" />
             </Button>
@@ -54,7 +55,7 @@ export function MobileNavbar() {
 
       <div className="px-6 py-2 bg-white">
         <FilterSheet />
-        <FilterStaysBar />
+        {/* <FilterStaysBar /> */}
         <SearchSheet
           isOpen={false}
           onClose={function () {

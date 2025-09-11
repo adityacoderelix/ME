@@ -3,8 +3,9 @@
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 const propertyTypes = [
   {
     icon: "/images/property-icons/h.png",
@@ -109,7 +110,7 @@ const propertyTypes = [
     route: "treehouse",
   },
 ];
-
+import { AuthContext } from "@/contexts/AuthContext";
 export default function FilterStaysBar({
   selectProperty,
   setSelectProperty,
@@ -126,7 +127,7 @@ export default function FilterStaysBar({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
-
+  const { modalFilter, setModalFilter } = useAuth();
   const router = useRouter();
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -233,10 +234,15 @@ export default function FilterStaysBar({
       </div>
 
       <div className="hidden md:flex flex-row font-poppins items-center gap-4">
-        {/* <button className=" py-2.5 px-8 ring-1 ring-lightGray text-absoluteDark rounded-full hover:ring-absoluteDark transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2">
+        <button
+          className=" py-2.5 px-4 ring-1 ring-lightGray text-absoluteDark rounded-full hover:ring-absoluteDark transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2"
+          onClick={() => {
+            setModalFilter(true);
+          }}
+        >
           <SlidersHorizontal className="w-4 h-4" />
-          <span>Filters</span>
-        </button> */}
+          <span>Filter</span>
+        </button>
 
         <div
           className={`${
@@ -257,7 +263,7 @@ export default function FilterStaysBar({
             <div className="bg-white w-3 h-3 rounded-full shadow-md" />
           </button>
           <span className="text-sm text-absoluteDark font-medium whitespace-nowrap">
-            {includeTaxes ? "Include Taxes" : "Exclude Taxes"}
+            {includeTaxes ? "Include Tax" : "Exclude Tax"}
           </span>
         </div>
       </div>

@@ -16,11 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Search, Minus, Plus, HomeIcon } from "lucide-react";
+import { Search, Minus, Plus, HomeIcon, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CustomCommandInput } from "./ui/custom-command-input";
+// import { CustomCommandInput } from "./ui/custom-command-input";
 import { toast } from "sonner";
 import FilterStaysBar from "./filter-stays-bar";
+import FilterModal from "./ui/modal";
 
 interface SearchFilterProps {
   isScrolled: boolean;
@@ -75,6 +76,7 @@ export default function SearchFilter({
     children: active ? child : 0,
     infants: active ? baby : 0,
   });
+
   const router = useRouter();
   const handleGuestChange = (
     type: "adults" | "children" | "infants",
@@ -93,7 +95,7 @@ export default function SearchFilter({
 
   // Load from localStorage on mount
   React.useEffect(() => {
-    const saved = localStorage.getItem("searchFilters");
+    const saved = sessionStorage.getItem("searchFilters");
     if (saved) {
       const parsed = JSON.parse(saved);
 
@@ -115,7 +117,7 @@ export default function SearchFilter({
   React.useEffect(() => {
     if (!hydrated) return; // skip first run until state is restored
 
-    localStorage.setItem(
+    sessionStorage.setItem(
       "searchFilters",
       JSON.stringify({
         dateRange: {

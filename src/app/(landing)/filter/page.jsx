@@ -5,7 +5,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useEffect } from "react";
 import { toast, Toaster } from "sonner";
-
+import { useAuth } from "@/contexts/AuthContext";
+import FilterModal from "@/components/ui/modal";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function FarmHouse() {
@@ -18,8 +19,28 @@ export default function FarmHouse() {
   const children = searchParams.get("children");
   const infants = searchParams.get("infants");
   const property = searchParams.get("propertyType");
+  const minPrice = searchParams.get("priceMin");
+  const maxPrice = searchParams.get("priceMax");
+  const placeType = searchParams.get("placeType");
+  const beds = searchParams.get("beds");
+  const bedrooms = searchParams.get("bedrooms");
+  const bathrooms = searchParams.get("bathrooms");
+  const bookingType = searchParams.get("bookingType");
+  const checkinType = searchParams.get("checkinType");
+  const pets = searchParams.get("pets");
+  const amenities = searchParams.get("amenities");
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { modalFilter, openModal, closeModal, toggleModal } = useAuth();
+
+  const array = amenities
+    ? amenities
+        .split(",")
+        .map((x) => x.trim())
+        .filter((x) => x)
+    : [];
+
+  console.log("arry", array);
 
   useEffect(() => {
     async function fetchDates() {
@@ -34,6 +55,16 @@ export default function FarmHouse() {
               to: to ? new Date(to).toISOString() : undefined,
               guests: guests,
               propertyType: property,
+              minPrice: minPrice,
+              maxPrice: maxPrice,
+              placeType: placeType,
+              beds: beds,
+              bedrooms: bedrooms,
+              bathrooms: bathrooms,
+              checkinType: checkinType,
+              bookingType: bookingType,
+              pets: pets,
+              amenities: array,
             },
           }
         );
@@ -49,10 +80,29 @@ export default function FarmHouse() {
     }
 
     fetchDates();
-  }, [from, to, guests, location, property]);
-
+  }, [
+    from,
+    to,
+    guests,
+    location,
+    property,
+    minPrice,
+    maxPrice,
+    placeType,
+    beds,
+    bedrooms,
+    bathrooms,
+    checkinType,
+    bookingType,
+    pets,
+  ]);
+  const { setAddPropertyType } = useAuth();
   console.log("now", data);
-
+  useEffect(() => {
+    if (property) {
+      setAddPropertyType(property);
+    }
+  }, [property, setAddPropertyType]);
   return (
     <div>
       {/* Add a Toaster component here as well for immediate visibility */}
@@ -63,6 +113,9 @@ export default function FarmHouse() {
         </div>
       ) : (
         <>
+          {modalFilter && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-40"></div>
+          )}
           <FilterProperties
             properties={data}
             from={from}
@@ -73,6 +126,12 @@ export default function FarmHouse() {
             children={children}
             infants={infants}
             property={property}
+          />
+          <FilterModal
+            isOpen={modalFilter}
+            onClose={closeModal}
+            propertySelected={property}
+            page={true}
           />
         </>
       )}
