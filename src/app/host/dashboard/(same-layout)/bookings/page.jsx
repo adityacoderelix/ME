@@ -299,7 +299,7 @@ export default function ReservationsPage() {
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
-              {/* <SelectItem value="1d">Today</SelectItem> */}
+              <SelectItem value="1d">Today</SelectItem>
               <SelectItem value="1w">Next 7 days</SelectItem>
               <SelectItem value="1m">Next 30 days</SelectItem>
               <SelectItem value="3m">Last 3 months</SelectItem>
@@ -372,7 +372,9 @@ export default function ReservationsPage() {
           </SelectContent>
         </Select>
       </div>
-
+      <div className="pl-2 text-gray-500 text-xs font-medium-500">
+        <>Note: If booking isn't visible try changing date from calendar</>
+      </div>
       <Table className="w-full">
         <TableHeader>
           <TableRow>

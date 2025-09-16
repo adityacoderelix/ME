@@ -22,13 +22,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     auth();
   }, []);
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
-      </div>
-    );
-  }
+
   if (!isAuth) {
     return (
       <>
@@ -42,6 +36,13 @@ const Layout = ({ children }) => {
           &nbsp; to log in now to access.
         </div>
       </>
+    );
+  }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+      </div>
     );
   }
   return (
