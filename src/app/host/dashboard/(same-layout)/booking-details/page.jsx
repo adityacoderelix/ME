@@ -64,7 +64,11 @@ export default function Page() {
   }, []);
 
   const changeTime = (num) => {
-    return `${Number(num) - 12} p.m.`;
+    if (Number(num) == 12) {
+      return `${Number(num)} p.m.`;
+    } else {
+      return `${Number(num) - 12} p.m.`;
+    }
   };
   console.log("m", fetchedData);
   if (fetchedData.length == 0)
@@ -113,7 +117,11 @@ export default function Page() {
     "November",
     "December",
   ];
-
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
   return (
     <div className="min-h-screen font-poppins">
       <header className="flow-root bg-offWhite shadow-sm">
@@ -171,10 +179,7 @@ export default function Page() {
                   <div>
                     <p>
                       {days[checkInDate?.getDay()]},{" "}
-                      <strong>
-                        {months[checkInDate?.getMonth()]}{" "}
-                        {checkInDate?.getDate()}, {checkInDate?.getFullYear()}
-                      </strong>
+                      <strong>{fmt.format(checkInDate)}</strong>
                       <br />
                       Check-in :{" "}
                       {fetchedData?.propertyId?.checkinTime > 11
@@ -185,10 +190,7 @@ export default function Page() {
                   <div>
                     <p>
                       {days[checkOutDate?.getDay()]},{" "}
-                      <strong>
-                        {months[checkOutDate?.getMonth()]}{" "}
-                        {checkOutDate?.getDate()}, {checkOutDate?.getFullYear()}
-                      </strong>
+                      <strong>{fmt.format(checkOutDate)}</strong>
                       <br />
                       Check-out :{" "}
                       {fetchedData?.propertyId?.checkoutTime > 11
