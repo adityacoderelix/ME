@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { addDays, format } from "date-fns";
+import { addDays, addMonths, format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -38,14 +38,14 @@ export default function ReviewsPage() {
   const [selectedProperty, setSelectedProperty] = useState("all");
   const [selectedRating, setSelectedRating] = useState("all");
   const [reviewData, setReviewData] = useState();
-  const [avgRating, setAvgRating] = useState();
-  const [count, setCount] = useState();
-  const [copyData, setCopyData] = useState();
+  const [search, setSearch] = useState("");
+  const [properties, setProperties] = useState();
+
   const [date, setDate] = useState({
-    from: new Date(),
+    from: addMonths(new Date(), -1),
     to: addDays(new Date(), 20),
   });
-
+  console.log("what now", selectedRating);
   const fetchData = async () => {
     try {
       const getUserId = await localStorage.getItem("userId");
@@ -53,7 +53,42 @@ export default function ReviewsPage() {
       const getLocalData = await localStorage.getItem("token");
       const data = JSON.parse(getLocalData);
       if (data) {
-        const response = await fetch(`${API_URL}/hostData/review/${userId}`, {
+        const response = await fetch(
+          `${API_URL}/hostData/review/${userId}?stars=${selectedRating}&search=${search}&property=${selectedProperty}&checkin=${new Date(
+            date.from
+          ).toLocaleDateString()}&checkout=${new Date(
+            date.to
+          ).toLocaleDateString()}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          toast.error("Error in fetching data");
+        }
+        const result = await response.json();
+        console.log("what now", result);
+        const final = await result;
+        setReviewData(result);
+
+        return result.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const fetchProperties = async () => {
+    try {
+      const getUserId = await localStorage.getItem("userId");
+      const userId = JSON.parse(getUserId);
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(`${API_URL}/properties/active/${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -64,9 +99,7 @@ export default function ReviewsPage() {
           toast.error("Error in fetching data");
         }
         const result = await response.json();
-        const final = await result;
-        setReviewData(result);
-        setCopyData(result);
+        setProperties(result.data);
 
         return result.data;
       }
@@ -76,20 +109,10 @@ export default function ReviewsPage() {
   };
   useEffect(() => {
     fetchData();
+  }, [selectedRating, selectedProperty, search, date]);
+  useEffect(() => {
+    fetchProperties();
   }, []);
-  for (let i in reviewData?.data) {
-    for (let j in reviewData?.data[i]) {
-      if (reviewData?.data[i][j].property.title == selectedProperty) {
-        const filteredProperty = reviewData?.data[i].filter(
-          (item) => item.property.title == selectedProperty
-        );
-      }
-    }
-  }
-  const filteredProperty = reviewData?.data[0].filter(
-    (item) => item.property.title == selectedProperty
-  );
-  console.log("sdhjshdjs", filteredProperty);
   // const {
   //   data: reviewData,
   //   isLoading: isReviewLoading, // Renamed for clarity
@@ -183,7 +206,12 @@ export default function ReviewsPage() {
           <CardContent>
             <div className="flex justify-between items-center mb-4">
               <div className="flex grid w-full gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Input placeholder="Search reviews..." className="" />
+                <Input
+                  placeholder="Search reviews..."
+                  className=""
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
                 <Select
                   value={selectedProperty}
                   onValueChange={setSelectedProperty}
@@ -194,14 +222,12 @@ export default function ReviewsPage() {
                   <SelectContent>
                     <SelectItem value="all">All Properties</SelectItem>
 
-                    {reviewData?.data
-                      ? reviewData?.data.map((item) =>
-                          item[0] ? (
-                            <SelectItem value={item[0]?.property?.title}>
-                              {item[0]?.property?.title}
-                            </SelectItem>
-                          ) : null
-                        )
+                    {properties
+                      ? properties.map((item) => (
+                          <SelectItem value={item?.title}>
+                            {item?.title}
+                          </SelectItem>
+                        ))
                       : null}
                     {/* <SelectItem value="beachside">Beachside Villa</SelectItem>
                   <SelectItem value="mountain">Mountain Retreat</SelectItem>
@@ -275,54 +301,50 @@ export default function ReviewsPage() {
               </TableHeader>
               <TableBody>
                 {reviewData?.data ? (
-                  reviewData?.data.map((item) =>
-                    item.map((review) => (
-                      <TableRow key={review._id}>
-                        <TableCell className="font-medium">
-                          {review._id}
-                        </TableCell>
-                        <TableCell>{review.user.firstName}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < review.rating
-                                    ? "fill-current text-yellow-400"
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {review.content}
-                        </TableCell>
-                        <TableCell>{review.property.title}</TableCell>
-                        <TableCell>
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm">
-                              <MessageSquare className="h-4 w-4" />
-                              <span className="sr-only">Reply</span>
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Flag className="h-4 w-4" />
-                              <span className="sr-only">Flag</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )
+                  reviewData?.data.map((review) => (
+                    <TableRow key={review._id}>
+                      <TableCell className="font-medium">
+                        {review._id}
+                      </TableCell>
+                      <TableCell>{review.user.firstName}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "fill-current text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {review.content}
+                      </TableCell>
+                      <TableCell>{review.property.title}</TableCell>
+                      <TableCell>
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button variant="ghost" size="sm">
+                            <MessageSquare className="h-4 w-4" />
+                            <span className="sr-only">Reply</span>
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Flag className="h-4 w-4" />
+                            <span className="sr-only">Flag</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <TableRow>
-                    <TableCell className="font-medium">
-                      Loading Table Data....
-                    </TableCell>
+                    <TableCell className="font-medium">No Data....</TableCell>
                   </TableRow>
                 )}
               </TableBody>
