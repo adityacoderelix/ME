@@ -37,7 +37,7 @@ import {
 import ConfirmationModal from "@/components/dialog-modal"; // adjust path as needed
 
 import { cn } from "@/lib/utils";
-import { addDays, format, subMonths } from "date-fns";
+import { addDays, format, addMonths, subMonths } from "date-fns";
 import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -48,8 +48,8 @@ const reservations = [];
 
 export default function ReservationsPage() {
   const [date, setDate] = useState({
-    from: new Date(),
-    to: addDays(new Date(), 7),
+    from: addMonths(new Date(), -1),
+    to: new Date(),
   });
 
   const handleDateRangeChange = (range) => {
@@ -74,6 +74,7 @@ export default function ReservationsPage() {
         break;
     }
   };
+
   const router = useRouter();
   const [bookings, setBookings] = useState();
   const [localState, setLocalState] = useState();
@@ -99,7 +100,7 @@ export default function ReservationsPage() {
     if (data) {
       try {
         const response = await fetch(
-          `${API_URL}/booking/filter?search=${searchValue}&status=${status}&from=${from}&to=${to}`,
+          `${API_URL}/booking/analytics-filter?search=${searchValue}&status=${status}&from=${from}&to=${to}`,
           {
             method: "GET",
             headers: {
@@ -265,6 +266,56 @@ export default function ReservationsPage() {
       return value.substring(0, 15) + "…";
     }
     return value;
+  }
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  function canShowReview(booking) {
+    if (!booking?.checkOut || !booking?.propertyId?.checkoutTime) return false;
+
+    const checkoutDate = new Date(booking?.checkOut);
+    const today = new Date();
+
+    const differenceInDays = (today - checkoutDate) / (1000 * 60 * 60 * 24);
+
+    if (today > checkoutDate && differenceInDays <= 14) {
+      const isSameDay = today.toDateString() === checkoutDate.toDateString();
+      if (!isSameDay) {
+        return true;
+      } else {
+        const checkoutWithTime = new Date(checkoutDate);
+        checkoutWithTime.setHours(booking?.propertyId?.checkoutTime, 0, 0, 0);
+
+        const fiveHoursLater = new Date(
+          checkoutWithTime.getTime() + 5 * 60 * 60 * 1000
+        );
+
+        if (today >= fiveHoursLater) {
+          return true;
+        }
+      }
+    }
+    // console.log("dta", today.toDateString(), checkoutDate.toDateString());
+
+    // const isSameDay = today.toDateString() === checkoutDate.toDateString();
+
+    // if (isSameDay) {
+    //   const checkoutWithTime = new Date(checkoutDate);
+    //   checkoutWithTime.setHours(booking?.propertyId?.checkoutTime, 0, 0, 0);
+
+    //   const fiveHoursLater = new Date(
+    //     checkoutWithTime.getTime() + 5 * 60 * 60 * 1000
+    //   );
+
+    //   if (today >= fiveHoursLater) {
+    //     return true;
+    //   }
+    // }
+
+    return false;
   }
   console.log(bookings);
   return (
@@ -500,47 +551,71 @@ export default function ReservationsPage() {
                         </>
                       ) : booking?.status == "confirmed" &&
                         booking?.status != "rejected" ? (
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => {
-                            openModal("cancel", booking);
-                            // sendCancelToUser(
-                            //   booking?._id,
-                            //   booking?.userId?.email,
-                            //   booking?.hostId?.email,
-                            //   booking?.userId?.firstName +
-                            //     " " +
-                            //     booking?.userId?.lastName,
-                            //   booking?.hostId?.firstName +
-                            //     " " +
-                            //     booking?.hostId?.lastName
-                            // );
-                          }}
-                        >
-                          Cancel Reservation
-                        </DropdownMenuItem>
+                        <>
+                          {canShowReview(booking) ? (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                router.push(
+                                  `/host/dashboard/bookings/review-guest?booking=${booking?._id}`
+                                )
+                              }
+                            >
+                              Review
+                            </DropdownMenuItem>
+                          ) : null}
+                          {new Date().setHours(0, 0, 0, 0) <
+                          new Date(booking?.checkIn).setHours(0, 0, 0, 0) ? (
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => {
+                                openModal("cancel", booking);
+                                // sendCancelToUser(
+                                //   booking?._id,
+                                //   booking?.userId?.email,
+                                //   booking?.hostId?.email,
+                                //   booking?.userId?.firstName +
+                                //     " " +
+                                //     booking?.userId?.lastName,
+                                //   booking?.hostId?.firstName +
+                                //     " " +
+                                //     booking?.hostId?.lastName
+                                // );
+                              }}
+                            >
+                              Cancel Reservation
+                            </DropdownMenuItem>
+                          ) : null}
+                        </>
                       ) : null
                     ) : booking?.propertyId?.bookingType?.instantBook &&
                       booking?.status == "confirmed" ? (
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => {
-                          openModal("cancel", booking);
-                          // sendCancelToUser(
-                          //   booking?._id,
-                          //   booking?.userId?.email,
-                          //   booking?.hostId?.email,
-                          //   booking?.userId?.firstName +
-                          //     " " +
-                          //     booking?.userId?.lastName,
-                          //   booking?.hostId?.firstName +
-                          //     " " +
-                          //     booking?.hostId?.lastName
-                          // );
-                        }}
-                      >
-                        Cancel Reservation
-                      </DropdownMenuItem>
+                      <>
+                        {canShowReview(booking) ? (
+                          <DropdownMenuItem>Review</DropdownMenuItem>
+                        ) : null}
+                        {new Date().setHours(0, 0, 0, 0) <
+                        new Date(booking?.checkIn).setHours(0, 0, 0, 0) ? (
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => {
+                              openModal("cancel", booking);
+                              // sendCancelToUser(
+                              //   booking?._id,
+                              //   booking?.userId?.email,
+                              //   booking?.hostId?.email,
+                              //   booking?.userId?.firstName +
+                              //     " " +
+                              //     booking?.userId?.lastName,
+                              //   booking?.hostId?.firstName +
+                              //     " " +
+                              //     booking?.hostId?.lastName
+                              // );
+                            }}
+                          >
+                            Cancel Reservation
+                          </DropdownMenuItem>
+                        ) : null}
+                      </>
                     ) : null}
                   </DropdownMenuContent>
                 </DropdownMenu>
