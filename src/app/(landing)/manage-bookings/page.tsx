@@ -171,9 +171,13 @@ const ManageBookings = () => {
       const checkIn = new Date(booking.checkIn);
       const checkOut = new Date(booking.checkOut);
 
-      const isUpcoming = checkIn.toDateString() > new Date().toDateString();
-      const isPast = checkOut.toDateString() < new Date().toDateString();
-      const isCancelled = booking?.status === "cancelled";
+      const isUpcoming =
+        checkIn.toLocaleDateString() > new Date().toLocaleDateString();
+
+      const isPast =
+        checkIn.toLocaleDateString() < new Date().toLocaleDateString();
+      const isCancelled =
+        booking?.status === "cancelled" || booking?.status === "rejected";
 
       const matchesTab =
         activeTab === "all" ||
@@ -486,8 +490,8 @@ const ManageBookings = () => {
               adults: booking?.adults,
               children: booking?.children,
               infants: booking?.infants,
-              totalAmount: booking?.price.toString(),
-              nights: booking?.nights.toString(),
+              totalAmount: booking?.price?.toString(),
+              nights: booking?.nights?.toString(),
               checkinTime: booking?.propertyId?.checkinTime,
               checkoutTime: booking?.propertyId?.checkoutTime,
             });
