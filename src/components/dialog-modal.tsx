@@ -27,7 +27,11 @@ const ConfirmCancelDialog = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{choice} Your Booking</DialogTitle>
+          {choice == "Unblock" ? (
+            <DialogTitle>{choice} the dates</DialogTitle>
+          ) : (
+            <DialogTitle>{choice} Your Booking</DialogTitle>
+          )}
           <DialogDescription>
             Are you sure you want to continue?
           </DialogDescription>
