@@ -1,11 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { addMonths, format, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
-import { ChevronLeft, ChevronRight, Upload, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
+import { useEffect, useState } from "react";
+import {
+  addMonths,
+  format,
+  isSameMonth,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  addDays,
+} from "date-fns";
+import axios from "axios";
+import { ChevronLeft, ChevronRight, Upload, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -13,69 +29,233 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "next/navigation";
+import ConfirmCancelDialog from "@/components/dialog-modal";
 
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const FullCalendarPage = () => {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [dateRange, setDateRange] = useState({ from: undefined, to: undefined })
-  const [blockReason, setBlockReason] = useState("")
-  const [syncPlatform, setSyncPlatform] = useState("")
-  const [iCalUrl, setICalUrl] = useState("")
-  const [offers, setOffers] = useState([])
-  const [pricing, setPricing] = useState({})
-  const [reservedDates, setReservedDates] = useState([])
-  const [blockedDates, setBlockedDates] = useState([])
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dateRange, setDateRange] = useState({
+    from: null,
+    to: null,
+  });
+  const [blockReason, setBlockReason] = useState("");
+  const [syncPlatform, setSyncPlatform] = useState("");
+  const [iCalUrl, setICalUrl] = useState("");
+  const [offers, setOffers] = useState([]);
+  const [hostBlock, setHostBlock] = useState([]);
+  const [pricing, setPricing] = useState({});
+  const [reservedDates, setReservedDates] = useState([]);
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [unavailableDates, setUnavailableDates] = useState([]);
+  const [allowBlock, setAllowBlock] = useState(true);
+  const [tab, setTab] = useState("block");
+  const arr = [];
+  const handlePrevMonth = () => {
+    if (currentDate > new Date()) {
+      setCurrentDate(addMonths(currentDate, -1));
+    }
+  };
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const searchParams = useSearchParams();
+  const propertyId = searchParams.get("propertyId");
+  console.log("nik", unavailableDates, hostBlock);
 
-  const handlePrevMonth = () => setCurrentDate(addMonths(currentDate, -1))
-  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
+  const saveBlockedDates = async (
+    propertyId,
 
+    checkin,
+    checkout
+  ) => {
+    try {
+      const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      const newCheckin = checkout
+        ? addDays(new Date(checkin), 1)
+        : addDays(new Date(checkin), 1);
+
+      const newCheckout = checkout
+        ? addDays(new Date(checkout), 2)
+        : addDays(new Date(checkin), 2);
+
+      const response = await fetch(`${API_URL}/booking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
+        },
+        body: JSON.stringify({
+          userId: userId,
+          action: "host",
+          guests: 1,
+          adults: 1,
+          children: 0,
+          infants: 0,
+          propertyId: propertyId,
+          hostId: userId,
+          status: "confirmed",
+          checkIn: newCheckin,
+
+          checkOut: newCheckout,
+          price: 0,
+          currency: "INR",
+          guestData: {
+            adults: [{ name: "host", age: 18 }],
+            children: [],
+          },
+        }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        toast.error(result.message);
+      }
+      const result = await response.json();
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const unblockDates = async (selectedDate) => {
+    try {
+      const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+
+      const response = await fetch(
+        `${API_URL}/booking/unblock-dates/${propertyId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data}`,
+          },
+          body: JSON.stringify({
+            selectedDate: selectedDate,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new error("Failed to save the data");
+      }
+      toast.success("You have successfully unblocked date");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    async function fetchDates() {
+      try {
+        const response = await axios.get(
+          `${API_URL}/booking/blocked-dates/${propertyId}`
+        );
+
+        if (response.status != 200) {
+          throw new Error(
+            `Failed to fetch host data (status: ${response.status})`
+          );
+        }
+
+        setUnavailableDates(response.data.data);
+        setHostBlock(response.data.blocked);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchDates();
+  }, [propertyId, saveBlockedDates, unblockDates]);
   const handleDateClick = (date) => {
-    setSelectedDate(date)
-    setDateRange({ from: date, to: undefined })
-    setIsDialogOpen(true)
-  }
+    const getDate = new Date(date);
+    getDate.setDate(getDate.getDate() + 1);
+
+    if (unavailableDates.includes(getDate.toISOString().split("T")[0])) {
+      toast.error("Date already reserved.");
+    } else if (arr.includes(getDate.toISOString().split("T")[0])) {
+      toast.error("Past date cannot be reserved.");
+    } else if (hostBlock.includes(getDate.toISOString().split("T")[0])) {
+      setSelectedDate(date);
+      setConfirmDialogOpen(true);
+    } else {
+      setSelectedDate(date);
+      setDateRange({ from: date, to: null });
+      setIsDialogOpen(true);
+    }
+  };
 
   const handleBlockDates = () => {
     if (dateRange.from && dateRange.to) {
-      const dates = eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
-      setBlockedDates([...blockedDates, ...dates])
+      const dates = eachDayOfInterval({
+        start: dateRange.from,
+        end: addDays(dateRange.to, -2),
+      });
+
+      setBlockedDates((prev) => [...prev, ...dates]);
+      saveBlockedDates(propertyId, dateRange.from, dateRange.to);
     } else if (dateRange.from) {
-      setBlockedDates([...blockedDates, dateRange.from])
+      setBlockedDates((prev) => [...prev, dateRange.from]);
+      saveBlockedDates(propertyId, dateRange.from, dateRange.to);
     }
-    setIsDialogOpen(false)
-    setBlockReason("")
-  }
+    setIsDialogOpen(false);
+    setBlockReason("");
+  };
 
   const handleReserveDates = () => {
     if (dateRange.from && dateRange.to) {
-      const dates = eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
-      setReservedDates([...reservedDates, ...dates])
+      const dates = eachDayOfInterval({
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+      setReservedDates([...reservedDates, ...dates]);
     } else if (dateRange.from) {
-      setReservedDates([...reservedDates, dateRange.from])
+      setReservedDates([...reservedDates, dateRange.from]);
     }
-    setIsDialogOpen(false)
-  }
+    setIsDialogOpen(false);
+  };
+  const syncWithUrl = async (kind) => {
+    const url = iCalUrl;
+    try {
+      const res = await axios.post(`${API_URL}/calendarSync/saveCalendar`, {
+        propertyId,
 
-  const handleSyncCalendar = () => {
+        url,
+        kind,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleSyncCalendar = (kind) => {
     if (syncPlatform === "google") {
-      console.log("Syncing with Google Calendar")
+      console.log("Syncing with Google Calendar");
       // Implement Google Calendar sync logic here
     } else if (syncPlatform === "ical") {
-      console.log("Syncing with iCal URL:", iCalUrl)
+      syncWithUrl(kind);
+      console.log("Syncing with iCal URL:", iCalUrl);
       // Implement iCal sync logic here
     }
-  }
+  };
 
+  console.log("what th", arr);
   const renderCalendar = () => {
-    const monthStart = startOfMonth(currentDate)
-    const monthEnd = endOfMonth(currentDate)
-    const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
+    const monthStart = startOfMonth(currentDate);
+
+    const monthEnd = endOfMonth(currentDate);
+    const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
     return (
       <div className="grid grid-cols-7 gap-1">
@@ -85,69 +265,129 @@ const FullCalendarPage = () => {
           </div>
         ))}
         {monthDays.map((day) => {
-          const isReserved = reservedDates.some((date) => isSameDay(date, day))
-          const isBlocked = blockedDates.some((date) => isSameDay(date, day))
-          const dayPrice = pricing[format(day, "yyyy-MM-dd")] || ""
+          const isReserved = unavailableDates.some((date) =>
+            isSameDay(date.toString(), day)
+          );
+          const isBlocked = hostBlock.some((date) => isSameDay(date, day));
+          const dayPrice = pricing[format(day, "yyyy-MM-dd")] || "";
+          const isUnable = day < addDays(new Date(), -1);
+          if (day > monthStart && day < currentDate) {
+            arr.push(day.toISOString().split("T")[0]);
+          }
           return (
             <Button
               key={day.toString()}
               variant="outline"
               className={`h-16 relative ${
                 !isSameMonth(day, currentDate) ? "opacity-50" : ""
-              } ${isReserved ? "!bg-green-500 hover:!bg-green-600 !text-white" : ""} ${
+              } ${
+                isReserved
+                  ? "!bg-green-500 hover:!bg-green-600 !text-white"
+                  : ""
+              } ${
                 isBlocked ? "!bg-red-400 hover:!bg-red-500 !text-white" : ""
+              } ${
+                isUnable ? "!bg-gray-200 hover:!bg-gray-500 !text-black" : ""
               }`}
               onClick={() => handleDateClick(day)}
             >
-              <span className="absolute top-1 left-1 text-sm font-semibold">{format(day, "d")}</span>
-              <span className="absolute bottom-1 right-1 text-xs font-medium">${dayPrice}</span>
-              {isReserved && <span className="absolute bottom-1 left-1 text-xs font-medium">Reserved</span>}
-              {isBlocked && <span className="absolute bottom-1 left-1 text-xs font-medium">Blocked</span>}
+              <span className="absolute top-1 left-1 text-sm font-semibold">
+                {format(day, "d")}
+              </span>
+              <span className="absolute bottom-1 right-1 text-xs font-medium">
+                ${dayPrice}
+              </span>
+              {isReserved && (
+                <span className="absolute bottom-1 left-1 text-xs font-medium">
+                  Reserved
+                </span>
+              )}
+              {isBlocked && (
+                <span className="absolute bottom-1 left-1 text-xs font-medium">
+                  Blocked
+                </span>
+              )}
             </Button>
-          )
+          );
         })}
       </div>
-    )
-  }
+    );
+  };
 
   const handleAddOffer = (offer) => {
-    setOffers([...offers, offer])
-  }
+    setOffers([...offers, offer]);
+  };
 
   const handleRemoveOffer = (offerId) => {
-    setOffers(offers.filter((offer) => offer.id !== offerId))
-  }
+    setOffers(offers.filter((offer) => offer.id !== offerId));
+  };
 
   const handleSetPricing = (date, price) => {
-    setPricing({ ...pricing, [format(date, "yyyy-MM-dd")]: price })
-  }
+    setPricing({ ...pricing, [format(date, "yyyy-MM-dd")]: price });
+  };
 
   const handleDialogSubmit = () => {
-    const selectedTab = document.querySelector('[role="tab"][aria-selected="true"]').getAttribute("value")
+    const selectedTab = tab;
 
     if (selectedTab === "block") {
-      handleBlockDates()
+      const dateDays = eachDayOfInterval({
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+      console.log("k", dateDays);
+      let hasOverlap = false; // use local variable
+
+      // for (let i = 1; i < dateDays.length; i++) {
+      //   const dateStr = dateDays[i].toISOString().split("T")[0];
+
+      //   if (hostBlock.includes(dateStr) || unavailableDates.includes(dateStr)) {
+      //     toast.error("Selected dates overlap with existing reserved date");
+      //     hasOverlap = true;
+      //     break;
+      //   }
+      // }
+
+      // if (!hasOverlap) {
+      handleBlockDates();
+      // }
     } else if (selectedTab === "reserve") {
-      handleReserveDates()
+      handleReserveDates();
     } else if (selectedTab === "offer") {
-      const offerName = document.getElementById("offerName").value
-      const offerDiscount = document.getElementById("offerDiscount").value
-      handleAddOffer({ id: Date.now(), name: offerName, discount: offerDiscount })
+      const offerName = document.getElementById("offerName").value;
+      const offerDiscount = document.getElementById("offerDiscount").value;
+      handleAddOffer({
+        id: Date.now(),
+        name: offerName,
+        discount: offerDiscount,
+      });
     } else if (selectedTab === "pricing") {
-      const price = document.getElementById("price").value
+      const price = document.getElementById("price").value;
       if (dateRange.from && dateRange.to) {
-        const dates = eachDayOfInterval({ start: dateRange.from, end: dateRange.to })
-        dates.forEach((date) => handleSetPricing(date, price))
+        const dates = eachDayOfInterval({
+          start: dateRange.from,
+          end: dateRange.to,
+        });
+        dates.forEach((date) => handleSetPricing(date, price));
       } else if (dateRange.from) {
-        handleSetPricing(dateRange.from, price)
+        handleSetPricing(dateRange.from, price);
       }
     }
-
-    setIsDialogOpen(false)
-  }
+  };
 
   return (
     <div className="container mx-auto p-4">
+      <ConfirmCancelDialog
+        choice={"Unblock"}
+        open={confirmDialogOpen}
+        onConfirm={() => {
+          unblockDates(addDays(selectedDate, 1));
+          setConfirmDialogOpen(false);
+        }}
+        onClose={() => {
+          setConfirmDialogOpen(false);
+          setBookingToCancel(null);
+        }}
+      />
       <Card className="w-full mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{format(currentDate, "MMMM yyyy")}</CardTitle>
@@ -155,7 +395,12 @@ const FullCalendarPage = () => {
             <Button variant="outline" size="icon" onClick={handlePrevMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleNextMonth} className="ml-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNextMonth}
+              className="ml-2"
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -198,12 +443,18 @@ const FullCalendarPage = () => {
                   </SelectContent>
                 </Select>
                 {syncPlatform === "ical" && (
-                  <Input placeholder="Enter iCal URL" value={iCalUrl} onChange={(e) => setICalUrl(e.target.value)} />
+                  <Input
+                    placeholder="Enter iCal URL"
+                    value={iCalUrl}
+                    onChange={(e) => setICalUrl(e.target.value)}
+                  />
                 )}
                 <Button
                   className="bg-primaryGreen hover:bg-brightGreen"
-                  onClick={handleSyncCalendar}
-                  disabled={!syncPlatform || (syncPlatform === "ical" && !iCalUrl)}
+                  onClick={() => handleSyncCalendar("import")}
+                  disabled={
+                    !syncPlatform || (syncPlatform === "ical" && !iCalUrl)
+                  }
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Import Calendar
@@ -233,11 +484,17 @@ const FullCalendarPage = () => {
           ) : (
             <ul>
               {offers.map((offer) => (
-                <li key={offer.id} className="flex justify-between items-center mb-2">
+                <li
+                  key={offer.id}
+                  className="flex justify-between items-center mb-2"
+                >
                   <span>
                     {offer.name} - {offer.discount}% off
                   </span>
-                  <Button variant="destructive" onClick={() => handleRemoveOffer(offer.id)}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleRemoveOffer(offer.id)}
+                  >
                     Remove
                   </Button>
                 </li>
@@ -252,7 +509,8 @@ const FullCalendarPage = () => {
           <DialogHeader>
             <DialogTitle>Manage Date</DialogTitle>
             <DialogDescription>
-              Block, reserve dates, add offers, or set pricing for the selected date range.
+              Block, reserve dates, add offers, or set pricing for the selected
+              date range.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -261,12 +519,17 @@ const FullCalendarPage = () => {
               selected={dateRange}
               onSelect={setDateRange}
               numberOfMonths={2}
+              disabled={[
+                { before: new Date() }, // disable past dates
+                ...unavailableDates.map((d) => new Date(d)), // disable specific unavailable dates
+                ...hostBlock.map((d) => new Date(d)),
+              ]}
               className="rounded-md border"
             />
-            <Tabs defaultValue="block">
+            <Tabs defaultValue="block" onValueChange={setTab}>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="block">Block</TabsTrigger>
-                <TabsTrigger value="reserve">Reserve</TabsTrigger>
+                {/* <TabsTrigger value="reserve">Reserve</TabsTrigger> */}
                 <TabsTrigger value="offer">Offer</TabsTrigger>
                 <TabsTrigger value="pricing">Pricing</TabsTrigger>
               </TabsList>
@@ -295,7 +558,11 @@ const FullCalendarPage = () => {
                   <Label htmlFor="offerDiscount" className="text-right">
                     Discount %
                   </Label>
-                  <Input id="offerDiscount" type="number" className="col-span-3" />
+                  <Input
+                    id="offerDiscount"
+                    type="number"
+                    className="col-span-3"
+                  />
                 </div>
               </TabsContent>
               <TabsContent value="pricing">
@@ -316,8 +583,7 @@ const FullCalendarPage = () => {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default FullCalendarPage
-
+export default FullCalendarPage;
