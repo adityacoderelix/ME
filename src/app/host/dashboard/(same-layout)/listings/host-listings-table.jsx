@@ -355,6 +355,17 @@ export function HostListingsTable({ userEmail }) {
                 >
                   Add Time
                 </DropdownMenuItem>
+                {listing.status == "active" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      router.push(
+                        `/host/dashboard/calendar?propertyId=${listing._id}`
+                      );
+                    }}
+                  >
+                    Block Dates
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           );
