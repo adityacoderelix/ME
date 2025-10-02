@@ -94,8 +94,8 @@ export default function ReservationsPage() {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
 
-    const from = getDate(date.from);
-    const to = getDate(date.to);
+    const from = date.from ? date.from.toLocaleDateString() : null;
+    const to = date.to ? date.to.toLocaleDateString() : null;
     console.log(from, to);
     if (data) {
       try {
@@ -109,6 +109,13 @@ export default function ReservationsPage() {
             },
           }
         );
+        if (response.status === 401) {
+          // Token expired or missing
+          localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+          router.push("/"); // redirect to login
+          return;
+        }
         const result = await response.json();
         console.log(result);
         const final = await result.data;
@@ -209,7 +216,7 @@ export default function ReservationsPage() {
     try {
       const getLocalData = await localStorage.getItem("token");
       const data = JSON.parse(getLocalData);
-
+      console.log("term", bookingId, userEmail, hostEmail, userName, hostName);
       if (data) {
         const response = await fetch(`${API_URL}/booking/host/terminate`, {
           method: "PATCH",
@@ -420,6 +427,7 @@ export default function ReservationsPage() {
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -552,16 +560,18 @@ export default function ReservationsPage() {
                       ) : booking?.status == "confirmed" &&
                         booking?.status != "rejected" ? (
                         <>
-                          {canShowReview(booking) ? (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(
-                                  `/host/dashboard/bookings/review-guest?booking=${booking?._id}`
-                                )
-                              }
-                            >
-                              Review
-                            </DropdownMenuItem>
+                          {!booking?.hostReviewed ? (
+                            canShowReview(booking) ? (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(
+                                    `/host/dashboard/bookings/review-guest?booking=${booking?._id}`
+                                  )
+                                }
+                              >
+                                Review
+                              </DropdownMenuItem>
+                            ) : null
                           ) : null}
                           {new Date().setHours(0, 0, 0, 0) <
                           new Date(booking?.checkIn).setHours(0, 0, 0, 0) ? (
