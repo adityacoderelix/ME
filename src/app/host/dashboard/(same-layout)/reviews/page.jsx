@@ -14,6 +14,15 @@ import {
 } from "@/components/ui/table";
 import { Star, ThumbsUp, MessageSquare, TrendingUp, Flag } from "lucide-react";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -40,25 +49,27 @@ export default function ReviewsPage() {
   const [reviewData, setReviewData] = useState();
   const [search, setSearch] = useState("");
   const [properties, setProperties] = useState();
-
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [bookingId, setBookingId] = useState("");
   const [date, setDate] = useState({
     from: addMonths(new Date(), -1),
-    to: addDays(new Date(), 20),
+    to: new Date(),
   });
+  const [hostEmail, setHostEmail] = useState("");
   console.log("what now", selectedRating);
   const fetchData = async () => {
     try {
       const getUserId = await localStorage.getItem("userId");
       const userId = JSON.parse(getUserId);
+      const from = date.from ? new Date(date.from).toLocaleDateString() : "";
+
+      const to = date.to ? new Date(date.to).toLocaleDateString() : "";
+      console.log(from, to);
       const getLocalData = await localStorage.getItem("token");
       const data = JSON.parse(getLocalData);
       if (data) {
         const response = await fetch(
-          `${API_URL}/hostData/review/${userId}?stars=${selectedRating}&search=${search}&property=${selectedProperty}&checkin=${new Date(
-            date.from
-          ).toLocaleDateString()}&checkout=${new Date(
-            date.to
-          ).toLocaleDateString()}`,
+          `${API_URL}/hostData/review/${userId}?stars=${selectedRating}&search=${search}&property=${selectedProperty}&checkin=${from}&checkout=${to}`,
           {
             method: "GET",
             headers: {
@@ -81,6 +92,7 @@ export default function ReviewsPage() {
       console.error(err);
     }
   };
+  console.log("bla", reviewData);
   const fetchProperties = async () => {
     try {
       const getUserId = await localStorage.getItem("userId");
@@ -123,9 +135,92 @@ export default function ReviewsPage() {
   //   queryKey: ["review"],
   //   queryFn: () => fetchData(),
   // });
+  function checkLength(value) {
+    if (value?.length > 15) {
+      return value.substring(0, 15) + "…";
+    }
+    return value;
+  }
+  const updateFlag = async () => {
+    try {
+      const getUserId = await localStorage.getItem("userId");
+      const userId = JSON.parse(getUserId);
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      if (data) {
+        const response = await fetch(
+          `${API_URL}/booking/update-flag?id=${bookingId}&email=${hostEmail}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          toast.error("Error during update");
+        }
+        toast.success("Successfully flagged review");
+        setDialogOpen(false);
+        await fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleModal = (review) => {
+    setDialogOpen(true);
+    console.log("ogs", review?.bookingId?._id);
+    setBookingId(review?.bookingId?._id);
+    setHostEmail(review?.property?.hostEmail);
+  };
+  const StatusPill = ({ status }) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case "accept":
+          return "bg-green-100 text-green-800";
+        case "reject":
+          return "bg-red-100 text-red-800";
 
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+    return (
+      <span
+        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+          status?.hideStatus
+        )}`}
+      >
+        {status?.bookingId?.flag
+          ? status?.hideStatus?.charAt(0).toUpperCase() +
+            status?.hideStatus?.slice(1)
+          : null}
+      </span>
+    );
+  };
   return (
     <div className="space-y-4 grid grid-cols-1">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Review Flagging</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to flag this review? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={updateFlag}>
+              Yes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="container mx-auto  space-y-6 max-w-full">
         <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">
           Guest Reviews
@@ -297,6 +392,7 @@ export default function ReviewsPage() {
                   <TableHead>Property</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Request</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -304,9 +400,23 @@ export default function ReviewsPage() {
                   reviewData?.data.map((review) => (
                     <TableRow key={review._id}>
                       <TableCell className="font-medium">
-                        {review._id}
+                        <span title={review._id}>
+                          {" "}
+                          {checkLength(review._id)}
+                        </span>
                       </TableCell>
-                      <TableCell>{review.user.firstName}</TableCell>
+                      <TableCell>
+                        <span
+                          title={
+                            review.user.firstName + " " + review.user.lastName
+                          }
+                        >
+                          {" "}
+                          {checkLength(
+                            review.user.firstName + " " + review.user.lastName
+                          )}
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
@@ -322,7 +432,9 @@ export default function ReviewsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="max-w-xs truncate">
-                        {review.content}
+                        <span title={review.content}>
+                          {checkLength(review.content)}
+                        </span>
                       </TableCell>
                       <TableCell>{review.property.title}</TableCell>
                       <TableCell>
@@ -330,15 +442,26 @@ export default function ReviewsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm">
+                          {/* <Button variant="ghost" size="sm">
                             <MessageSquare className="h-4 w-4" />
                             <span className="sr-only">Reply</span>
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Flag className="h-4 w-4" />
-                            <span className="sr-only">Flag</span>
-                          </Button>
+                          </Button> */}
+                          {!review?.bookingId?.flag ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleModal(review)}
+                            >
+                              <Flag className="h-4 w-4" />
+                              <span className="sr-only">Flag</span>
+                            </Button>
+                          ) : (
+                            "Flagged"
+                          )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <StatusPill status={review} />
                       </TableCell>
                     </TableRow>
                   ))
