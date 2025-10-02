@@ -176,14 +176,17 @@ const ManageBookings = () => {
 
       const isPast =
         checkIn.toLocaleDateString() < new Date().toLocaleDateString();
-      const isCancelled =
-        booking?.status === "cancelled" || booking?.status === "rejected";
+      const isConfirmed = booking?.status === "confirmed";
+      const isCancelled = booking?.status === "cancelled";
+      const isRejected = booking?.status === "rejected";
 
       const matchesTab =
         activeTab === "all" ||
         (activeTab === "upcoming" && isUpcoming) ||
         (activeTab === "past" && isPast) ||
-        (activeTab === "cancelled" && isCancelled);
+        (activeTab === "confirmed" && isConfirmed) ||
+        (activeTab === "cancelled" && isCancelled) ||
+        (activeTab == "rejected" && isRejected);
 
       const matchesLocation =
         !appliedFilters.location ||
@@ -277,12 +280,12 @@ const ManageBookings = () => {
   };
 
   function diff(date) {
-    const futureDate = new Date(date);
+    const futureDate = new Date(date).setHours(12, 0, 0, 0);
 
     // const date2 = new Date().toLocaleDateString();
-    const date1 = new Date().setHours(0, 0, 0, 0);
-    const differenceInDays = (futureDate.getTime() - date1) / 86400000;
-    console.log("o", differenceInDays);
+    const date1 = new Date();
+    const differenceInDays = (futureDate - date1) / 86400000;
+    console.log("opti", date, futureDate, date1, differenceInDays);
     return differenceInDays;
   }
 
@@ -337,9 +340,9 @@ const ManageBookings = () => {
     const futureHours = new Date(futureDate).setHours(time, 0);
 
     // const date2 = new Date();
-    const date1 = new Date().setHours(0, 0, 0, 0);
+    const date1 = new Date();
     const differenceInHours = (futureHours - date1) / 3600000;
-    // console.log("dyb", futureDate, time, date2, differenceInHours);
+    console.log("dyb", futureDate, time, date1, differenceInHours);
     return differenceInHours;
   }
 
@@ -393,7 +396,9 @@ const ManageBookings = () => {
                 { value: "all", label: "All" },
                 { value: "upcoming", label: "Upcoming" },
                 { value: "past", label: "Past" },
+                { value: "confirmed", label: "Confirmed" },
                 { value: "cancelled", label: "Cancelled" },
+                { value: "rejected", label: "Rejected" },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
