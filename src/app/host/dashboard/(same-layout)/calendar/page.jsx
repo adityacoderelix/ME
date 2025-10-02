@@ -63,6 +63,7 @@ const FullCalendarPage = () => {
   const [blockedDates, setBlockedDates] = useState([]);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [allowBlock, setAllowBlock] = useState(true);
+  const [exportUrl, setExportUrl] = useState("");
   const [tab, setTab] = useState("block");
   const arr = [];
   const handlePrevMonth = () => {
@@ -75,7 +76,27 @@ const FullCalendarPage = () => {
   const searchParams = useSearchParams();
   const propertyId = searchParams.get("propertyId");
   console.log("nik", unavailableDates, hostBlock);
+  async function fetchDates() {
+    try {
+      const response = await axios.get(
+        `${API_URL}/booking/blocked-dates/${propertyId}`
+      );
 
+      if (response.status != 200) {
+        throw new Error(
+          `Failed to fetch host data (status: ${response.status})`
+        );
+      }
+      console.log("aaaa", response.data.data, response.data.blocked);
+      setUnavailableDates(response.data.data);
+      setHostBlock(response.data.blocked);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  useEffect(() => {
+    fetchDates();
+  }, [propertyId]);
   const saveBlockedDates = async (
     propertyId,
 
@@ -110,6 +131,7 @@ const FullCalendarPage = () => {
           propertyId: propertyId,
           hostId: userId,
           status: "confirmed",
+          paymentStatus: "paid",
           checkIn: newCheckin,
 
           checkOut: newCheckout,
@@ -126,6 +148,7 @@ const FullCalendarPage = () => {
         toast.error(result.message);
       }
       const result = await response.json();
+      await fetchDates();
       return result;
     } catch (err) {
       console.error(err);
@@ -154,31 +177,12 @@ const FullCalendarPage = () => {
         throw new error("Failed to save the data");
       }
       toast.success("You have successfully unblocked date");
+      await fetchDates();
     } catch (err) {
       console.error(err);
     }
   };
-  useEffect(() => {
-    async function fetchDates() {
-      try {
-        const response = await axios.get(
-          `${API_URL}/booking/blocked-dates/${propertyId}`
-        );
 
-        if (response.status != 200) {
-          throw new Error(
-            `Failed to fetch host data (status: ${response.status})`
-          );
-        }
-
-        setUnavailableDates(response.data.data);
-        setHostBlock(response.data.blocked);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    fetchDates();
-  }, [propertyId, saveBlockedDates, unblockDates]);
   const handleDateClick = (date) => {
     const getDate = new Date(date);
     getDate.setDate(getDate.getDate() + 1);
@@ -196,6 +200,33 @@ const FullCalendarPage = () => {
       setIsDialogOpen(true);
     }
   };
+  const createSecret = async () => {
+    try {
+      const kind = "export";
+      const res = await axios.post(`${API_URL}/calendarSync/saveCalendar`, {
+        propertyId,
+        kind,
+      });
+
+      // ✅ Axios automatically throws on error, so no need for res.ok
+      const final = res.data;
+      console.log("sss", final);
+
+      if (final.success) {
+        setExportUrl(final.url);
+      } else {
+        console.error("API error:", final.message);
+      }
+    } catch (error) {
+      console.error("Request failed:", error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (propertyId) {
+      createSecret();
+    }
+  }, [propertyId]);
 
   const handleBlockDates = () => {
     if (dateRange.from && dateRange.to) {
@@ -220,6 +251,7 @@ const FullCalendarPage = () => {
         start: dateRange.from,
         end: dateRange.to,
       });
+
       setReservedDates([...reservedDates, ...dates]);
     } else if (dateRange.from) {
       setReservedDates([...reservedDates, dateRange.from]);
@@ -228,6 +260,7 @@ const FullCalendarPage = () => {
   };
   const syncWithUrl = async (kind) => {
     const url = iCalUrl;
+
     try {
       const res = await axios.post(`${API_URL}/calendarSync/saveCalendar`, {
         propertyId,
@@ -239,6 +272,7 @@ const FullCalendarPage = () => {
       console.error(error);
     }
   };
+
   const handleSyncCalendar = (kind) => {
     if (syncPlatform === "google") {
       console.log("Syncing with Google Calendar");
@@ -253,7 +287,7 @@ const FullCalendarPage = () => {
   console.log("what th", arr);
   const renderCalendar = () => {
     const monthStart = startOfMonth(currentDate);
-
+    console.log("supss", currentDate, monthStart);
     const monthEnd = endOfMonth(currentDate);
     const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
@@ -271,8 +305,11 @@ const FullCalendarPage = () => {
           const isBlocked = hostBlock.some((date) => isSameDay(date, day));
           const dayPrice = pricing[format(day, "yyyy-MM-dd")] || "";
           const isUnable = day < addDays(new Date(), -1);
-          if (day > monthStart && day < currentDate) {
-            arr.push(day.toISOString().split("T")[0]);
+
+          if (new Date().getMonth() == new Date(day).getMonth()) {
+            if (day > monthStart && day < currentDate) {
+              arr.push(day.toISOString().split("T")[0]);
+            }
           }
           return (
             <Button
@@ -464,10 +501,29 @@ const FullCalendarPage = () => {
             <TabsContent value="export">
               <div className="space-y-4">
                 <p>Export your calendar to use on other platforms:</p>
-                <Button>
+                <Button
+                  onClick={() => {
+                    if (!exportUrl) {
+                      toast.error("No export link available");
+                      return;
+                    }
+                    window.open(exportUrl, "_blank"); // open in new tab / downloads
+                  }}
+                  className="bg-primaryGreen hover:bg-brightGreen"
+                >
                   <Download className="mr-2 h-4 w-4" />
-                  Export as iCal
+                  Download iCal
                 </Button>
+                {exportUrl && (
+                  <div className="text-sm mt-2">
+                    <p className="font-medium">
+                      Copy this link into Airbnb/Google Calendar:
+                    </p>
+                    <code className="block p-2 bg-gray-100 rounded break-all">
+                      {exportUrl}
+                    </code>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
