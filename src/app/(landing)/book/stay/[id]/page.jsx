@@ -57,7 +57,7 @@ const fetchProperty = async (id) => {
         );
       }
       const result = await response.json();
-      return result.data;
+      return result?.data;
     }
   } catch (err) {
     console.error(err);
@@ -181,13 +181,13 @@ function BookPageContent() {
       { length: parseInt(adults) },
       (_, index) => ({
         name: index === 0 ? `${firstName} ${lastName}`.trim() : "",
-        age: index === 0 ? 13 : 13,
+        age: index === 0 ? 18 : 18,
       })
     );
 
     const initialChildren = Array.from({ length: parseInt(children) }, () => ({
       name: "",
-      age: 2,
+      age: 3,
     }));
 
     setGuestData({
@@ -240,6 +240,7 @@ function BookPageContent() {
     // Check dates again and proceed with payment
 
     const date = await fetchDates();
+    console.log("sor", date);
     if (date.includes(checkinDate)) {
       toast.error("Sorry, someone has already booked");
     } else {
@@ -334,15 +335,17 @@ function BookPageContent() {
         }),
       });
       if (!response.ok) {
-        throw new error("Failed to save the data");
+        const errorText = await response.text();
+        throw new Error(`Booking failed: ${errorText}`);
       }
+      console.log("trhis is how", response.json);
       const result = await response.json();
       return result;
     } catch (err) {
       console.error(err);
     }
   };
-  const createPaymentOrder = async (bookingId, amount) => {
+  const createPaymentOrder = async (bookingId, amount, propertyId) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
@@ -358,6 +361,7 @@ function BookPageContent() {
           userId: userId,
           currency: "INR",
           amount: amount,
+          propertyId: propertyId,
         }),
       });
 
@@ -368,7 +372,7 @@ function BookPageContent() {
       console.error(err);
     }
   };
-  const verifyPayment = async (orderId, paymentId, signature) => {
+  const verifyPayment = async (orderId, paymentId, signature, method) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
@@ -383,14 +387,17 @@ function BookPageContent() {
           razorpay_order_id: orderId,
           razorpay_payment_id: paymentId,
           razorpay_signature: signature,
+          paymentMethod: method,
         }),
       });
       if (!response.ok) {
-        throw new error("Failed to save the data");
+        throw new Error("Failed to save the data");
       }
       const result = await response.json();
       return result;
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
   };
   const updateBookingStatus = async (bookingId, host, manual) => {
     try {
@@ -440,6 +447,30 @@ function BookPageContent() {
       console.error(err);
     }
   };
+  const closeModalUpdate = async (bookingId) => {
+    try {
+      console.log("enter close");
+      const userId = JSON.parse(localStorage.getItem("userId"));
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      const response = await fetch(`${API_URL}/booking/modal-close`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          userId: userId,
+        }),
+      });
+      const result = await response.json();
+      console.log("enter close", result);
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handlePayment = async () => {
     if (typeof window.Razorpay === "undefined") {
       alert("Razorpay SDK is not loaded yet. Please try again in a moment.");
@@ -455,7 +486,7 @@ function BookPageContent() {
       );
       const extract = JSON.stringify(found);
       const parsed = JSON.parse(extract);
-      const cancel = parsed[0];
+      const cancel = parsed[0]; //check dates and property id payment status paid
       const booking = await saveData(
         propertyId,
         totals.total,
@@ -467,17 +498,21 @@ function BookPageContent() {
         guestData
       );
       console.log("green lan", booking);
-
+      if (!booking || !booking.data?._id) {
+        toast.error("Booking could not be created. Please try again.");
+        return; // stop here
+      }
       const order_id = await createPaymentOrder(
-        booking.data._id,
-        totals.total * 100
+        booking?.data?._id,
+        totals?.total * 100,
+        property?._id
       );
 
       const options = {
         key: "rzp_test_w0bKE5w5UPOPrY", // Replace with your actual test key
         amount: totals.total * 100,
         currency: "INR",
-        order_id: order_id.data.id,
+        order_id: order_id?.data?.id,
         name: "Majestic Escape",
         description: `Booking for ${
           property?.title || "Property"
@@ -486,6 +521,7 @@ function BookPageContent() {
         handler: async (response) => {
           console.log("Payment successful:", response);
           // Redirect to booking summary page
+
           const totalAmount = totals.total;
           const currency = "INR";
           const checkin = date.from.toISOString();
@@ -518,24 +554,25 @@ function BookPageContent() {
           });
 
           const verify = await verifyPayment(
-            response.razorpay_order_id,
+            order_id?.data?.id, //orderid from server
             response.razorpay_payment_id,
-            response.razorpay_signature
+            response.razorpay_signature,
+            response.method
           );
           const hostEmail = await property.hostEmail;
           if (verify) {
             if (property.bookingType.manual) {
               console.log("not selected");
               const update = await updateBookingStatus(
-                booking.data._id,
+                booking?.data?._id,
                 hostEmail,
                 property.bookingType.manual
               );
             } else {
               console.log("This got selected");
-              const confirm = await updateConfirmStatus(booking.data._id);
+              const confirm = await updateConfirmStatus(booking?.data?._id);
               await updateBookingStatus(
-                booking.data._id,
+                booking?.data?._id,
                 hostEmail,
                 property.bookingType.manual
               );
@@ -551,8 +588,9 @@ function BookPageContent() {
           color: "#36621F", // Airbnb red color
         },
         modal: {
-          ondismiss: () => {
-            console.log("Payment modal closed");
+          ondismiss: async () => {
+            console.log("its closed no");
+            await closeModalUpdate(booking?.data?._id);
           },
         },
         notes: {
@@ -586,8 +624,8 @@ function BookPageContent() {
         );
       }
       console.log("oppo", response);
-      setUnavailableDates(response.data.data);
-      return response.data.data;
+      setUnavailableDates(response?.data?.data);
+      return response?.data?.data;
     } catch (err) {
       console.error(err);
     }
