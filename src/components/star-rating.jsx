@@ -31,26 +31,24 @@ export default function StarRating({ max = 5, onRatingChange, resetChange }) {
   };
   return (
     <>
-      <div className="flex space-x-2 align-middle">
+      <div className="flex items-center space-x-2">
         {Array.from({ length: max }, (_, index) => {
           const value = index + 1;
           return (
-            <>
-              <button
-                key={value}
-                type="button"
-                onClick={() => handleClick(value)}
-                onMouseEnter={() => setHover(value)}
-                onMouseLeave={() => setHover(0)}
-                className="text-yellow-400 hover:scale-110 transition-transform duration-150"
-              >
-                <Star filled={value <= (hover || rating)} />
-              </button>
-            </>
+            <button
+              key={value}
+              type="button"
+              onClick={() => handleClick(value)}
+              onMouseEnter={() => setHover(value)}
+              onMouseLeave={() => setHover(0)}
+              className="text-yellow-400 hover:scale-110 transition-transform duration-150"
+            >
+              <Star filled={value <= (hover || rating)} />
+            </button>
           );
         })}
         <button
-          className="mt-4 bg-white text-black border-0 underline hover:text-blue-700"
+          className="bg-white text-black border-0 underline hover:text-blue-700"
           onClick={handleReset}
         >
           Reset
