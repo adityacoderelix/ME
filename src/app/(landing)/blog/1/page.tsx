@@ -45,10 +45,16 @@ export default function BlogPost() {
                 </p>
               </div>
               <p className="text-lg text-gray-800 ">
-                Nestled along the northern coastline of Goa, Sada Fort stands as a hidden historical treasure, often overlooked by mainstream tourism. This remarkable fortress offers a unique glimpse into the region&apos;s complex colonial past and strategic maritime importance.
+                Nestled along the northern coastline of Goa, Sada Fort stands as
+                a hidden historical treasure, often overlooked by mainstream
+                tourism. This remarkable fortress offers a unique glimpse into
+                the region&apos;s complex colonial past and strategic maritime
+                importance.
               </p>
               <p className="text-lg text-gray-800 ">
-                Located in the Sawantwadi taluka of Sindhudurg district, Sada Fort represents a fascinating intersection of Portuguese colonial architecture and indigenous defensive strategies.
+                Located in the Sawantwadi taluka of Sindhudurg district, Sada
+                Fort represents a fascinating intersection of Portuguese
+                colonial architecture and indigenous defensive strategies.
               </p>
               <div className="text-center">
                 <div className="grid lg:grid-cols-2 gap-3">
@@ -87,14 +93,23 @@ export default function BlogPost() {
                 </span>
               </div>
               <p className="text-lg text-gray-800 ">
-                The fort&apos;s strategic location allowed Portuguese colonizers to monitor maritime trade routes and defend against potential invasions. Its unique architectural design blends European defensive techniques with local building methods, creating a remarkable testament to cultural exchange.
+                The fort&apos;s strategic location allowed Portuguese colonizers
+                to monitor maritime trade routes and defend against potential
+                invasions. Its unique architectural design blends European
+                defensive techniques with local building methods, creating a
+                remarkable testament to cultural exchange.
               </p>
               <p className="text-lg text-gray-800 ">
-                While many travelers focus on Goa&apos;s beaches and more famous Portuguese forts, Sada offers a more intimate and authentic historical experience. The surrounding landscape, with its lush vegetation and dramatic coastal views, adds to the fort&apos;s compelling narrative.
+                While many travelers focus on Goa&apos;s beaches and more famous
+                Portuguese forts, Sada offers a more intimate and authentic
+                historical experience. The surrounding landscape, with its lush
+                vegetation and dramatic coastal views, adds to the fort&apos;s
+                compelling narrative.
               </p>
               <blockquote className="text-center p-4 sm:px-7">
                 <p className="text-xl font-medium text-gray-800 lg:text-2xl lg:leading-normal xl:text-2xl xl:leading-normal ">
-                  Sada Fort whispers stories of colonial resilience, standing as a silent guardian of Goa&apos;s multilayered history.
+                  Sada Fort whispers stories of colonial resilience, standing as
+                  a silent guardian of Goa&apos;s multilayered history.
                 </p>
                 <p className="mt-5 text-gray-800 ">
                   Local Historian, Maria Santos
@@ -117,19 +132,31 @@ export default function BlogPost() {
                   Preserving a Hidden Heritage
                 </h3>
                 <p className="text-lg text-gray-800 ">
-                  Conservation efforts are crucial for maintaining Sada Fort&apos;s structural integrity. Local archaeological departments and heritage organizations work diligently to protect this historical site, ensuring that future generations can appreciate its significance.
+                  Conservation efforts are crucial for maintaining Sada
+                  Fort&apos;s structural integrity. Local archaeological
+                  departments and heritage organizations work diligently to
+                  protect this historical site, ensuring that future generations
+                  can appreciate its significance.
                 </p>
               </div>
               <ul className="list-disc list-outside space-y-5 ps-5 text-lg text-gray-800 ">
                 <li className="ps-2">
-                  &quot;Sada Fort represents more than just stone and mortar; it&apos;s a living museum of cultural intersections,&quot; says Dr. Rajesh Patkar, Archaeological Survey of India.
+                  &quot;Sada Fort represents more than just stone and mortar;
+                  it&apos;s a living museum of cultural intersections,&quot;
+                  says Dr. Rajesh Patkar, Archaeological Survey of India.
                 </li>
                 <li className="ps-2">
-                  The fort&apos;s unique positioning offers unparalleled views of the Arabian Sea, making it a photographer&apos;s and history enthusiast&apos;s dream destination.
+                  The fort&apos;s unique positioning offers unparalleled views
+                  of the Arabian Sea, making it a photographer&apos;s and
+                  history enthusiast&apos;s dream destination.
                 </li>
               </ul>
               <p className="text-lg text-gray-800 ">
-                For travelers seeking to move beyond typical tourist experiences, Sada Fort offers an immersive journey into Goa&apos;s rich and complex historical tapestry. Its relatively untouched state provides an authentic glimpse into the region&apos;s colonial past.
+                For travelers seeking to move beyond typical tourist
+                experiences, Sada Fort offers an immersive journey into
+                Goa&apos;s rich and complex historical tapestry. Its relatively
+                untouched state provides an authentic glimpse into the
+                region&apos;s colonial past.
               </p>
               <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-y-5 lg:gap-y-0">
                 {/* Badges/Tags */}
@@ -160,8 +187,6 @@ export default function BlogPost() {
                   </a>
                 </div>
                 {/* End Badges/Tags */}
-                
-             
               </div>
             </div>
           </div>
@@ -183,13 +208,12 @@ export default function BlogPost() {
               </a>
               <a className="group grow block focus:outline-none" href="">
                 <h5 className="group-hover:text-gray-600 group-focus:text-gray-600 text-sm font-semibold text-gray-800  ">
-                 Majestic Escape
+                  Majestic Escape
                 </h5>
-              
               </a>
               <div className="grow">
                 <div className="flex justify-end">
-                  <button
+                  {/* <button
                     type="button"
                     className="py-1.5 px-2.5 inline-flex items-center gap-x-2 text-xs font-medium rounded-lg border border-transparent bg-primaryGreen text-white hover:bg-brightGreen focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                   >
@@ -211,7 +235,7 @@ export default function BlogPost() {
                       <line x1={22} x2={16} y1={11} y2={11} />
                     </svg>
                     Subscribe
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -223,9 +247,9 @@ export default function BlogPost() {
                 href="/blog/2"
               >
                 <div className="grow">
-                <span className="text-base font-medium text-absluteDark font-bricolage group-hover:text-brightGreen group-focus:text-brightGreen ">
-                November Nooks: Hidden Gems to Explore in Goa Before Winter
-                </span>
+                  <span className="text-base font-medium text-absluteDark font-bricolage group-hover:text-brightGreen group-focus:text-brightGreen ">
+                    November Nooks: Hidden Gems to Explore in Goa Before Winter
+                  </span>
                 </div>
                 <div className="shrink-0 relative rounded-lg overflow-hidden size-20">
                   <Image
@@ -244,8 +268,9 @@ export default function BlogPost() {
                 href="/blog/3"
               >
                 <div className="grow">
-                <span className="text-base font-medium text-absluteDark font-bricolage group-hover:text-brightGreen group-focus:text-brightGreen ">
-                Waves and Wheels: Goa&apos;s Best Water Sports and Bike Tours
+                  <span className="text-base font-medium text-absluteDark font-bricolage group-hover:text-brightGreen group-focus:text-brightGreen ">
+                    Waves and Wheels: Goa&apos;s Best Water Sports and Bike
+                    Tours
                   </span>
                 </div>
                 <div className="shrink-0 relative rounded-lg overflow-hidden size-20">
@@ -266,7 +291,7 @@ export default function BlogPost() {
               >
                 <div className="grow">
                   <span className="text-base font-medium text-absluteDark font-bricolage group-hover:text-brightGreen group-focus:text-brightGreen ">
-                  Spice of Life: A Culinary Journey Through Goan Cuisine
+                    Spice of Life: A Culinary Journey Through Goan Cuisine
                   </span>
                 </div>
                 <div className="shrink-0 relative rounded-lg overflow-hidden size-20">
