@@ -10,7 +10,7 @@ export default function Component() {
       <Features />
       <Faq />
       <Blogs />
-      <Newsletter />
+      {/* <Newsletter /> */}
     </div>
   );
 }

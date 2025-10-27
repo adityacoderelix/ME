@@ -11,7 +11,7 @@ export default function Stays() {
       <LocationWiseStays />
       <SpotWiseStays />
       {/* <Testimonials /> */}
-      <Newsletter />
+      {/* <Newsletter /> */}
     </main>
   );
 }

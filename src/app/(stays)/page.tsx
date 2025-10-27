@@ -19,7 +19,7 @@ export default function Component() {
 
       {/* <Testimonials /> */}
       <Blogs />
-      <Newsletter />
+      {/* <Newsletter /> */}
     </div>
   );
 }
