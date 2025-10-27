@@ -42,8 +42,10 @@
     "embla-carousel-autoplay": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.11.17",
+    "html2canvas": "^1.4.1",
     "input-otp": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.3",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^4.0.0",
@@ -69,6 +71,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-places-autocomplete": "^4.0.1",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
