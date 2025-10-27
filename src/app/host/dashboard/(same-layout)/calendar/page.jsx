@@ -97,6 +97,35 @@ const FullCalendarPage = () => {
   useEffect(() => {
     fetchDates();
   }, [propertyId]);
+  const createSecret = async () => {
+    try {
+      const kind = "export";
+      const res = await axios.post(`${API_URL}/calendarSync/saveCalendar`, {
+        propertyId,
+        kind,
+      });
+
+      // ✅ Axios automatically throws on error, so no need for res.ok
+      const final = res.data;
+      console.log("sss", final);
+
+      if (final.success) {
+        setExportUrl(final.url);
+      } else {
+        console.error("API error:", final.message);
+      }
+    } catch (error) {
+      console.error("Request failed:", error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    let didRun = false;
+    if (propertyId && !didRun) {
+      didRun = true;
+      createSecret();
+    }
+  }, [propertyId]);
   const saveBlockedDates = async (
     propertyId,
 
@@ -200,33 +229,6 @@ const FullCalendarPage = () => {
       setIsDialogOpen(true);
     }
   };
-  const createSecret = async () => {
-    try {
-      const kind = "export";
-      const res = await axios.post(`${API_URL}/calendarSync/saveCalendar`, {
-        propertyId,
-        kind,
-      });
-
-      // ✅ Axios automatically throws on error, so no need for res.ok
-      const final = res.data;
-      console.log("sss", final);
-
-      if (final.success) {
-        setExportUrl(final.url);
-      } else {
-        console.error("API error:", final.message);
-      }
-    } catch (error) {
-      console.error("Request failed:", error.response?.data || error.message);
-    }
-  };
-
-  useEffect(() => {
-    if (propertyId) {
-      createSecret();
-    }
-  }, [propertyId]);
 
   const handleBlockDates = () => {
     if (dateRange.from && dateRange.to) {
