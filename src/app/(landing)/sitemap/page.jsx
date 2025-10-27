@@ -1,14 +1,13 @@
-import Link from "next/link"
-import { ChevronRight } from 'lucide-react'
-import Heading from '@/components/ui/heading'
-
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import Heading from "@/components/ui/heading";
 
 export default function Component() {
   return (
     <div className="min-h-screen font-poppins bg-white">
       <main className="container mx-auto py-12 sm:py-24 ">
         <div className="mx-auto max-w-7xl">
-            <Heading text="Sitemap"/>
+          <Heading text="Sitemap" />
           <div className="grid gap-16 mt-16 sm:grid-cols-2 lg:grid-cols-4">
             {/* Company Section */}
             <div className="space-y-6">
@@ -180,13 +179,13 @@ export default function Component() {
                   </Link>
                 </li>
                 <li>
-                  <Link
+                  {/* <Link
                     href="/complaints"
                     className="group flex items-center text-muted-foreground hover:text-primary"
                   >
                     <ChevronRight className="mr-2 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                     Complaints
-                  </Link>
+                  </Link> */}
                 </li>
                 <li>
                   <Link
@@ -203,5 +202,5 @@ export default function Component() {
         </div>
       </main>
     </div>
-  )
+  );
 }
