@@ -157,7 +157,12 @@ function BookPageContent() {
           );
     const subtotal = nightlyRate * nightsCount;
     const serviceFee = Math.round(subtotal * 0.12); // 12% service fee like Airbnb
-    const taxes = Math.round(subtotal * 0.18); // 18% GST in India
+    let taxes;
+    if (subtotal <= 7500) {
+      taxes = Math.round(subtotal * 0.12) + Math.round(serviceFee * 0.18); // 12% GST in India
+    } else if (subtotal > 7500) {
+      taxes = Math.round(subtotal * 0.18) + Math.round(serviceFee * 0.18); // 18% GST in India
+    }
 
     return {
       nights: nightsCount,
@@ -214,8 +219,8 @@ function BookPageContent() {
       if (!adult.name.trim()) {
         errors[`adult-name-${index}`] = "Name is required";
       }
-      if (adult.age < 13) {
-        errors[`adult-age-${index}`] = "Age must be 13 or above";
+      if (adult.age < 18) {
+        errors[`adult-age-${index}`] = "Age must be 18 or above";
       }
     });
 
@@ -224,8 +229,8 @@ function BookPageContent() {
       if (!child.name.trim()) {
         errors[`child-name-${index}`] = "Name is required";
       }
-      if (child.age < 2 || child.age > 12) {
-        errors[`child-age-${index}`] = "Age must be between 2 and 12";
+      if (child.age < 3 || child.age >= 18) {
+        errors[`child-age-${index}`] = "Age must be between 3 and 17";
       }
     });
 
@@ -257,7 +262,8 @@ function BookPageContent() {
 
     setGuestData((prev) => {
       const newData = { ...prev };
-      newData[type][index][field] = value;
+      // newData[type][index][field] = value;
+      newData[type][index] = { ...newData[type][index], [field]: value };
       return newData;
     });
 
@@ -305,13 +311,14 @@ function BookPageContent() {
     checkout,
     host,
     cancel,
-    guestData
+    guestData,
+    subTotal
   ) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
       const data = JSON.parse(getLocalData);
-      console.log(propertyId, amount, currency, checkin, checkout, host);
+      console.log("bat", subTotal);
       const response = await fetch(`${API_URL}/booking/`, {
         method: "POST",
         headers: {
@@ -330,6 +337,7 @@ function BookPageContent() {
           checkIn: checkin,
           checkOut: checkout,
           price: amount,
+          subTotal: subTotal,
           currency: currency,
           guestData: guestData,
         }),
@@ -471,6 +479,63 @@ function BookPageContent() {
       console.error(err);
     }
   };
+
+  const createPayout = async (bookingId, propertyId, amount) => {
+    try {
+      const getLocalData = await localStorage.getItem("token");
+      const data = JSON.parse(getLocalData);
+      const response = await fetch(`${API_URL}/payment/create-payout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data}`,
+        },
+        body: JSON.stringify({
+          bookingId: bookingId,
+          propertyId: propertyId,
+          amount: amount,
+        }),
+      });
+      const result = await response.json();
+
+      return result;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // const initiatePayout = async (
+  //   propertyId,
+  //   amount,
+  //   host,
+  //   bookingId,
+  //   property
+  // ) => {
+  //   try {
+  //     const userId = JSON.parse(localStorage.getItem("userId"));
+  //     const getLocalData = await localStorage.getItem("token");
+  //     const data = JSON.parse(getLocalData);
+  //     const response = await fetch(`${API_URL}/payment/payout`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${data}`,
+  //       },
+  //       body: JSON.stringify({
+  //         userId: userId,
+  //         bookingId: bookingId,
+  //         hostId: host,
+  //         propertyId: propertyId,
+  //         amount: amount,
+  //         property: property,
+  //       }),
+  //     });
+  //     const result = await response.json();
+
+  //     return result;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
   const handlePayment = async () => {
     if (typeof window.Razorpay === "undefined") {
       alert("Razorpay SDK is not loaded yet. Please try again in a moment.");
@@ -480,6 +545,7 @@ function BookPageContent() {
     try {
       const propertyId = await property._id;
       const propertyHostId = await property.host;
+      const propertyTitle = await property.title;
       console.log(propertyId, date.from, date.to, propertyHostId);
       const found = Object.entries(property?.cancellationType).find(
         ([key, value]) => value === true
@@ -495,7 +561,8 @@ function BookPageContent() {
         date.to,
         propertyHostId,
         cancel,
-        guestData
+        guestData,
+        totals.subtotal
       );
       console.log("green lan", booking);
       if (!booking || !booking.data?._id) {
@@ -509,7 +576,7 @@ function BookPageContent() {
       );
 
       const options = {
-        key: "rzp_test_w0bKE5w5UPOPrY", // Replace with your actual test key
+        key: "rzp_test_RRelkKgMDh3dun", //"rzp_test_w0bKE5w5UPOPrY", // Replace with your actual test key
         amount: totals.total * 100,
         currency: "INR",
         order_id: order_id?.data?.id,
@@ -568,6 +635,19 @@ function BookPageContent() {
                 hostEmail,
                 property.bookingType.manual
               );
+
+              await createPayout(
+                booking?.data?._id,
+                propertyId,
+                totals.subtotal
+              );
+              // const payout = await initiatePayout(
+              //   propertyId,
+              //   totals?.total * 100,
+              //   propertyHostId,
+              //   booking?.data?._id,
+              //   propertyTitle
+              // );
             } else {
               console.log("This got selected");
               const confirm = await updateConfirmStatus(booking?.data?._id);
@@ -576,6 +656,18 @@ function BookPageContent() {
                 hostEmail,
                 property.bookingType.manual
               );
+              await createPayout(
+                booking?.data?._id,
+                propertyId,
+                totals.subtotal
+              );
+              // const payout = await initiatePayout(
+              //   propertyId,
+              //   totals?.total * 100,
+              //   propertyHostId,
+              //   booking?.data?._id,
+              //   propertyTitle
+              // );
             }
 
             router.push(`/booking-summary?${summaryParams.toString()}`);
@@ -860,14 +952,17 @@ function BookPageContent() {
                               </label>
                               <input
                                 type="number"
-                                min="13"
+                                min="18"
                                 value={adult.age}
                                 onChange={(e) =>
                                   updateGuestData(
                                     "adults",
                                     index,
                                     "age",
-                                    parseInt(e.target.value) || 13
+                                    // parseInt(e.target.value) || 13
+                                    e.target.value === ""
+                                      ? ""
+                                      : parseInt(e.target.value, 10)
                                   )
                                 }
                                 className={`w-full p-2 border rounded ${
@@ -932,15 +1027,18 @@ function BookPageContent() {
                               </label>
                               <input
                                 type="number"
-                                min="2"
-                                max="12"
+                                min="3"
+                                max="17"
                                 value={child.age}
                                 onChange={(e) =>
                                   updateGuestData(
                                     "children",
                                     index,
                                     "age",
-                                    parseInt(e.target.value) || 2
+                                    // parseInt(e.target.value) || 2
+                                    e.target.value === ""
+                                      ? ""
+                                      : parseInt(e.target.value, 10)
                                   )
                                 }
                                 className={`w-full p-2 border rounded ${
