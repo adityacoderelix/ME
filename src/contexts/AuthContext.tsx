@@ -105,8 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     localStorage.clear();
     sessionStorage.clear();
-    localStorage.removeItem("user");
-    localStorage.removeItem("filterState"); // Clear filters on logout
+    // localStorage.removeItem("user");
+    // localStorage.removeItem("filterState"); // Clear filters on logout
   };
 
   // Convenience functions for modal
