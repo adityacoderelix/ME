@@ -13,7 +13,7 @@ const footerData = {
       { label: "Partners", href: "/partners" },
       { label: "Blogs", href: "/blogs" },
       { label: "Book a Home Stay", href: "/stays" },
-      { label: "Book an Experience", href: "/experiences" },
+      // { label: "Book an Experience", href: "/experiences" },
     ],
   },
   host: {
@@ -40,12 +40,12 @@ const footerData = {
     links: [
       { label: "FAQ", href: "/faq" },
       { label: "Help Center", href: "/help-center" },
-      { label: "Complaints", href: "/complaints" },
+      // { label: "Complaints", href: "/complaints" },
     ],
   },
 };
 
-const FooterColumn = ({ data  }) => (
+const FooterColumn = ({ data }) => (
   <div className="flex flex-col">
     <h3 className="text-base font-bricolage font-semibold text-graphite mb-4">
       {data.title}
@@ -75,14 +75,12 @@ export default function Footer() {
             <div className="xl:grid xl:grid-cols-5 xl:gap-8">
               <div className="xl:col-span-1">
                 <Link href="/">
-
-
-                <Image
-                  src="/images/logo-footer.svg"
-                  width={165}
-                  height={88}
-                  alt="Majestic Escape Logo"
-                />
+                  <Image
+                    src="/images/logo-footer.svg"
+                    width={165}
+                    height={88}
+                    alt="Majestic Escape Logo"
+                  />
                 </Link>
               </div>
               <div className="mt-16 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-4 xl:grid-cols-4">
@@ -91,8 +89,7 @@ export default function Footer() {
                 <FooterColumn data={footerData.legal} />
                 <FooterColumn data={footerData.support} />
               </div>
-              <div className="absolute top-16 right-4 lg:-top-0.5 lg:right-18">
-              </div>
+              <div className="absolute top-16 right-4 lg:-top-0.5 lg:right-18"></div>
             </div>
             <hr className="mt-12" />
 
@@ -111,7 +108,10 @@ export default function Footer() {
                   />
                 </Link>
 
-                <Link href="https://www.instagram.com/themajesticescape" target="_blank">
+                <Link
+                  href="https://www.instagram.com/themajesticescape"
+                  target="_blank"
+                >
                   <Image
                     src="/icons/instagram.png"
                     width={24}
@@ -121,7 +121,10 @@ export default function Footer() {
                   />
                 </Link>
 
-                <Link href="https://www.facebook.com/profile.php?id=61567800352990" target="_blank">
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61567800352990"
+                  target="_blank"
+                >
                   <Image
                     src="/icons/facebook.png"
                     width={24}

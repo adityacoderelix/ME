@@ -59,28 +59,34 @@ const data = {
       icon: PlusIcon,
       items: [],
     },
-    {
-      title: "Inbox",
-      url: "/host/inbox",
-      icon: Inbox,
-      items: [],
-    },
+    // {
+    //   title: "Inbox",
+    //   url: "/host/inbox",
+    //   icon: Inbox,
+    //   items: [],
+    // },
     {
       title: "Revenue",
       url: "/host/dashboard/revenue",
       icon: IndianRupeeIcon,
       items: [],
     },
+    // {
+    //   title: "Queries",
+    //   url: "/host/dashboard/queries",
+    //   icon: MessageCircleIcon,
+    //   items: [],
+    // },
+    // {
+    //   title: "Complaints",
+    //   url: "/host/dashboard/complaints",
+    //   icon: AlertCircle,
+    //   items: [],
+    // },
     {
-      title: "Queries",
-      url: "/host/dashboard/queries",
-      icon: MessageCircleIcon,
-      items: [],
-    },
-    {
-      title: "Complaints",
-      url: "/host/dashboard/complaints",
-      icon: AlertCircle,
+      title: "Analytics",
+      url: "/host/dashboard/analytics",
+      icon: CheckCheck,
       items: [],
     },
     {
@@ -89,12 +95,12 @@ const data = {
       icon: DollarSign,
       items: [],
     },
-    {
-      title: "Taxes",
-      url: "/host/dashboard/taxes",
-      icon: DollarSign,
-      items: [],
-    },
+    // {
+    //   title: "Taxes",
+    //   url: "/host/dashboard/taxes",
+    //   icon: DollarSign,
+    //   items: [],
+    // },
 
     {
       title: "Bookings",
@@ -103,12 +109,12 @@ const data = {
       items: [],
     },
 
-    {
-      title: "Invoices",
-      url: "/host/dashboard/invoices",
-      icon: Receipt,
-      items: [],
-    },
+    // {
+    //   title: "Invoices",
+    //   url: "/host/dashboard/invoices",
+    //   icon: Receipt,
+    //   items: [],
+    // },
     {
       title: "Reviews",
       url: "/host/dashboard/reviews",
@@ -117,7 +123,7 @@ const data = {
     },
     {
       title: "Help Center",
-      url: "/host/help-center",
+      url: "/help-center",
       icon: HelpCircle,
       items: [],
     },
