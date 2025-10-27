@@ -1,37 +1,61 @@
-import Link from 'next/link'
-import { Input } from "@/components/ui/input"
-import Heading from "@/components/ui/heading"
-import SubHeading from "@/components/ui/sub-heading"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, FileText, MessageCircle, Settings, HelpCircle, ArrowRight, Phone, Mail, MessageSquare } from 'lucide-react'
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import Heading from "@/components/ui/heading";
+import SubHeading from "@/components/ui/sub-heading";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Search,
+  FileText,
+  MessageCircle,
+  Settings,
+  HelpCircle,
+  ArrowRight,
+  Phone,
+  Mail,
+  MessageSquare,
+} from "lucide-react";
 export default function HelpCenter() {
   const categories = [
-    { icon: <FileText className="h-6 w-6" />, title: "Booking & Reservations", description: "Learn about making, modifying, and canceling reservations" },
-    { icon: <MessageCircle className="h-6 w-6" />, title: "Guest Services", description: "Information on amenities, special requests, and local attractions" },
-    { icon: <Settings className="h-6 w-6" />, title: "Account Management", description: "Manage your profile, preferences, and payment methods" },
-    { icon: <HelpCircle className="h-6 w-6" />, title: "General Inquiries", description: "Get answers to common questions about Majestic Escape" },
-  ]
+    {
+      icon: <FileText className="h-6 w-6" />,
+      title: "Booking & Reservations",
+      description: "Learn about making, modifying, and canceling reservations",
+    },
+    {
+      icon: <MessageCircle className="h-6 w-6" />,
+      title: "Guest Services",
+      description:
+        "Information on amenities, special requests, and local attractions",
+    },
+    {
+      icon: <Settings className="h-6 w-6" />,
+      title: "Account Management",
+      description: "Manage your profile, preferences, and payment methods",
+    },
+    {
+      icon: <HelpCircle className="h-6 w-6" />,
+      title: "General Inquiries",
+      description: "Get answers to common questions about Majestic Escape",
+    },
+  ];
 
   const popularQuestions = [
     { question: "How do I make a reservation?", link: "#" },
     { question: "What is your cancellation policy?", link: "#" },
     { question: "How can I modify my booking?", link: "#" },
     { question: "What amenities are included in my stay?", link: "#" },
-  ]
+  ];
 
   return (
-
-
     <div className="font-poppins min-h-screen py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         <header className=" mb-6">
-        <Heading text="How can we help you?" />
-        
-        <SubHeading text="Find answers to your questions or contact our support team" />
-    
+          <Heading text="How can we help you?" />
+
+          <SubHeading text="Find answers to your questions or contact our support team" />
         </header>
 
-        <div className="max-w-2xl mb-8">
+        {/* <div className="max-w-2xl mb-8">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 
@@ -116,9 +140,8 @@ export default function HelpCenter() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
+        </div> */}
       </div>
     </div>
-  )
+  );
 }
