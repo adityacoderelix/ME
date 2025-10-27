@@ -245,7 +245,7 @@ export default function FilterStaysBar({
           <span>Filter</span>
         </button>
 
-        <div
+        {/* <div
           className={`${
             includeTaxes
               ? "ring-lightGray ring-1 transition-all"
@@ -266,7 +266,7 @@ export default function FilterStaysBar({
           <span className="text-sm text-absoluteDark font-medium whitespace-nowrap">
             {includeTaxes ? "Include Tax" : "Exclude Tax"}
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
