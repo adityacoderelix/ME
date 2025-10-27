@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,13 +36,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import ConfirmationModal from "@/components/dialog-modal"; // adjust path as needed
-
+import InvoicePage from "@/components/invoice";
 import { cn } from "@/lib/utils";
 import { addDays, format, addMonths, subMonths } from "date-fns";
 import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Invoice from "../../../../../components/invoice";
+
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // Mock data for reservations
 const reservations = [];
@@ -51,7 +54,12 @@ export default function ReservationsPage() {
     from: addMonths(new Date(), -1),
     to: new Date(),
   });
+  const printRef = useRef(null);
+  const [invoiceData, setInvoiceData] = useState();
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [payment, setPayment] = useState();
 
+  console.log("cl", payment);
   const handleDateRangeChange = (range) => {
     const today = new Date();
     switch (range) {
@@ -74,7 +82,32 @@ export default function ReservationsPage() {
         break;
     }
   };
-
+  const downloadPdf = async () => {
+    const res = await fetch(`${API_URL}/booking/generate-pdf`);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "test.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    // const element = printRef.current;
+    // if (!element) {
+    //   return;
+    // }
+    // const canvas = await html2canvas(element);
+    // const data = canvas.toDataURL("image/png");
+    // const pdf = new jsPDF({
+    //   orientation: "portrait",
+    //   unit: "px",
+    //   format: "a4",
+    // });
+    // const imgProperties = pdf.getImageProperties(data);
+    // const pdfWidth = pdf.internal.pageSize.getWidth();
+    // const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+    // pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight);
+    // pdf.save("examplepdf.pdf");
+  };
   const router = useRouter();
   const [bookings, setBookings] = useState();
   const [localState, setLocalState] = useState();
@@ -125,6 +158,33 @@ export default function ReservationsPage() {
       }
     }
   };
+  const getPayment = async (bookingId) => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    if (data) {
+      try {
+        const response = await fetch(
+          `${API_URL}/payment/booking?id=${bookingId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.status != 200) {
+          return;
+        }
+        const result = await response.json();
+        console.log("enll", result);
+        setPayment(result.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [searchValue, status, date]);
@@ -247,6 +307,7 @@ export default function ReservationsPage() {
   const openModal = (action, booking) => {
     setModalAction(action);
     setSelectedBooking(booking);
+
     setTimeout(() => setModalOpen(true), 50);
   };
 
@@ -324,13 +385,56 @@ export default function ReservationsPage() {
 
     return false;
   }
-  console.log(bookings);
+  console.log("dddddddd", payment);
   return (
     <div className="w-full space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <h1 className="text-2xl font-semibold font-bricolage text-absoluteDark">
           Bookings
         </h1>
+        {showInvoice && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            {/* Outer container — center modal */}
+            <div className="bg-white w-full rounded-2xl max-w-2xl max-h-[90vh] flex flex-col relative">
+              {/* Header (fixed top) */}
+              <div className="sticky rounded-t-2xl top-0 bg-white  border-b flex justify-between items-center px-4 py-3 z-10">
+                <h2 className="text-lg font-semibold text-gray-800">Invoice</h2>
+                <button
+                  onClick={() => {
+                    setShowInvoice(false);
+                    setInvoiceData();
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div ref={printRef} className="flex-1 overflow-y-auto px-6 py-4">
+                <Invoice payment={payment} invoiceData={invoiceData} />
+              </div>
+
+              {/* Footer (fixed bottom) */}
+              <div className="sticky  rounded-b-2xl  bottom-0 bg-gray-50 border-t flex justify-end px-4 py-3 z-10">
+                <Button onClick={() => downloadPdf()}>Download PDF</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <ConfirmationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -350,7 +454,6 @@ export default function ReservationsPage() {
               : "cancel"
           }
         />
-
         <div className="flex items-center space-x-4">
           <Select className="bg-white" onValueChange={handleDateRangeChange}>
             <SelectTrigger className="w-[180px]">
@@ -512,6 +615,15 @@ export default function ReservationsPage() {
                       }}
                     >
                       View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setShowInvoice(true);
+                        getPayment(booking._id);
+                        setInvoiceData(booking);
+                      }}
+                    >
+                      Invoice
                     </DropdownMenuItem>
                     {booking?.propertyId?.bookingType?.manual ? (
                       booking?.status != "confirmed" &&
