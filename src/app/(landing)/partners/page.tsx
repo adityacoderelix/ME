@@ -1,9 +1,23 @@
-import { ArrowRight, CheckCircle2, Hotel, TrendingUp, Users, Zap } from "lucide-react"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import {
+  ArrowRight,
+  CheckCircle2,
+  Hotel,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 import {
   Dialog,
@@ -12,12 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
 export default function PartnerPage() {
+  const router = useRouter();
   function PartnerForm() {
     return (
       <form className="space-y-4">
@@ -45,14 +61,21 @@ export default function PartnerPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="numberOfProperties">Number of properties</Label>
-          <Input id="numberOfProperties" type="number" placeholder="How many properties do you manage?" />
+          <Input
+            id="numberOfProperties"
+            type="number"
+            placeholder="How many properties do you manage?"
+          />
         </div>
- 
-        <Button type="submit" className="w-full bg-primaryGreen hover:bg-brightGreen">
+
+        <Button
+          type="submit"
+          className="w-full bg-primaryGreen hover:bg-brightGreen"
+        >
           Submit Application
         </Button>
       </form>
-    )
+    );
   }
 
   return (
@@ -63,24 +86,40 @@ export default function PartnerPage() {
           <h1 className="text-4xl md:text-5xl font-bricolage lg:text-6xl font-bold tracking-tight text-absoluteDark mb-6">
             Become a Hospitality Partner
           </h1>
-          <p className="text-xl text-graphite mb-8">Join the Elite Network of Luxury Stay Providers</p>
-          <Dialog>
+          <p className="text-xl text-graphite mb-8">
+            Join the Elite Network of Luxury Stay Providers
+          </p>
+          <Button
+            size="lg"
+            className="bg-primaryGreen hover:bg-brightGreen transition-colors rounded-3xl"
+            onClick={() => router.push("/host/register")}
+          >
+            Partner with us
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          {/* <Dialog>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-primaryGreen hover:bg-brightGreen transition-colors rounded-3xl">
+              <Button
+                size="lg"
+                className="bg-primaryGreen hover:bg-brightGreen transition-colors rounded-3xl"
+              >
                 Partner with us
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bricolage">Partner Application</DialogTitle>
+                <DialogTitle className="text-2xl font-bricolage">
+                  Partner Application
+                </DialogTitle>
                 <DialogDescription>
-                  Fill out the form below to start your partnership journey with Majestic Escape.
+                  Fill out the form below to start your partnership journey with
+                  Majestic Escape.
                 </DialogDescription>
               </DialogHeader>
               <PartnerForm />
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
       </section>
 
@@ -95,28 +134,34 @@ export default function PartnerPage() {
               {
                 icon: Hotel,
                 title: "Increased Visibility",
-                description: "Showcase your property to our network of luxury travelers",
+                description:
+                  "Showcase your property to our network of luxury travelers",
               },
               {
                 icon: TrendingUp,
                 title: "Revenue Growth",
-                description: "Boost your bookings and maximize your property's potential",
+                description:
+                  "Boost your bookings and maximize your property's potential",
               },
               {
                 icon: Users,
                 title: "Quality Guests",
-                description: "Connect with discerning travelers who appreciate luxury",
+                description:
+                  "Connect with discerning travelers who appreciate luxury",
               },
               {
                 icon: Zap,
                 title: "Streamlined Operations",
-                description: "Benefit from our efficient booking and management tools",
+                description:
+                  "Benefit from our efficient booking and management tools",
               },
             ].map((benefit, index) => (
               <div key={index} className="flex items-start space-x-4">
                 <benefit.icon className="h-6 w-6 text-stone mt-1" />
                 <div>
-                  <h3 className="text-xl font-semibold text-stone mb-2">{benefit.title}</h3>
+                  <h3 className="text-xl font-semibold text-stone mb-2">
+                    {benefit.title}
+                  </h3>
                   <p className="text-solidGray">{benefit.description}</p>
                 </div>
               </div>
@@ -134,7 +179,9 @@ export default function PartnerPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-stone">Property Standards</CardTitle>
+                <CardTitle className="text-xl font-semibold text-stone">
+                  Property Standards
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -153,18 +200,22 @@ export default function PartnerPage() {
             </Card>
             <Card className="bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-stone">Operational Excellence</CardTitle>
+                <CardTitle className="text-xl font-semibold text-stone">
+                  Operational Excellence
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {["Responsive communication", "Professional guest services", "Commitment to guest satisfaction"].map(
-                    (item, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        <span>{item}</span>
-                      </li>
-                    ),
-                  )}
+                  {[
+                    "Responsive communication",
+                    "Professional guest services",
+                    "Commitment to guest satisfaction",
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
@@ -200,7 +251,8 @@ export default function PartnerPage() {
                       },
                       {
                         title: "Contract Duration",
-                        description: "Initial partnership agreement is for 12 months with automatic renewal option.",
+                        description:
+                          "Initial partnership agreement is for 12 months with automatic renewal option.",
                       },
                     ].map((item, index) => (
                       <div key={index} className="flex items-start gap-4">
@@ -252,7 +304,6 @@ export default function PartnerPage() {
         </div>
       </section>
 
-
       {/* FAQ Section */}
       <section className="px-4 py-20">
         <div className="container mx-auto max-w-3xl">
@@ -283,8 +334,12 @@ export default function PartnerPage() {
               },
             ].map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left text-graphite">{faq.question}</AccordionTrigger>
-                <AccordionContent className="text-stone">{faq.answer}</AccordionContent>
+                <AccordionTrigger className="text-left text-graphite">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-stone">
+                  {faq.answer}
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -294,27 +349,46 @@ export default function PartnerPage() {
       {/* CTA Section */}
       <section className="px-4 py-20 bg-primaryGreen text-white">
         <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bricolage font-semibold  mb-6">Ready to Elevate Your Hospitality Business?</h2>
-          <p className="text-xl mb-8">Join Majestic Escape today and unlock the potential of your luxury property.</p>
-          <Dialog>
+          <h2 className="text-3xl font-bricolage font-semibold  mb-6">
+            Ready to Elevate Your Hospitality Business?
+          </h2>
+          <p className="text-xl mb-8">
+            Join Majestic Escape today and unlock the potential of your luxury
+            property.
+          </p>
+          <Button
+            size="lg"
+            className="bg-white text-green-800 hover:bg-green-100"
+            onClick={() => router.push("/host/register")}
+          >
+            Become a Partner
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          {/* <Dialog>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-white text-green-800 hover:bg-green-100">
+              <Button
+                size="lg"
+                className="bg-white text-green-800 hover:bg-green-100"
+              >
                 Become a Partner
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bricolage">Partner Application</DialogTitle>
+                <DialogTitle className="text-2xl font-bricolage">
+                  Partner Application
+                </DialogTitle>
                 <DialogDescription>
-                  Fill out the form below to start your partnership journey with Majestic Escape.
+                  Fill out the form below to start your partnership journey with
+                  Majestic Escape.
                 </DialogDescription>
               </DialogHeader>
               <PartnerForm />
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
       </section>
     </div>
-  )
+  );
 }
