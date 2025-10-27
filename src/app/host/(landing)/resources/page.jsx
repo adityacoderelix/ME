@@ -1,5 +1,4 @@
-'use client'
-
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -25,7 +24,8 @@ export default function HostResources() {
   const allResources = [
     {
       title: "Ultimate Hosting Guide",
-      description: "A comprehensive guide covering all aspects of being a successful host.",
+      description:
+        "A comprehensive guide covering all aspects of being a successful host.",
       icon: <BookOpen className="h-6 w-6" />,
       link: "#",
       type: "guide",
@@ -33,7 +33,8 @@ export default function HostResources() {
     },
     {
       title: "Mastering Property Photography",
-      description: "Learn how to capture stunning photos that showcase your property's best features.",
+      description:
+        "Learn how to capture stunning photos that showcase your property's best features.",
       icon: <PlayCircle className="h-6 w-6" />,
       link: "#",
       type: "video",
@@ -41,7 +42,8 @@ export default function HostResources() {
     },
     {
       title: "Seasonal Pricing Strategies",
-      description: "Optimize your pricing throughout the year to maximize occupancy and revenue.",
+      description:
+        "Optimize your pricing throughout the year to maximize occupancy and revenue.",
       icon: <DollarSign className="h-6 w-6" />,
       link: "#",
       type: "article",
@@ -49,7 +51,8 @@ export default function HostResources() {
     },
     {
       title: "Creating Memorable Guest Experiences",
-      description: "Tips and tricks to delight your guests and earn stellar reviews.",
+      description:
+        "Tips and tricks to delight your guests and earn stellar reviews.",
       icon: <Users className="h-6 w-6" />,
       link: "#",
       type: "guide",
@@ -57,7 +60,8 @@ export default function HostResources() {
     },
     {
       title: "Understanding Local Regulations",
-      description: "Stay compliant with local laws and regulations for short-term rentals.",
+      description:
+        "Stay compliant with local laws and regulations for short-term rentals.",
       icon: <FileText className="h-6 w-6" />,
       link: "#",
       type: "article",
@@ -74,9 +78,10 @@ export default function HostResources() {
     "Legal & Safety",
   ];
 
-  const filteredResources = allResources.filter((resource) =>
-    resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    resource.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredResources = allResources.filter(
+    (resource) =>
+      resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      resource.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const articles = [
@@ -86,19 +91,23 @@ export default function HostResources() {
     },
     {
       title: "Navigating the Post-Pandemic Travel Landscape",
-      description: "Adapt your hosting strategy to meet changing guest expectations",
+      description:
+        "Adapt your hosting strategy to meet changing guest expectations",
     },
     {
       title: "Eco-Friendly Hosting: A Complete Guide",
-      description: "Implement sustainable practices to attract environmentally conscious guests",
+      description:
+        "Implement sustainable practices to attract environmentally conscious guests",
     },
     {
       title: "Mastering the Art of Guest Communication",
-      description: "Improve your response rates and guest satisfaction with effective communication",
+      description:
+        "Improve your response rates and guest satisfaction with effective communication",
     },
     {
       title: "Tax Tips for Short-Term Rental Hosts",
-      description: "Understand your tax obligations and maximize deductions as a host",
+      description:
+        "Understand your tax obligations and maximize deductions as a host",
     },
   ];
 
@@ -106,12 +115,15 @@ export default function HostResources() {
     <div className="font-poppins min-h-screen py-16 md:py-32 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="mb-12">
-          <h1 className="text-4xl font-bricolage font-bold text-gray-900 mb-4">Host Resources</h1>
+          <h1 className="text-4xl font-bricolage font-bold text-gray-900 mb-4">
+            Host Resources
+          </h1>
           <p className="text-xl text-gray-600 max-w-3xl">
-            Explore our curated collection of guides, articles, and tools to enhance your hosting skills and grow your business.
+            Explore our curated collection of guides, articles, and tools to
+            enhance your hosting skills and grow your business.
           </p>
         </header>
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <div className="relative max-w-2xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
@@ -233,9 +245,8 @@ export default function HostResources() {
               </CardContent>
             </Card>
           </div>
-        </section>
+        </section> */}
       </div>
     </div>
   );
 }
-

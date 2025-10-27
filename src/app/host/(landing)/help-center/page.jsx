@@ -1,34 +1,73 @@
-
-import Link from 'next/link'
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Home,  Calendar, DollarSign, Settings, ArrowRight, Phone, Mail, MessageSquare } from 'lucide-react'
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Search,
+  Home,
+  Calendar,
+  DollarSign,
+  Settings,
+  ArrowRight,
+  Phone,
+  Mail,
+  MessageSquare,
+} from "lucide-react";
 
 export default function HostHelpCenter() {
   const categories = [
-    { icon: <Home className="h-6 w-6" />, title: "Property Management", description: "Learn about listing, updating, and managing your properties" },
-    { icon: <Calendar className="h-6 w-6" />, title: "Booking & Availability", description: "Manage your calendar, reservations, and guest communications" },
-    { icon: <DollarSign className="h-6 w-6" />, title: "Payments & Pricing", description: "Understand pricing strategies, payouts, and financial reports" },
-    { icon: <Settings className="h-6 w-6" />, title: "Account Settings", description: "Manage your host profile, preferences, and account security" },
-  ]
+    {
+      icon: <Home className="h-6 w-6" />,
+      title: "Property Management",
+      description:
+        "Learn about listing, updating, and managing your properties",
+    },
+    {
+      icon: <Calendar className="h-6 w-6" />,
+      title: "Booking & Availability",
+      description:
+        "Manage your calendar, reservations, and guest communications",
+    },
+    {
+      icon: <DollarSign className="h-6 w-6" />,
+      title: "Payments & Pricing",
+      description:
+        "Understand pricing strategies, payouts, and financial reports",
+    },
+    {
+      icon: <Settings className="h-6 w-6" />,
+      title: "Account Settings",
+      description:
+        "Manage your host profile, preferences, and account security",
+    },
+  ];
 
   const popularQuestions = [
     { question: "How do I list a new property?", link: "#" },
-    { question: "What are the best practices for pricing my property?", link: "#" },
+    {
+      question: "What are the best practices for pricing my property?",
+      link: "#",
+    },
     { question: "How can I improve my property's ranking?", link: "#" },
-    { question: "What should I do if I have an issue with a guest?", link: "#" },
-  ]
+    {
+      question: "What should I do if I have an issue with a guest?",
+      link: "#",
+    },
+  ];
 
   return (
-    
     <div className="font-poppins min-h-screen py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         <header className=" mb-6">
-          <h1 className="text-4xl font-bricolage font-bold text-absoluteDark mb-2">Host Support Center</h1>
-          <p className="text-base text-stone">Find answers to your hosting questions or contact our host support team</p>
+          <h1 className="text-4xl font-bricolage font-bold text-absoluteDark mb-2">
+            Host Support Center
+          </h1>
+          <p className="text-base text-stone">
+            Find answers to your hosting questions or contact our host support
+            team
+          </p>
         </header>
 
-        <div className="max-w-2xl mb-8">
+        {/* <div className="max-w-2xl mb-8">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 
@@ -113,11 +152,8 @@ export default function HostHelpCenter() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
+        </div> */}
       </div>
     </div>
-     
-  )
+  );
 }
-
