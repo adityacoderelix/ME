@@ -172,8 +172,8 @@ const AnalyticsPage = () => {
     const data = JSON.parse(getLocalData);
     const host = await localStorage.getItem("userId");
 
-    const from = getDate(dateRange.from);
-    const to = getDate(dateRange.to);
+    const from = dateRange.from ? dateRange.from.toLocaleDateString() : null;
+    const to = dateRange.to ? dateRange.to.toLocaleDateString() : null;
     console.log(from, to);
     if (data) {
       try {

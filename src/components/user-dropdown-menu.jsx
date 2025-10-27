@@ -1,33 +1,34 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-import { User } from 'lucide-react'
-import { cn } from "@/lib/utils"
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export function UserDropdownMenu() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-    const { user, logout } = useAuth()
-    const router = useRouter()
-  
-    const handleLogout = () => {
-      logout()
-      router.push('/login') // Redirect to home page after logout
-    }
-  
-    if (!user) {
-      // If there's no user, redirect to login page
-      router.push('/login')
-      return null
-    }
+  const handleLogout = () => {
+    logout();
+    localStorage.clear();
+    sessionStorage.clear();
+    router.push("/login"); // Redirect to home page after logout
+  };
+
+  if (!user) {
+    // If there's no user, redirect to login page
+    router.push("/login");
+    return null;
+  }
   return (
     <div className="relative">
       <DropdownMenu>
@@ -41,8 +42,8 @@ export function UserDropdownMenu() {
             <span className="sr-only">Toggle user menu</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          align="end" 
+        <DropdownMenuContent
+          align="end"
           className={cn(
             "w-56",
             "absolute right-0 mt-2",
@@ -52,56 +53,61 @@ export function UserDropdownMenu() {
           sideOffset={5}
         >
           <DropdownMenuItem asChild>
-            <Link className='py-2' href="/account/personal-info">
+            <Link className="py-2" href="/account/personal-info">
               Account
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link className='py-2'  href="/notifications">
+            <Link className="py-2" href="/notifications">
               Notifications
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link className='py-2'  href="/manage-bookings">
+            <Link className="py-2" href="/manage-bookings">
               Bookings
             </Link>
           </DropdownMenuItem>
 
-          <hr/>
+          <hr />
           <DropdownMenuItem asChild>
-            <Link className='py-2' href="/host/dashboard/add-listing" rel="noopener noreferrer">
+            <Link
+              className="py-2"
+              href="/host/dashboard/add-listing"
+              rel="noopener noreferrer"
+            >
               Host your Property
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link className='py-2' href="/host/dashboard" rel="noopener noreferrer">
+            <Link
+              className="py-2"
+              href="/host/dashboard"
+              rel="noopener noreferrer"
+            >
               Manage Experiences
             </Link>
           </DropdownMenuItem>
 
-
-          <hr/>
+          <hr />
           <DropdownMenuItem asChild>
-            <Link className='py-2'  href="/faq">
+            <Link className="py-2" href="/faq">
               FAQ
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link className='py-2'  href="/help-center">
+            <Link className="py-2" href="/help-center">
               Help Center
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <button             onClick={handleLogout} className='py-2 w-full'  >
+            <button onClick={handleLogout} className="py-2 w-full">
               Logout
             </button>
           </DropdownMenuItem>
-         
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }
-
