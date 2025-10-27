@@ -1197,7 +1197,7 @@ export default function Properties() {
                   <span>Filters</span>
                 </button>
               </FilterSheet>
-              <div
+              {/* <div
                 className={`${
                   includeTaxes
                     ? "ring-brightGreen ring-1 transition-all"
@@ -1218,7 +1218,7 @@ export default function Properties() {
                 <span className="text-sm text-[#666666] font-medium whitespace-nowrap">
                   {includeTaxes ? "Include Taxes" : "Exclude Taxes"}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
 
