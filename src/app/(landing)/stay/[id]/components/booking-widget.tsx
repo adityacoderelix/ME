@@ -78,9 +78,11 @@ export default function BookingWidget({
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
     const data = JSON.parse(getLocalData);
-    if (data) setIsAuth(true);
+    if (data) {
+      setIsAuth(true);
+    }
   };
-
+  console.log("nonssssssss", isAuth, isValid);
   useEffect(() => {
     auth();
   }, []);
@@ -447,19 +449,27 @@ export default function BookingWidget({
                   <Button
                     className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
                     onClick={() => {
-                      toast.error("Enter both check in and check out dates");
+                      toast.error("Select both dates");
                     }}
                   >
                     {"Check availability"}
                   </Button>
                 )
               ) : (
-                <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
+                <Button
+                  className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                  onClick={() => {
+                    toast.error("Select dates");
+                  }}
+                >
                   Check availability
                 </Button>
               )
             ) : (
-              <Button className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium">
+              <Button
+                className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                // onClick={() => toast.error("Check if you are logged in")}
+              >
                 Check availability
               </Button>
             )}
