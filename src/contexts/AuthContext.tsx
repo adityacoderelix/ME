@@ -103,6 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = () => {
     setUser(null);
+    localStorage.clear();
+    sessionStorage.clear();
     localStorage.removeItem("user");
     localStorage.removeItem("filterState"); // Clear filters on logout
   };
