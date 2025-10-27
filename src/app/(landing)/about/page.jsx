@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 
-import Heading from '@/components/ui/heading';
-import SubHeading from '@/components/ui/sub-heading';
-import Title from '@/components/ui/title';
+import Heading from "@/components/ui/heading";
+import SubHeading from "@/components/ui/sub-heading";
+import Title from "@/components/ui/title";
 
 import Link from "next/link";
 
@@ -13,36 +13,24 @@ const Card = ({ children, className }) => (
 );
 
 const CardHeader = ({ children }) => (
-  <div className="px-6 py-4">
-    {children}
-  </div>
+  <div className="px-6 py-4">{children}</div>
 );
 
 const CardContent = ({ children }) => (
-  <div className="px-6 py-4">
-    {children}
-  </div>
+  <div className="px-6 py-4">{children}</div>
 );
 
 const CardFooter = ({ children }) => (
-  <div className="px-6 py-8 bg-offWhite border-t border-t-gray">
-    {children}
-  </div>
+  <div className="px-6 py-8 bg-offWhite border-t border-t-gray">{children}</div>
 );
-
-
 
 export default function About() {
   return (
- 
-
-  
     <div className="font-poppins min-h-screen pt-24 bg-white">
       <header className="bg-offWhite shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <Heading text="About Majestic Escape" />
-              <SubHeading text="Your gateway to authentic Goan experiences" />
-        
+          <Heading text="About Majestic Escape" />
+          <SubHeading text="Your gateway to authentic Goan experiences" />
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -50,11 +38,15 @@ export default function About() {
           <div className="mb-12">
             <Card className="">
               <CardHeader>
-                <Title text="Our Mission"/>
+                <Title text="Our Mission" />
               </CardHeader>
               <CardContent>
                 <p className="text-base text-stone">
-                  At Majestic Escape, we&apos;re passionate about making your Goan adventure unforgettable. Our platform connects travellers with unique, comfortable, and authentic accommodations across the beautiful state of Goa. From beachside shacks to luxury villas, we&apos;ve got something for every type of traveller.
+                  At Majestic Escape, we&apos;re passionate about making your
+                  Goan adventure unforgettable. Our platform connects travellers
+                  with unique, comfortable, and authentic accommodations across
+                  the beautiful state of Goa. From beachside shacks to luxury
+                  villas, we&apos;ve got something for every type of traveller.
                 </p>
               </CardContent>
             </Card>
@@ -63,52 +55,118 @@ export default function About() {
           <div className="mb-12">
             <Card>
               <CardHeader>
-              <Title text="Why Choose Majestic Escape?"/>
+                <Title text="Why Choose Majestic Escape?" />
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-6 w-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
-                      <p className="ml-3 text-stone">Curated Selection: We handpick high-quality accommodations to ensure your comfort and satisfaction.</p>
+                      <p className="ml-3 text-stone">
+                        Curated Selection: We handpick high-quality
+                        accommodations to ensure your comfort and satisfaction.
+                      </p>
                     </div>
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-6 w-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
-                      <p className="ml-3 text-stone">Easy Booking: Our user-friendly platform makes reservations and payments simple and secure.</p>
+                      <p className="ml-3 text-stone">
+                        Easy Booking: Our user-friendly platform makes
+                        reservations and payments simple and secure.
+                      </p>
                     </div>
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-6 w-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
-                      <p className="ml-3 text-stone">Local Insights: Benefit from our team&apos;s deep knowledge of Goa, including insider tips and recommendations.</p>
+                      <p className="ml-3 text-stone">
+                        Local Insights: Benefit from our team&apos;s deep
+                        knowledge of Goa, including insider tips and
+                        recommendations.
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-6 w-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
-                      <p className="ml-3 text-stone">24/7 Support: Our customer service team is always ready to assist you, day or night.</p>
+                      <p className="ml-3 text-stone">
+                        24/7 Support: Our customer service team is always ready
+                        to assist you, day or night.
+                      </p>
                     </div>
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
-                        <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="h-6 w-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
-                      <p className="ml-3 text-stone">Flexible Policies: We understand plans can change, so we offer accommodating cancellation options.</p>
+                      <p className="ml-3 text-stone">
+                        Flexible Policies: We understand plans can change, so we
+                        offer accommodating cancellation options.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -119,18 +177,26 @@ export default function About() {
           <div className="mt-8">
             <Card>
               <CardHeader>
-              <Title text="Our Story"/>
+                <Title text="Our Story" />
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="mb-4 text-stone">
-                    Founded in 2024, Majestic Escape was born out of a love for Goa&apos;s vibrant culture, stunning beaches, and warm hospitality. Our founders, avid travellers themselves, recognized the need for a platform that could showcase the best of Goa&apos;s accommodations while supporting local businesses.
+                    Founded in 2024, Majestic Escape was born out of a love for
+                    Goa&apos;s vibrant culture, stunning beaches, and warm
+                    hospitality. Our founders, avid travellers themselves,
+                    recognized the need for a platform that could showcase the
+                    best of Goa&apos;s accommodations while supporting local
+                    businesses.
                   </p>
                   <p className="text-stone">
-                    Today, we&apos;re proud to be the go-to platform for travellers seeking authentic Goan experiences. Our team works tirelessly to ensure that every stay booked through Majestic Escape meets our high standards of quality and authenticity.
+                    Today, we&apos;re proud to be the go-to platform for
+                    travellers seeking authentic Goan experiences. Our team
+                    works tirelessly to ensure that every stay booked through
+                    Majestic Escape meets our high standards of quality and
+                    authenticity.
                   </p>
                 </div>
-              
               </CardContent>
             </Card>
           </div>
@@ -139,11 +205,16 @@ export default function About() {
             <div className="transform transition duration-300 hover:scale-105 active:scale-95">
               <Card className="h-full bg-white overflow-hidden relative group">
                 <CardHeader>
-                 
-                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">Responsible Tourism</h3>
+                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">
+                    Responsible Tourism
+                  </h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">We&apos;re dedicated to promoting sustainable travel practices that benefit local communities and preserve Goa&apos;s natural beauty.</p>
+                  <p className="text-gray-700">
+                    We&apos;re dedicated to promoting sustainable travel
+                    practices that benefit local communities and preserve
+                    Goa&apos;s natural beauty.
+                  </p>
                 </CardContent>
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-lightGreen transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Card>
@@ -152,11 +223,16 @@ export default function About() {
             <div className="transform transition duration-300 hover:scale-105 active:scale-95">
               <Card className="h-full bg-white overflow-hidden relative group">
                 <CardHeader>
-                 
-                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">Local Partnerships</h3>
+                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">
+                    Local Partnerships
+                  </h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">Majestic Escape actively collaborates with local businesses and property owners, supporting the local economy and providing you with genuine Goan experiences.</p>
+                  <p className="text-gray-700">
+                    Majestic Escape actively collaborates with local businesses
+                    and property owners, supporting the local economy and
+                    providing you with genuine Goan experiences.
+                  </p>
                 </CardContent>
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-lightGreen transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Card>
@@ -165,12 +241,15 @@ export default function About() {
             <div className="transform transition duration-300 hover:scale-105 active:scale-95">
               <Card className="h-full bg-white overflow-hidden relative group">
                 <CardHeader>
-                  
-
-                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">Cultural Respect</h3>
+                  <h3 className="text-xl font-medium font-bricolage text-absoluteDark">
+                    Cultural Respect
+                  </h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700">We encourage our guests to immerse themselves in Goan culture while respecting local customs and traditions.</p>
+                  <p className="text-gray-700">
+                    We encourage our guests to immerse themselves in Goan
+                    culture while respecting local customs and traditions.
+                  </p>
                 </CardContent>
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-lightGreen transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </Card>
@@ -180,11 +259,17 @@ export default function About() {
           <div className="mt-8">
             <Card className="bg-white ">
               <CardHeader>
-                <h2 className="text-2xl font-bricolage font-semibold text-absoluteDark">Discover Goa with Us</h2>
+                <h2 className="text-2xl font-bricolage font-semibold text-absoluteDark">
+                  Discover Goa with Us
+                </h2>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-slate-600">
-                  Whether you&apos;re looking for a peaceful retreat or an adventure-filled holiday, Majestic Escape is here to make your Goan dreams a reality. From the moment you book until the end of your stay, we&apos;re committed to providing you with exceptional service and unforgettable experiences.
+                  Whether you&apos;re looking for a peaceful retreat or an
+                  adventure-filled holiday, Majestic Escape is here to make your
+                  Goan dreams a reality. From the moment you book until the end
+                  of your stay, we&apos;re committed to providing you with
+                  exceptional service and unforgettable experiences.
                 </p>
                 <p className="font-medium text-stone">
                   Join us in exploring the magic of Goa, one stay at a time.
@@ -192,8 +277,9 @@ export default function About() {
               </CardContent>
               <CardFooter>
                 <Link
-                 href='/stayss'
-                  className=" bg-primaryGreen hover:bg-brightGreen text-white  hover:scale-105 transition-all px-6 py-3  rounded-3xl ">
+                  href="/stays"
+                  className=" bg-primaryGreen hover:bg-brightGreen text-white  hover:scale-105 transition-all px-6 py-3  rounded-3xl "
+                >
                   Book your stay
                 </Link>
               </CardFooter>
@@ -202,9 +288,5 @@ export default function About() {
         </div>
       </main>
     </div>
-   
-
-
-
   );
 }
