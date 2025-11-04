@@ -17,7 +17,7 @@ export default function FilterProperties({
   guests,
   location,
   senior,
-  children,
+  child,
   infants,
   property,
 }) {
@@ -73,7 +73,7 @@ export default function FilterProperties({
             location={location}
             active={true}
             grownup={senior}
-            child={children}
+            child={child}
             baby={infants}
             property={property}
           />

@@ -66,12 +66,18 @@ export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
             >
               <option value="">Select time</option>
               <option value="0">12 am</option>
-              {numbersList.map((item) => (
-                <option value={item}>{item} am</option>
+              {numbersList.map((item, index) => (
+                <option key={item || index} value={item}>
+                  {item} am
+                </option>
               ))}
-              <option value="12">12 pm</option>
-              {numbersList.map((item) => (
-                <option value={Number(item) + 12}>{item} pm</option>
+              <option key={12} value="12">
+                12 pm
+              </option>
+              {numbersList.map((item, index) => (
+                <option key={item || index} valvalue={Number(item) + 12}>
+                  {item} pm
+                </option>
               ))}
             </select>
           </div>
@@ -87,14 +93,22 @@ export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
             value={checkoutTime}
             onChange={(e) => setCheckoutTime(e.target.value)}
           >
-            <option value="">Select time</option>
-            <option value="0">12 am</option>
-            {numbersList.map((item) => (
-              <option value={item}>{item} am</option>
+            <option key={"select time"} value="">
+              Select time
+            </option>
+            <option key={0} value="0">
+              12 am
+            </option>
+            {numbersList.map((item, index) => (
+              <option key={item || index} value={item}>
+                {item} am
+              </option>
             ))}
             <option value="12">12 pm</option>
-            {numbersList.map((item) => (
-              <option value={Number(item) + 12}>{item} pm</option>
+            {numbersList.map((item, index) => (
+              <option key={item || index} value={Number(item) + 12}>
+                {item} pm
+              </option>
             ))}
           </select>
         </div>

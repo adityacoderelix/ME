@@ -16,7 +16,7 @@ export default function FarmHouse() {
   const guests = searchParams.get("adults");
   const location = searchParams.get("location");
   const senior = searchParams.get("senior");
-  const children = searchParams.get("children");
+  const child = searchParams.get("children");
   const infants = searchParams.get("infants");
   const property = searchParams.get("propertyType");
   const minPrice = searchParams.get("priceMin");
@@ -123,7 +123,7 @@ export default function FarmHouse() {
             guests={guests}
             location={location}
             senior={senior}
-            children={children}
+            child={child}
             infants={infants}
             property={property}
           />
