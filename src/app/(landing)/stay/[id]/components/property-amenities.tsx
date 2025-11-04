@@ -42,7 +42,7 @@ interface PropertyAmenitiesProps {
   setShowAmenitiesDialog: (show: boolean) => void;
   rules: Array<string>;
   custom: Array<string>;
-  safety: Object;
+  safety: object;
 }
 
 export default function PropertyAmenities({

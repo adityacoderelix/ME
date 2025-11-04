@@ -528,7 +528,9 @@ export function LocationForm({ updateFormData, formData }) {
                   </SelectTrigger>
                   <SelectContent>
                     {INDIA_STATES_AND_UT.map((name) => (
-                      <SelectItem value={name}>{name}</SelectItem>
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
