@@ -34,6 +34,30 @@ interface FilterState {
   minPrice: string;
   maxPrice: string;
 }
+interface Booking {
+  _id: string;
+  propertyId: {
+    _id: string;
+    title: string;
+    address: {
+      city: string;
+      state: string;
+      country: string;
+      street: string;
+    };
+    photos?: string[];
+    checkinTime?: number;
+    checkoutTime?: number;
+  };
+  status: string;
+  price: number;
+  checkIn: string;
+  checkOut: string;
+  cancellationPolicy?: string;
+  reviewed?: boolean;
+  hostId?: { firstName: string; lastName: string; email: string };
+  userId?: { firstName: string; lastName: string; email: string };
+}
 
 const FilterDialog = ({
   open,
@@ -117,7 +141,7 @@ const FilterDialog = ({
 };
 
 const ManageBookings = () => {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>("all");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
@@ -127,7 +151,9 @@ const ManageBookings = () => {
     null
   );
   const [cancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
-  const [bookingToCancel, setBookingToCancel] = useState<any>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking[] | null>(
+    null
+  );
   const [tempFilters, setTempFilters] = useState<FilterState>({
     location: "",
     minPrice: "",
