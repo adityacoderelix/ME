@@ -117,28 +117,28 @@ const FilterDialog = ({
 };
 
 const ManageBookings = () => {
-  const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
-  const [differenceDays, setDifferenceDays] = useState();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<string | null>("all");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
   const router = useRouter();
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [bookingToCancel, setBookingToCancel] = useState(null);
-  const [tempFilters, setTempFilters] = useState({
+  const [cancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
+  const [bookingToCancel, setBookingToCancel] = useState<any>(null);
+  const [tempFilters, setTempFilters] = useState<FilterState>({
     location: "",
     minPrice: "",
     maxPrice: "",
   });
-  const [appliedFilters, setAppliedFilters] = useState({
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>({
     location: "",
     minPrice: "",
     maxPrice: "",
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchData = async () => {
     const getLocalData = await localStorage.getItem("token");
