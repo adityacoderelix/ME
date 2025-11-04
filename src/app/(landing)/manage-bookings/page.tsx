@@ -142,7 +142,7 @@ const ManageBookings = () => {
 
   const fetchData = async () => {
     const getLocalData = await localStorage.getItem("token");
-    const data = JSON.parse(getLocalData);
+    const data = getLocalData ? JSON.parse(getLocalData) : null;
     if (data) {
       try {
         const response = await fetch(`${API_URL}/booking/data`, {
@@ -249,7 +249,7 @@ const ManageBookings = () => {
   ) => {
     try {
       const getLocalData = await localStorage.getItem("token");
-      const data = JSON.parse(getLocalData);
+      const data = JSON.parse(localStorage.getItem("token") || "null");
 
       if (data) {
         const response = await fetch(`${API_URL}/booking/user/terminate`, {
