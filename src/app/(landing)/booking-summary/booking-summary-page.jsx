@@ -18,7 +18,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export default function Page() {
+export default function BookingSummaryPage() {
   const searchParams = useSearchParams();
   const [queryData, setQueryData] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
