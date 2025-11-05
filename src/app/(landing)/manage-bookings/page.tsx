@@ -306,7 +306,6 @@ const ManageBookings: React.FC = () => {
         }
         toast.success("Successfully send the cancellation email");
         fetchData();
-        return response;
       }
     } catch (err) {
       console.error(err);
