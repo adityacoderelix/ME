@@ -48,6 +48,8 @@ interface Booking {
     photos?: string[];
     checkinTime?: number;
     checkoutTime?: number;
+    propertyType?: string; // ✅ added
+    placeType?: string; // ✅ added
   };
   status: string;
   price: number;
@@ -57,6 +59,11 @@ interface Booking {
   reviewed?: boolean;
   hostId?: { firstName: string; lastName: string; email: string };
   userId?: { firstName: string; lastName: string; email: string };
+  guests?: number; // ✅ added
+  adults?: number; // ✅ added
+  children?: number; // ✅ added
+  infants?: number; // ✅ added
+  nights?: number; // ✅ added
 }
 
 const FilterDialog = ({
@@ -140,7 +147,7 @@ const FilterDialog = ({
   );
 };
 
-const ManageBookings = () => {
+const ManageBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeTab, setActiveTab] = useState<string | null>("all");
   const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -151,9 +158,7 @@ const ManageBookings = () => {
     null
   );
   const [cancelDialogOpen, setCancelDialogOpen] = useState<boolean>(false);
-  const [bookingToCancel, setBookingToCancel] = useState<Booking[] | null>(
-    null
-  );
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [tempFilters, setTempFilters] = useState<FilterState>({
     location: "",
     minPrice: "",
@@ -166,7 +171,9 @@ const ManageBookings = () => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const fetchData = async () => {
+  const fetchData = async (): Promise<void> => {
+    if (typeof window === "undefined") return;
+
     const getLocalData = await localStorage.getItem("token");
     const data = getLocalData ? JSON.parse(getLocalData) : null;
     if (data) {
@@ -267,13 +274,14 @@ const ManageBookings = () => {
   // const hour = new Date().getHours();
 
   const cancelBooking = async (
-    bookingId,
-    userEmail,
-    hostEmail,
-    userName,
-    hostName
-  ) => {
+    bookingId: string,
+    userEmail: string,
+    hostEmail: string,
+    userName: string,
+    hostName: string
+  ): Promise<void> => {
     try {
+      if (typeof window === "undefined") return;
       const getLocalData = await localStorage.getItem("token");
       const data = JSON.parse(localStorage.getItem("token") || "null");
 
@@ -305,7 +313,7 @@ const ManageBookings = () => {
     }
   };
 
-  function diff(date) {
+  function diff(date: string | number | Date): number {
     const futureDate = new Date(date).setHours(12, 0, 0, 0);
 
     // const date2 = new Date().toLocaleDateString();
@@ -316,7 +324,7 @@ const ManageBookings = () => {
   }
 
   console.log("blackpa", new Date());
-  function canShowReview(booking) {
+  function canShowReview(booking: Booking): boolean {
     if (!booking?.checkOut || !booking?.propertyId?.checkoutTime) return false;
 
     const checkoutDate = new Date(booking?.checkOut);
@@ -361,7 +369,7 @@ const ManageBookings = () => {
     return false;
   }
 
-  function diffHours(date, time) {
+  function diffHours(date: string | number | Date, time: number): number {
     const futureDate = new Date(date);
     const futureHours = new Date(futureDate).setHours(time, 0);
 
@@ -372,8 +380,8 @@ const ManageBookings = () => {
     return differenceInHours;
   }
 
-  const StatusPill = ({ status }) => {
-    const getStatusColor = (status) => {
+  const StatusPill: React.FC<{ status: string }> = ({ status }) => {
+    const getStatusColor = (status: string): string => {
       switch (status) {
         case "confirmed":
           return "bg-green-100 text-green-800";
@@ -404,6 +412,7 @@ const ManageBookings = () => {
     day: "numeric",
     year: "numeric",
   });
+
   return (
     <main className="py-16 md:py-24">
       <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -685,12 +694,17 @@ const ManageBookings = () => {
                                   setBookingToCancel(null);
                                 }}
                                 onConfirm={async () => {
+                                  if (!bookingToCancel) return null;
                                   await cancelBooking(
                                     bookingToCancel._id,
-                                    bookingToCancel.userId.email,
-                                    bookingToCancel.hostId.email,
-                                    `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
-                                    `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
+                                    bookingToCancel.userId!.email,
+                                    bookingToCancel.hostId!.email,
+                                    `${bookingToCancel.userId!.firstName} ${
+                                      bookingToCancel.userId!.lastName
+                                    }`,
+                                    `${bookingToCancel.hostId!.firstName} ${
+                                      bookingToCancel.hostId!.lastName
+                                    }`
                                   );
                                   setCancelDialogOpen(false);
                                   setBookingToCancel(null);
@@ -724,12 +738,17 @@ const ManageBookings = () => {
                                   setBookingToCancel(null);
                                 }}
                                 onConfirm={async () => {
+                                  if (!bookingToCancel) return null;
                                   await cancelBooking(
                                     bookingToCancel._id,
-                                    bookingToCancel.userId.email,
-                                    bookingToCancel.hostId.email,
-                                    `${bookingToCancel.userId.firstName} ${bookingToCancel.userId.lastName}`,
-                                    `${bookingToCancel.hostId.firstName} ${bookingToCancel.hostId.lastName}`
+                                    bookingToCancel.userId!.email,
+                                    bookingToCancel.hostId!.email,
+                                    `${bookingToCancel.userId!.firstName} ${
+                                      bookingToCancel.userId!.lastName
+                                    }`,
+                                    `${bookingToCancel.hostId!.firstName} ${
+                                      bookingToCancel.hostId!.lastName
+                                    }`
                                   );
                                   setCancelDialogOpen(false);
                                   setBookingToCancel(null);
