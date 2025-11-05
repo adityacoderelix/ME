@@ -39,7 +39,7 @@ interface BookingWidgetProps {
   toggleCalendar: () => void;
   toggleGuestsDropdown: () => void;
   activation: boolean;
-  allowedGuests: string;
+  allowedGuests: number;
 }
 
 export default function BookingWidget({
@@ -77,7 +77,7 @@ export default function BookingWidget({
 
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
-    const data = JSON.parse(getLocalData);
+    const data = getLocalData ? JSON.parse(getLocalData) : null;
     if (data) {
       setIsAuth(true);
     }
@@ -132,12 +132,13 @@ export default function BookingWidget({
     const totalGuests = getTotalGuests();
     return `${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`;
   };
-  const createReserveRecord = async () => {
+  const createReserveRecord = async (): Promise<void> => {
     try {
       const getLocalData = await localStorage.getItem("token");
-      const data = JSON.parse(getLocalData);
+
+      const data = getLocalData ? JSON.parse(getLocalData) : null;
       const getUserId = await localStorage.getItem("userId");
-      const userId = JSON.parse(getUserId);
+      const userId = getUserId ? JSON.parse(getUserId) : null;
       console.log("this is user log", userId);
       if (!data) {
         toast.error("You need to signup or login to reserve.");
@@ -162,7 +163,6 @@ export default function BookingWidget({
         return;
       }
       setIsValid(true);
-      return response;
     } catch (err) {
       console.error(err);
     }
