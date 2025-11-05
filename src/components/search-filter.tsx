@@ -506,7 +506,7 @@ export default function SearcahFilter({
           to={null}
           adults={null}
           senior={null}
-          children={null}
+          childrens={null}
           infants={null}
         />
       </div>
