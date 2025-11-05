@@ -19,32 +19,32 @@ type AuthContextType = {
   login: (user: User) => void;
   logout: () => void;
   modalFilter: boolean;
-  setModalFilter: (value: boolean) => void;
+  setModalFilter: React.Dispatch<React.SetStateAction<boolean>>;
   openModal: () => void;
   closeModal: () => void;
   toggleModal: () => void;
 
   // Filter states
   priceRange: number[];
-  setPriceRange: (range: number[]) => void;
+  setPriceRange: React.Dispatch<React.SetStateAction<number[]>>;
   rooms: FilterRooms;
-  setRooms: (rooms: FilterRooms) => void;
+  setRooms: React.Dispatch<React.SetStateAction<FilterRooms>>;
   showAllAmenities: boolean;
-  setShowAllAmenities: (show: boolean) => void;
+  setShowAllAmenities: React.Dispatch<React.SetStateAction<boolean>>;
   showAllProperties: boolean;
-  setShowAllProperties: (show: boolean) => void;
+  setShowAllProperties: React.Dispatch<React.SetStateAction<boolean>>;
   addAmenities: string[];
-  setAddAmenities: (amenities: string[]) => void;
+  setAddAmenities: React.Dispatch<React.SetStateAction<string[]>>;
   addPlaceType: string;
-  setAddPlaceType: (type: string) => void;
+  setAddPlaceType: React.Dispatch<React.SetStateAction<string>>;
   addPropertyType: string;
-  setAddPropertyType: (types: string) => void;
+  setAddPropertyType: React.Dispatch<React.SetStateAction<string>>;
   bookingType: string;
-  setBookingType: (type: string) => void;
+  setBookingType: React.Dispatch<React.SetStateAction<string>>;
   petAllowed: string;
-  setPetAllowed: (allowed: string) => void;
+  setPetAllowed: React.Dispatch<React.SetStateAction<string>>;
   checkinType: string;
-  setCheckinType: (type: string) => void;
+  setCheckinType: React.Dispatch<React.SetStateAction<string>>;
 
   // Filter functions
   clearAllFilters: () => void;
@@ -140,10 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addPropertiesList = (value: string) => {
     if (addPropertyType == "") {
-      setAddPropertyType([value]);
+      setAddPropertyType(value);
     } else {
-      const data = addPropertyType.filter((item) => item !== value);
-      setAddPropertyType(data);
+      // const data = addPropertyType.filter((item) => item !== value);
+      // setAddPropertyType(data);
     }
 
     // if (!addPropertyType.includes(value)) {
@@ -184,54 +184,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     petAllowed,
     checkinType,
   ]);
+  const value: AuthContextType = {
+    user,
+    login,
+    logout,
+    modalFilter,
+    setModalFilter,
+    openModal,
+    closeModal,
+    toggleModal,
+    priceRange,
+    setPriceRange,
+    rooms,
+    setRooms,
+    showAllAmenities,
+    setShowAllAmenities,
+    showAllProperties,
+    setShowAllProperties,
+    addAmenities,
+    setAddAmenities,
+    addPlaceType,
+    setAddPlaceType,
+    addPropertyType,
+    setAddPropertyType,
+    bookingType,
+    setBookingType,
+    petAllowed,
+    setPetAllowed,
+    checkinType,
+    setCheckinType,
+    clearAllFilters,
+    addAmenitiesList,
+    addPropertiesList,
+    handleRoomChange,
+  };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        logout,
-        modalFilter,
-        setModalFilter,
-        openModal,
-        closeModal,
-        toggleModal,
-        // Filter states
-        priceRange,
-        setPriceRange,
-        rooms,
-        setRooms,
-        showAllAmenities,
-        setShowAllAmenities,
-        showAllProperties,
-        setShowAllProperties,
-        addAmenities,
-        setAddAmenities,
-        addPlaceType,
-        setAddPlaceType,
-        addPropertyType,
-        setAddPropertyType,
-        bookingType,
-        setBookingType,
-        petAllowed,
-        setPetAllowed,
-        checkinType,
-        setCheckinType,
-        // Filter functions
-        clearAllFilters,
-        addAmenitiesList,
-        addPropertiesList,
-        handleRoomChange,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+// return (
+//   <AuthContext.Provider
+//     value={{
+//       user,
+//       login,
+//       logout,
+//       modalFilter,
+//       setModalFilter,
+//       openModal,
+//       closeModal,
+//       toggleModal,
+//       // Filter states
+//       priceRange,
+//       setPriceRange,
+//       rooms,
+//       setRooms,
+//       showAllAmenities,
+//       setShowAllAmenities,
+//       showAllProperties,
+//       setShowAllProperties,
+//       addAmenities,
+//       setAddAmenities,
+//       addPlaceType,
+//       setAddPlaceType,
+//       addPropertyType,
+//       setAddPropertyType,
+//       bookingType,
+//       setBookingType,
+//       petAllowed,
+//       setPetAllowed,
+//       checkinType,
+//       setCheckinType,
+//       // Filter functions
+//       clearAllFilters,
+//       addAmenitiesList,
+//       addPropertiesList,
+//       handleRoomChange,
+//     }}
+//   >
+//     {children}
+//   </AuthContext.Provider>
+// );
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
