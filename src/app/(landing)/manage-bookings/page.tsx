@@ -26,8 +26,8 @@ import ConfirmCancelDialog from "@/components/dialog-modal";
 import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const moderate = process.env.NEXT_PUBLIC_MODERATE_POLICY_DAYS;
-const flexible = process.env.NEXT_PUBLIC_FLEXIBLE_POLICY_DAYS;
+const moderate = Number(process.env.NEXT_PUBLIC_MODERATE_POLICY_DAYS ?? 0);
+const flexible = Number(process.env.NEXT_PUBLIC_FLEXIBLE_POLICY_DAYS ?? 0);
 
 interface FilterState {
   location: string;
@@ -149,7 +149,7 @@ const FilterDialog = ({
 
 const ManageBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [activeTab, setActiveTab] = useState<string | null>("all");
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const router = useRouter();
@@ -199,7 +199,7 @@ const ManageBookings: React.FC = () => {
 
   console.log("booking", bookings);
   const filteredBookings = useMemo(() => {
-    return bookings.filter((booking) => {
+    return (bookings ?? [])?.filter((booking) => {
       console.log(booking.propertyId?.address?.city);
       const checkIn = new Date(booking.checkIn);
       const checkOut = new Date(booking.checkOut);
@@ -317,7 +317,9 @@ const ManageBookings: React.FC = () => {
 
     // const date2 = new Date().toLocaleDateString();
     const date1 = new Date();
-    const differenceInDays = (futureDate - date1) / 86400000;
+    const futureDateObj = new Date(futureDate);
+    const differenceInDays =
+      (futureDateObj.getTime() - date1.getTime()) / 86400000;
     console.log("opti", date, futureDate, date1, differenceInDays);
     return differenceInDays;
   }
@@ -329,7 +331,8 @@ const ManageBookings: React.FC = () => {
     const checkoutDate = new Date(booking?.checkOut);
     const today = new Date();
 
-    const differenceInDays = (today - checkoutDate) / (1000 * 60 * 60 * 24);
+    const differenceInDays =
+      (today.getTime() - checkoutDate.getTime()) / (1000 * 60 * 60 * 24);
 
     if (today > checkoutDate && differenceInDays <= 14) {
       const isSameDay = today.toDateString() === checkoutDate.toDateString();
@@ -374,7 +377,7 @@ const ManageBookings: React.FC = () => {
 
     // const date2 = new Date();
     const date1 = new Date();
-    const differenceInHours = (futureHours - date1) / 3600000;
+    const differenceInHours = (futureHours - date1.getTime()) / 3600000;
     console.log("dyb", futureDate, time, date1, differenceInHours);
     return differenceInHours;
   }
@@ -511,28 +514,28 @@ const ManageBookings: React.FC = () => {
 
           {filteredBookings.map((booking) => {
             const summaryParams = new URLSearchParams({
-              hostFirstName: booking?.hostId?.firstName,
-              hostLastName: booking?.hostId?.lastName,
-              bookingId: booking?._id,
-              propertyId: booking?.propertyId?._id,
-              propertyType: booking?.propertyId?.propertyType,
-              placeType: booking?.propertyId?.placeType,
+              hostFirstName: booking?.hostId?.firstName ?? "",
+              hostLastName: booking?.hostId?.lastName ?? "",
+              bookingId: booking?._id ?? "",
+              propertyId: booking?.propertyId?._id ?? "",
+              propertyType: booking?.propertyId?.propertyType ?? "",
+              placeType: booking?.propertyId?.placeType ?? "",
               propertyName: booking?.propertyId?.title || "Property",
-              street: booking?.propertyId?.address?.street,
-              city: booking?.propertyId?.address?.city,
-              state: booking?.propertyId?.address?.state,
-              country: booking?.propertyId?.address?.country,
-              propertyImage: booking?.propertyId?.photos[0],
-              checkin: new Date(booking?.checkIn).getTime(),
-              checkout: new Date(booking?.checkOut).getTime(),
-              numberOfGuests: booking?.guests,
-              adults: booking?.adults,
-              children: booking?.children,
-              infants: booking?.infants,
-              totalAmount: booking?.price?.toString(),
-              nights: booking?.nights?.toString(),
-              checkinTime: booking?.propertyId?.checkinTime,
-              checkoutTime: booking?.propertyId?.checkoutTime,
+              street: booking?.propertyId?.address?.street ?? "",
+              city: booking?.propertyId?.address?.city ?? "",
+              state: booking?.propertyId?.address?.state ?? "",
+              country: booking?.propertyId?.address?.country ?? "",
+              propertyImage: booking?.propertyId?.photos?.[0] ?? "",
+              checkin: String(new Date(booking?.checkIn).getTime()),
+              checkout: String(new Date(booking?.checkOut).getTime()),
+              numberOfGuests: String(booking?.guests ?? ""),
+              adults: String(booking?.adults ?? ""),
+              children: String(booking?.children ?? ""),
+              infants: String(booking?.infants ?? ""),
+              totalAmount: String(booking?.price ?? ""),
+              nights: String(booking?.nights ?? ""),
+              checkinTime: String(booking?.propertyId?.checkinTime ?? ""),
+              checkoutTime: String(booking?.propertyId?.checkoutTime ?? ""),
             });
             return (
               <Card key={booking?._id} className="p-4">
@@ -547,7 +550,9 @@ const ManageBookings: React.FC = () => {
                     />
                     {}
                     <div className="space-y-2">
-                      <h3 className="font-medium">{booking?.property}</h3>
+                      <h3 className="font-medium">
+                        {booking?.propertyId?.title}
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Located at {booking?.propertyId?.address?.city},{" "}
                         {booking?.propertyId?.address?.state}
