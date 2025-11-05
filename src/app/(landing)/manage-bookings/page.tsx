@@ -718,7 +718,7 @@ const ManageBookings: React.FC = () => {
                           </>
                         ) : diffHours(
                             booking?.checkIn,
-                            booking?.propertyId?.checkinTime
+                            booking?.propertyId?.checkinTime ?? 0
                           ) > flexible &&
                           booking?.cancellationPolicy == "flexible" ? (
                           <>
