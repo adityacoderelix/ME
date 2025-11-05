@@ -223,7 +223,7 @@ export default function FilterModal({
 
   const totalGuests = guests.adults + guests.children;
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: Date) => {
     if (!date) return "";
     return format(date, "MMM d");
   };
