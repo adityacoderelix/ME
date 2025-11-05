@@ -66,7 +66,7 @@ export default function FilterModal({
   onClose,
 }: {
   isOpen: boolean;
-  onClose: any;
+  onClose: () => void;
 }) {
   // Get all states and functions from context
 
