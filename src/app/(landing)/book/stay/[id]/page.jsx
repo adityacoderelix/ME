@@ -75,12 +75,13 @@ function BookPageContent() {
   const [date, setDate] = useState({
     from: searchParams.get("checkin")
       ? new Date(searchParams.get("checkin"))
-      : new Date("2025-03-24"),
+      : null,
     to: searchParams.get("checkout")
       ? new Date(searchParams.get("checkout"))
-      : new Date("2025-03-28"),
+      : null,
   });
-
+  const [guestInfo, setGuestInfo] = useState([]);
+  const [summaryRoute, setSummaryRoute] = useState(false);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const auth = async () => {
     const getLocalData = await localStorage.getItem("token");
@@ -96,8 +97,45 @@ function BookPageContent() {
     hours = hours % 12 || 12; // 0 becomes 12, otherwise use remainder
     return `${hours}:00 ${period}`;
   }
+
+  const userData = async () => {
+    const getLocalData = await localStorage.getItem("token");
+    const data = JSON.parse(getLocalData);
+    const userData = await localStorage.getItem("userId");
+    const userId = JSON.parse(userData);
+    if (data) {
+      try {
+        const response = await fetch(
+          `${API_URL}/guests/guest-by-id?userId=${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${data}`,
+            },
+          }
+        );
+        // console.log("djfjdf", await response.json());
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch property:",
+            response.status,
+            await response.text()
+          );
+          throw new Error(
+            `Failed to fetch property data (status: ${response.status})`
+          );
+        }
+        const result = await response.json();
+        setGuestInfo(result);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
   useEffect(() => {
     auth();
+    userData();
   }, []);
 
   // useEffect(() => {
@@ -178,8 +216,8 @@ function BookPageContent() {
   const fetchForm = async () => {
     // Get user data from localStorage
 
-    const firstName = property?.host?.firstName || "";
-    const lastName = property?.host?.lastName || "";
+    const firstName = guestInfo?.firstName || "";
+    const lastName = guestInfo?.lastName || "";
 
     // Initialize guest data arrays based on the number of adults and children
     const initialAdults = Array.from(
@@ -433,7 +471,7 @@ function BookPageContent() {
       console.error(err);
     }
   };
-  const updateConfirmStatus = async (bookingId) => {
+  const updateConfirmStatus = async (bookingId, propertyTitle) => {
     try {
       const userId = JSON.parse(localStorage.getItem("userId"));
       const getLocalData = await localStorage.getItem("token");
@@ -445,6 +483,7 @@ function BookPageContent() {
           Authorization: `Bearer ${data}`,
         },
         body: JSON.stringify({
+          propertyTitle: propertyTitle,
           bookingId: bookingId,
           userId: userId,
         }),
@@ -619,6 +658,7 @@ function BookPageContent() {
             checkinTime: property?.checkinTime,
             checkoutTime: property?.checkoutTime,
             instant: property?.bookingType?.manual ? false : true,
+            bookingHistory: "false",
           });
 
           const verify = await verifyPayment(
@@ -630,6 +670,8 @@ function BookPageContent() {
 
           const hostEmail = await property.hostEmail;
           if (verify) {
+            setSummaryRoute(true);
+            window.scrollTo(0, 0);
             if (property.bookingType.manual) {
               console.log("not selected");
               const update = await updateBookingStatus(
@@ -653,7 +695,10 @@ function BookPageContent() {
               // );
             } else {
               console.log("This got selected");
-              const confirm = await updateConfirmStatus(booking?.data?._id);
+              const confirm = await updateConfirmStatus(
+                booking?.data?._id,
+                property?.title
+              );
               await updateBookingStatus(
                 booking?.data?._id,
                 hostEmail,
@@ -728,6 +773,18 @@ function BookPageContent() {
   }
   if (isLoading) {
     return <BookingPageSkeleton />;
+  }
+  if (summaryRoute) {
+    return (
+      <>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="h-20 w-20 animate-spin rounded-full border-b-2 border-current"></div>
+          <div className="pl-16">
+            <h1>Taking you to summary page...</h1>
+          </div>
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -1085,6 +1142,7 @@ function BookPageContent() {
                 onClick={async () => {
                   await fetchForm();
                 }}
+                disabled={summaryRoute}
                 className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
               >
                 Pay ₹{totals.total.toLocaleString()}

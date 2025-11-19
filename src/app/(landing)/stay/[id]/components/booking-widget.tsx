@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { eachDayOfInterval, format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,11 +60,12 @@ export default function BookingWidget({
   activation,
   allowedGuests,
 }: BookingWidgetProps) {
-  const [totalPrice, setTotalPrice] = useState(pricePerNight);
-  const [nightsCount, setNightsCount] = useState(1);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
-  const [isValid, setIsValid] = useState(false);
+  const [totalPrice, setTotalPrice] = useState<number>(pricePerNight);
+  const [nightsCount, setNightsCount] = useState<number>(1);
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [isValid, setIsValid] = useState<boolean>(false);
+
   useEffect(() => {
     if (date?.from && date?.to) {
       const nights = Math.ceil(
@@ -123,7 +124,10 @@ export default function BookingWidget({
   const formatDate = (date: Date | undefined) => {
     return date ? format(date, "dd/MM/yyyy") : "";
   };
-
+  const formatRevDate = (date: Date | undefined) => {
+    return date ? format(date, "yyyy-MM-dd") : "";
+  };
+  console.log("not what", formatRevDate(new Date()));
   const getTotalGuests = () => {
     return guests.adults + guests.children;
   };
@@ -167,7 +171,30 @@ export default function BookingWidget({
       console.error(err);
     }
   };
-  console.log("formu", unavailableDates);
+  function getDateRange(start: Date, end: Date) {
+    const dates = [];
+    let current = new Date(start);
+    const final = new Date(end);
+
+    while (current < final) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    // Remove checkout date
+
+    return dates;
+  }
+
+  // Check for overlap
+  function hasDateOverlap() {
+    if (!date?.from || !date?.to) return false;
+
+    const range = getDateRange(date.from, date.to).map((d) => formatRevDate(d)); // You already have formatRevDate()
+
+    return range.some((d) => unavailableDates.includes(d));
+  }
+  console.log("get tyep", Object.prototype.toString.call(date?.from));
   return (
     <Card className="border rounded-xl sticky shadow-lg">
       <CardContent className="p-0">
@@ -402,8 +429,8 @@ export default function BookingWidget({
                 </div> */}
 
                 <div className="text-sm text-gray-600 pt-2 border-t">
-                  This place has a maximum of 2 guests, not including infants.
-                  Pets aren't allowed.
+                  {/* This place has a maximum of 2 guests, not including infants.
+                  Pets aren't allowed. */}
                 </div>
 
                 <div className="flex justify-end">
@@ -422,29 +449,48 @@ export default function BookingWidget({
             {isAuth || isValid ? (
               activation ? (
                 date?.from && date?.to ? (
-                  <Link
-                    href={{
-                      pathname: `/book/stay/${propertyId}`,
-                      query: {
-                        checkin: date?.from
-                          ? format(date.from, "yyyy-MM-dd")
-                          : undefined,
-                        checkout: date?.to
-                          ? format(date.to, "yyyy-MM-dd")
-                          : undefined,
-                        guests: getTotalGuests(),
-                        nights: nightsCount,
-                        adults: guests.adults,
-                        children: guests.children,
-                        infants: guests.infants,
-                        checkinTime: checkinTime,
-                        checkoutTime: checkoutTime,
-                      },
-                    }}
-                    className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
-                  >
-                    Reserve
-                  </Link>
+                  hasDateOverlap() ? (
+                    <Button
+                      className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                      onClick={() => toast.error("Overlapping Date")}
+                    >
+                      Reserve
+                    </Button>
+                  ) : formatRevDate(new Date(date?.from)) ==
+                    formatRevDate(new Date(date?.to)) ? (
+                    <Button
+                      className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                      onClick={() =>
+                        toast.error("Checkin and Checkout date cannot be same")
+                      }
+                    >
+                      Reserve
+                    </Button>
+                  ) : (
+                    <Link
+                      href={{
+                        pathname: `/book/stay/${propertyId}`,
+                        query: {
+                          checkin: date?.from
+                            ? format(date.from, "yyyy-MM-dd")
+                            : undefined,
+                          checkout: date?.to
+                            ? format(date.to, "yyyy-MM-dd")
+                            : undefined,
+                          guests: getTotalGuests(),
+                          nights: nightsCount,
+                          adults: guests.adults,
+                          children: guests.children,
+                          infants: guests.infants,
+                          checkinTime: checkinTime,
+                          checkoutTime: checkoutTime,
+                        },
+                      }}
+                      className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"
+                    >
+                      Reserve
+                    </Link>
+                  )
                 ) : (
                   <Button
                     className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"

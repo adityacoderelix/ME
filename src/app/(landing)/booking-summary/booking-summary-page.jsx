@@ -28,8 +28,33 @@ export default function BookingSummaryPage() {
     if (data) setIsAuth(true);
   };
   const router = useRouter();
+
+  // Push a fake entry into history so back button fires popstate
+
   useEffect(() => {
     auth();
+  }, []);
+
+  useEffect(() => {
+    const propertyId = searchParams.get("propertyId");
+    const bookingHistory = searchParams.get("bookingHistory")
+      ? searchParams.get("bookingHistory")
+      : null;
+    // Add a fake history entry so back button doesn't leave the page
+    if (bookingHistory && bookingHistory != "true") {
+      window.history.pushState({ preventBack: true }, "");
+
+      const handlePopState = (event) => {
+        // Instead of going back, redirect where you want
+        router.replace(`/stay/${propertyId}`);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
   }, []);
 
   function parseDateSafe(value) {
@@ -233,7 +258,7 @@ export default function BookingSummaryPage() {
               </div>
 
               <div className="space-y-4 text-sm">
-                <div class="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     {" "}
                     <p>

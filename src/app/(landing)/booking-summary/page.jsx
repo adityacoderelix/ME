@@ -2,6 +2,7 @@
 
 import React, { Suspense } from "react";
 import BookingSummaryPage from "./booking-summary-page";
+import { useEffect } from "react";
 
 export default function Page() {
   return (

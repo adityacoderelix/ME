@@ -158,6 +158,7 @@ export default function LoginForm() {
       console.log(data);
       // Store token and show success message
       localStorage.setItem("token", JSON.stringify(token));
+      console.log("why this is going", data);
       localStorage.setItem("userId", JSON.stringify(data.userId));
       login({ email });
       toast.success("Welcome. You are now signed in.");

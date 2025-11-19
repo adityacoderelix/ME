@@ -176,15 +176,20 @@ const ManageBookings: React.FC = () => {
 
     const getLocalData = await localStorage.getItem("token");
     const data = getLocalData ? JSON.parse(getLocalData) : null;
+    const userData = await localStorage.getItem("userId");
+    const userId = userData ? JSON.parse(userData) : null;
     if (data) {
       try {
-        const response = await fetch(`${API_URL}/booking/data`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${data}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `${API_URL}/booking/data?userId=${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const result = await response.json();
         setBookings(result.data);
       } catch (err) {
@@ -536,6 +541,7 @@ const ManageBookings: React.FC = () => {
               nights: String(booking?.nights ?? ""),
               checkinTime: String(booking?.propertyId?.checkinTime ?? ""),
               checkoutTime: String(booking?.propertyId?.checkoutTime ?? ""),
+              bookingHistory: "true",
             });
             return (
               <Card key={booking?._id} className="p-4">

@@ -55,7 +55,7 @@ export default function EditListing({ params }) {
 
     fetchListingData();
   }, [id, auth.user?.email]);
-
+  console.log("which is this", formData);
   const checkForSignificantChanges = () => {
     const significantFields = ["images", "title", "description", "customRules"];
     return significantFields.some(
@@ -188,7 +188,6 @@ export default function EditListing({ params }) {
 
   return (
     <div className="flex flex-col relative h-full">
-     
       <header className="bg-white w-screen z-50 top-0 fixed right-0 left-0 border-b border-b-gray-200 p-4">
         <div className="container max-w-7xl mx-auto px-4 flex justify-between items-center">
           <img className="h-7 w-auto" src="/images/logo.png" alt="Logo" />

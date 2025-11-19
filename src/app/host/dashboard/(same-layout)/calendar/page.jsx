@@ -11,6 +11,7 @@ import {
   eachDayOfInterval,
   addDays,
 } from "date-fns";
+
 import axios from "axios";
 import { ChevronLeft, ChevronRight, Upload, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -144,7 +145,7 @@ const FullCalendarPage = () => {
         ? addDays(new Date(checkout), 2)
         : addDays(new Date(checkin), 2);
 
-      const response = await fetch(`${API_URL}/booking`, {
+      const response = await fetch(`${API_URL}/booking/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +163,7 @@ const FullCalendarPage = () => {
           status: "confirmed",
           paymentStatus: "paid",
           checkIn: newCheckin,
-
+          subTotal: 0,
           checkOut: newCheckout,
           price: 0,
           currency: "INR",
@@ -175,6 +176,7 @@ const FullCalendarPage = () => {
       if (!response.ok) {
         const result = await response.json();
         toast.error(result.message);
+        return;
       }
       const result = await response.json();
       await fetchDates();
@@ -260,6 +262,7 @@ const FullCalendarPage = () => {
     }
     setIsDialogOpen(false);
   };
+
   const syncWithUrl = async (kind) => {
     const url = iCalUrl;
 
@@ -369,12 +372,12 @@ const FullCalendarPage = () => {
     const selectedTab = tab;
 
     if (selectedTab === "block") {
-      const dateDays = eachDayOfInterval({
-        start: dateRange.from,
-        end: dateRange.to,
-      });
-      console.log("k", dateDays);
-      let hasOverlap = false; // use local variable
+      // const dateDays = eachDayOfInterval({
+      //   start: dateRange.from,
+      //   end: dateRange.to,
+      // });
+      // console.log("k", dateDays);
+      // let hasOverlap = false; // use local variable
 
       // for (let i = 1; i < dateDays.length; i++) {
       //   const dateStr = dateDays[i].toISOString().split("T")[0];
@@ -387,6 +390,35 @@ const FullCalendarPage = () => {
       // }
 
       // if (!hasOverlap) {
+
+      const dateDays = eachDayOfInterval({
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+      const formatRevDate = (date) => {
+        return date ? format(date, "yyyy-MM-dd") : "";
+      };
+      // Convert selected range to "yyyy-mm-dd"
+      const selectedRange = dateDays.map((d) => formatRevDate(d));
+
+      // Check overlap with existing reserved or host-blocked dates
+      const hasOverlap = selectedRange.some((d) =>
+        unavailableDates.includes(d)
+      );
+
+      console.log(
+        "what is this",
+        selectedRange,
+        unavailableDates,
+        dateRange.from,
+        dateRange.to
+      );
+      if (hasOverlap) {
+        toast.error(
+          "Selected dates overlap with existing reserved/blocked dates."
+        );
+        return; // ❌ Stop processing
+      }
       handleBlockDates();
       // }
     } else if (selectedTab === "reserve") {
@@ -607,7 +639,7 @@ const FullCalendarPage = () => {
               <TabsContent value="reserve">
                 <p>Click submit to reserve the selected date range.</p>
               </TabsContent>
-              <TabsContent value="offer">
+              {/* <TabsContent value="offer">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="offerName" className="text-right">
                     Offer Name
@@ -630,7 +662,7 @@ const FullCalendarPage = () => {
                   </Label>
                   <Input id="price" type="number" className="col-span-3" />
                 </div>
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </div>
           <DialogFooter>

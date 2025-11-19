@@ -1,13 +1,49 @@
 // components/CheckInModal.js
+import { useEffect } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
-  const [startTime, setStartTime] = useState("3:00 pm");
+export default function CheckInModal({
+  isOpen,
+  onClose,
+  propertyId,
+  listing,
+  setOpen,
+}) {
   const [checkinTime, setCheckinTime] = useState("");
   const [checkoutTime, setCheckoutTime] = useState("");
+
   const numbersList = Array.from({ length: 11 }, (_, i) => i + 1);
   if (!isOpen) return null;
+
+  // const getData = async () => {
+  //   try {
+  //     const getLocalData = localStorage.getItem("token");
+  //     const data = JSON.parse(getLocalData);
+
+  //     if (data) {
+  //       const response = await fetch(
+  //         `${API_URL}/properties/get-timings/${propertyId}`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             Authorization: `Bearer ${data}`,
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+  //       if (!response.ok) {
+  //         return;
+  //       }
+  //       const result = await response.json();
+
+  //       return result.data;
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+  // getData();
 
   async function saveData() {
     try {
@@ -40,6 +76,8 @@ export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
       console.error(err);
     }
   }
+
+  console.log("nice", listing);
   const prev = 12;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -59,7 +97,7 @@ export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
           <div className="mt-2 flex gap-2">
             <select
               className="w-full mt-2 border border-gray-300 rounded-md p-2"
-              value={checkinTime}
+              value={listing ? listing?.checkinTime : checkinTime}
               onChange={(e) => {
                 setCheckinTime(e.target.value);
               }}
@@ -90,7 +128,7 @@ export default function CheckInModal({ isOpen, onClose, propertyId, setOpen }) {
           </label>
           <select
             className="w-full mt-2 border border-gray-300 rounded-md p-2"
-            value={checkoutTime}
+            value={listing ? listing?.checkoutTime : checkoutTime}
             onChange={(e) => setCheckoutTime(e.target.value)}
           >
             <option key={"select time"} value="">
