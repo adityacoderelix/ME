@@ -170,7 +170,8 @@ function BookPageContent() {
   const adults = searchParams.get("adults");
   const children = searchParams.get("children");
   const infants = searchParams.get("infants");
-
+  const propertyImg = searchParams.get("propertyImage");
+  console.log("bumd", propertyImg);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [guestData, setGuestData] = useState({
     adults: [],
@@ -664,7 +665,7 @@ function BookPageContent() {
             city: property?.address?.city,
             state: property?.address?.state,
             country: property?.address?.country,
-            propertyImage: property?.photos[0],
+            propertyImage: propertyImg, //property?.photos[0],
             checkin: date.from.getTime(),
             checkout: date.to.getTime(),
             numberOfGuests: guests,

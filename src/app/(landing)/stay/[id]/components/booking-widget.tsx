@@ -87,6 +87,7 @@ export default function BookingWidget({
   useEffect(() => {
     auth();
   }, []);
+  console.log("logite", propertyImages[0]);
   const calculatePriceWithTax = (basePrice: number) => {
     const serviceFee = Math.round((basePrice * 14) / 100);
     const priceWithServiceFee = basePrice + serviceFee;
@@ -194,6 +195,8 @@ export default function BookingWidget({
 
     return range.some((d) => unavailableDates.includes(d));
   }
+  const filename = propertyImages[0].split("/").pop();
+  console.log("bailan", filename);
   console.log("get tyep", Object.prototype.toString.call(date?.from));
   return (
     <Card className="border rounded-xl sticky shadow-lg">
@@ -484,6 +487,7 @@ export default function BookingWidget({
                           infants: guests.infants,
                           checkinTime: checkinTime,
                           checkoutTime: checkoutTime,
+                          propertyImage: filename,
                         },
                       }}
                       className="w-full flex justify-center items-center text-center py-3 px bg-primaryGreen text-base font-bricolage hover:bg-brightGreen text-white h-10 rounded-lg font-medium"

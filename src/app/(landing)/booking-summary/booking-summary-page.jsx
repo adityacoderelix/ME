@@ -162,7 +162,7 @@ export default function BookingSummaryPage() {
 
   const checkInDate = parseDateSafe(queryData?.checkin);
   const checkOutDate = parseDateSafe(queryData?.checkout);
-
+  // console.log("logiteh", propertyImage);
   const days = [
     "Sunday",
     "Monday",
@@ -232,8 +232,8 @@ export default function BookingSummaryPage() {
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 border rounded-xl p-4 shadow-lg">
               <div>
                 <Image
-                  src="/sf-loft.jpg"
-                  alt="Cozy SF Loft"
+                  src={`https://majestic-escape-host-properties.blr1.digitaloceanspaces.com/${queryData?.propertyImage}`}
+                  alt="Property Image"
                   width={600}
                   height={400}
                   className="rounded-xl"
