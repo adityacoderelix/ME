@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-
+import { useCheckToken } from "@/services/useCheckToken";
+import { usePathname } from "next/navigation";
 type User = {
   email: string;
   // Add other user properties as needed
@@ -72,7 +73,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [bookingType, setBookingType] = useState("");
   const [petAllowed, setPetAllowed] = useState("");
   const [checkinType, setCheckinType] = useState("");
+  const { checkToken } = useCheckToken();
+  const pathname = usePathname();
 
+    useEffect(() => {
+    const verify = async () => {
+      await checkToken();
+    };
+    verify();
+  }, [pathname]);
   useEffect(() => {
     // Check for existing user in localStorage on initial load
     const storedUser = localStorage.getItem("user");
@@ -184,6 +193,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     petAllowed,
     checkinType,
   ]);
+
+  useEffect(() => {
+    checkToken();
+  }, []);
   const value: AuthContextType = {
     user,
     login,
