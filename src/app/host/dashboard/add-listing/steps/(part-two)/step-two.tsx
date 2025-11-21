@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { TextReveal } from "@/components/text-reveal";
 import axios from "axios";
+import { toast } from "sonner";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -35,11 +36,46 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+    const ALLOWED_TYPES = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
+    const validFiles: File[] = [];
+
+    for (const file of Array.from(files)) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast.error(
+          `Invalid file type: ${file.name}. Only JPG, PNG, WEBP, GIF allowed.`
+        );
+        continue;
+      }
+
+      if (file.size > MAX_SIZE) {
+        toast.error(`File too large: ${file.name}. Max size is 5MB.`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
     setUploading(true);
     const formData = new FormData();
-    Array.from(files).forEach((file) => {
-      formData.append("images", file); // Match backend field name
+
+    validFiles.forEach((file) => {
+      formData.append("images", file);
     });
+
+    // setUploading(true);
+    // const formData = new FormData();
+    // Array.from(files).forEach((file) => {
+    //   formData.append("images", file); // Match backend field name
+    // });
 
     try {
       const res = await axios.post(`${API_URL}/uploads/`, formData, {
@@ -51,7 +87,7 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
         url,
       }));
       const updatedPhotos = [...photos, ...newPhotos];
-      console.log('we are reaching',updatedPhotos)
+      console.log("we are reaching", updatedPhotos);
       setPhotos(updatedPhotos);
       updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
     } catch (error) {
@@ -67,15 +103,15 @@ export function AddPhotos({ updateFormData, formData }: MakeItStandOutProps) {
   //   setPhotos(updatedPhotos);
   //   updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
   // };
-const removePhoto = async (id: string, url: string) => {
-  await axios.delete(`${API_URL}/uploads/delete`, {
-    data: { url },
-  });
+  const removePhoto = async (id: string, url: string) => {
+    await axios.delete(`${API_URL}/uploads/delete`, {
+      data: { url },
+    });
 
-  const updatedPhotos = photos.filter((photo) => photo.id !== id);
-  setPhotos(updatedPhotos);
-  updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
-};
+    const updatedPhotos = photos.filter((photo) => photo.id !== id);
+    setPhotos(updatedPhotos);
+    updateFormData({ photos: updatedPhotos.map((photo) => photo.url) });
+  };
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
     photo: Photo
