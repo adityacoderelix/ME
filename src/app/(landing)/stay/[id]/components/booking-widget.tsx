@@ -173,7 +173,7 @@ export default function BookingWidget({
   };
   function getDateRange(start: Date, end: Date) {
     const dates = [];
-    let current = new Date(start);
+    const current = new Date(start);
     const final = new Date(end);
 
     while (current < final) {
