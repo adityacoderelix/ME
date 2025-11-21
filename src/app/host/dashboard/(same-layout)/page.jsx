@@ -39,10 +39,19 @@ import Link from "next/link";
 import ListingStageCard from "./ListingStageCard";
 import { kycService } from "../../../../services/kycService";
 import { useEffect } from "react";
-
+// import { useCheckToken } from "@/services/useCheckToken";
 export default function Dashboard() {
   const [exist, setExist] = useState(false);
   const [form, setForm] = useState();
+
+  // const { checkToken } = useCheckToken();
+
+  // useEffect(() => {
+  //   const verify = async () => {
+  //     await checkToken();
+  //   };
+  //   verify();
+  // }, []);
   useEffect(() => {
     const checkIfKycProcessStarted = async () => {
       try {

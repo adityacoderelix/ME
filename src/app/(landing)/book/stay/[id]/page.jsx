@@ -18,17 +18,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import { Star, ChevronLeft, Check } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
+
 import { toast } from "sonner";
+
 // Add Razorpay to Window interface
 // declare global {
 //   interface Window {
 //     Razorpay: any
 //   }
 // }
-
+import { useAuth } from "@/contexts/AuthContext";
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Function to fetch property data
@@ -68,10 +71,12 @@ const fetchProperty = async (id) => {
 function BookPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { logout } = useAuth();
   const params = useParams();
   const propertyId = params.id;
   const [isAuth, setIsAuth] = useState(false);
   const checkinDate = searchParams.get("checkin");
+  const [ban, setBan] = useState(false);
   const [date, setDate] = useState({
     from: searchParams.get("checkin")
       ? new Date(searchParams.get("checkin"))
@@ -117,6 +122,16 @@ function BookPageContent() {
         );
         // console.log("djfjdf", await response.json());
         if (!response.ok) {
+          const data = await response.json();
+          if (data.code == "USER_BANNED") {
+            setBan(true);
+            logout();
+
+            localStorage.clear();
+            router.push("/");
+
+            return;
+          }
           console.error(
             "Failed to fetch property:",
             response.status,
@@ -380,12 +395,14 @@ function BookPageContent() {
           guestData: guestData,
         }),
       });
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Booking failed: ${errorText}`);
       }
       console.log("trhis is how", response.json);
       const result = await response.json();
+
       return result;
     } catch (err) {
       console.error(err);
@@ -605,6 +622,7 @@ function BookPageContent() {
         totals.subtotal
       );
       console.log("green lan", booking);
+
       if (!booking || !booking.data?._id) {
         toast.error("Booking could not be created. Please try again.");
         return; // stop here
@@ -1142,10 +1160,12 @@ function BookPageContent() {
                 onClick={async () => {
                   await fetchForm();
                 }}
-                disabled={summaryRoute}
+                disabled={summaryRoute || ban}
                 className="w-full h-12 text-base bg-primaryGreen hover:bg-brightGreen"
               >
-                Pay ₹{totals.total.toLocaleString()}
+                {ban
+                  ? "You are banned from platform. Check your email"
+                  : `Pay ₹${totals.total.toLocaleString()}`}
               </Button>
               {property.bookingType.manual ? (
                 <p className="text-sm text-center mt-4 text-gray-500">
