@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function useCheckToken() {
- 
   const router = useRouter();
 
   const checkToken = async () => {
@@ -26,16 +25,16 @@ export function useCheckToken() {
         if (result.code === "USER_BANNED") {
           localStorage.clear();
           sessionStorage.clear();
-  
+
           router.push("/login");
           toast.error("Your account has been banned.");
         }
-        if (result.code === "TOKEN_INVALIDATED") {
-          localStorage.clear();
-          sessionStorage.clear();
-          router.push("/login");
-          toast.error("Session expired, please login again.");
-        }
+        // if (result.code === "TOKEN_INVALIDATED") {
+        //   localStorage.clear();
+        //   sessionStorage.clear();
+        //   router.push("/login");
+        //   toast.error("Session expired, please login again.");
+        // }
         return null;
       }
 
