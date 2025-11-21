@@ -96,6 +96,7 @@ export default function EditListing({ params }) {
   };
 
   const handleSubmit = async () => {
+    const toastId = toast.loading("Updating your listing...");
     try {
       toast.loading("Updating your listing...");
       const hasSignificantChanges = checkForSignificantChanges();
@@ -105,6 +106,8 @@ export default function EditListing({ params }) {
         ...formData,
         status: newStatus,
       });
+      
+      toast.dismiss(toastId);
 
       let successMessage;
       if (newStatus === "processing") {
@@ -118,6 +121,7 @@ export default function EditListing({ params }) {
       toast.success(successMessage);
       router.push("/host/dashboard");
     } catch (error) {
+      toast.dismiss(toastId); 
       toast.error("Something went wrong. Please try again.");
     }
   };
