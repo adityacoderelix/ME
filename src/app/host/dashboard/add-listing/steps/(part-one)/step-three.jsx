@@ -313,46 +313,84 @@ export function LocationForm({ updateFormData, formData }) {
   // 1. It automatically ensures that the value always starts with "HOT"
   // 2. It limits the input to 10 characters.
   // 3. When 10 characters are reached, it validates the format using the regex and checks with the backend.
+  // const handleRegistrationInputChange = (e) => {
+  //   let value = e.target.value.toUpperCase();
+
+  //   // Ensure the fixed prefix "HOT" remains at the start.
+  //   if (address.state != "Goa") {
+  //     // Limit total length to 10 characters.
+  //     if (value.length > 10) {
+  //       value = value.slice(0, 10);
+  //     }
+
+  //     const newAddress = { ...address, registrationNumber: value };
+  //     setAddress(newAddress);
+  //     // Reset validRegistrationNo to false on change until verified again.
+  //     setValidRegistrationNo(false);
+  //     updateFormData({ address: newAddress, validRegistrationNo: false });
+
+  //     // Regex for validation: total 10 characters, starting with HOT and ending with at least one digit.
+  //     const regEx = /^(?=.{10}$)(?:[A-Z0-9]*)(\d+)$/;
+  //     //  const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/;
+  //     if (value.length === 10) {
+  //       if (!regEx.test(value)) {
+  //         setRegistrationNumberError("Invalid registration number format");
+  //       } else {
+  //         // Valid format: clear error then check existence on the backend.
+  //         setRegistrationNumberError("");
+  //         checkRegistrationNumber(value);
+  //       }
+  //     } else {
+  //       if (value.length > 3 && value.length < 30) {
+  //         const regEx = /^[A-Z0-9\/-]{3,30}$/;
+  //         if (regEx.test(value)) {
+  //           checkRegistrationNumber(value);
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     // Clear error if the input is incomplete.
+  //     setRegistrationNumberError("");
+  //   }
+  // };
+
   const handleRegistrationInputChange = (e) => {
     let value = e.target.value.toUpperCase();
 
-    // Ensure the fixed prefix "HOT" remains at the start.
-    if (address.state != "Goa") {
-      // Limit total length to 10 characters.
-      if (value.length > 10) {
-        value = value.slice(0, 10);
-      }
+    // Hard limit (allows backspace)
+    value = value.slice(0, 10);
 
-      const newAddress = { ...address, registrationNumber: value };
-      setAddress(newAddress);
-      // Reset validRegistrationNo to false on change until verified again.
-      setValidRegistrationNo(false);
-      updateFormData({ address: newAddress, validRegistrationNo: false });
+    // Always update state first
+    const newAddress = { ...address, registrationNumber: value };
+    setAddress(newAddress);
 
-      // Regex for validation: total 10 characters, starting with HOT and ending with at least one digit.
+    updateFormData({ address: newAddress, validRegistrationNo: false });
+    setValidRegistrationNo(false);
+
+    // Clear error when deleting
+    if (value.length < 3) {
+      setRegistrationNumberError("");
+      return;
+    }
+
+    // Validation only if enough characters
+    if (value.length === 10) {
       const regEx = /^(?=.{10}$)(?:[A-Z0-9]*)(\d+)$/;
-      //  const regEx = /^(?=.{10}$)HOT(?:[A-Z0-9]*)(\d+)$/;
-      if (value.length === 10) {
-        if (!regEx.test(value)) {
-          setRegistrationNumberError("Invalid registration number format");
-        } else {
-          // Valid format: clear error then check existence on the backend.
-          setRegistrationNumberError("");
-          checkRegistrationNumber(value);
-        }
+      if (!regEx.test(value)) {
+        setRegistrationNumberError("Invalid registration number format");
       } else {
-        if (value.length > 3 && value.length < 30) {
-          const regEx = /^[A-Z0-9\/-]{3,30}$/;
-          if (regEx.test(value)) {
-            checkRegistrationNumber(value);
-          }
-        }
+        setRegistrationNumberError("");
+        checkRegistrationNumber(value);
       }
     } else {
-      // Clear error if the input is incomplete.
-      setRegistrationNumberError("");
+      // Mid-length validation
+      const regEx = /^[A-Z0-9\/-]{3,30}$/;
+      if (regEx.test(value)) {
+        checkRegistrationNumber(value);
+      }
     }
   };
+
   console.log("we have reached", formData, address);
   // Retain manual input changes for other address fields.
   const handleManualInputChange = (key, value) => {
